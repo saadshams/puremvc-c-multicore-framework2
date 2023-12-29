@@ -11,7 +11,7 @@
 #define NOTE5 "Notification5"
 #define NOTE6 "Notification6"
 
-void viewTestMethod(void *context, struct Notification *notification);
+//void viewTestMethod(void *context, struct Notification *notification);
 
 typedef struct {} ViewComponent;
 
@@ -21,11 +21,5 @@ typedef struct ViewTest {
     bool onRemoveCalled;
     int counter;
 } ViewTest;
-
-typedef struct {
-    int value;
-} ViewTestVar;
-
-ViewTestVar *viewTestVar1;
 
 #endif //PUREMVC_VIEW_TEST_COMPONENT_H

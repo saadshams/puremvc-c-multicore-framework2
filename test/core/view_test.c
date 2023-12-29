@@ -25,6 +25,16 @@ int main() {
     testRemoveView();
 }
 
+typedef struct {
+    int value;
+} ViewTestVar;
+
+ViewTestVar *viewTestVar1;
+
+void viewTestMethod(void *context, struct Notification *notification) {
+    viewTestVar1 = notification->getBody(notification);
+}
+
 void testGetInstance() {
     // Test Factory Method
     struct View *view = puremvc_view_getInstance("ViewTestKey1", puremvc_view_new);
