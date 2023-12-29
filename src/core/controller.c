@@ -13,7 +13,7 @@ static Dictionary *instanceMap;
 static pthread_rwlock_t instanceMap_mutex = PTHREAD_RWLOCK_INITIALIZER;
 
 // mutex for commandMap
-static pthread_rwlock_t commandMap_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_rwlock_t commandMap_mutex = PTHREAD_RWLOCK_INITIALIZER;
 
 static void initializeController(struct Controller *self) {
     self->view = puremvc_view_getInstance(self->multitonKey, puremvc_view_new);

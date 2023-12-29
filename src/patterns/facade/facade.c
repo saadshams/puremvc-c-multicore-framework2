@@ -10,7 +10,7 @@
 static Dictionary *instanceMap;
 
 // mutex for instanceMap
-static pthread_rwlock_t instanceMap_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_rwlock_t instanceMap_mutex = PTHREAD_RWLOCK_INITIALIZER;
 
 static void initializeFacade(struct Facade *self) {
     self->initializeModel(self);
