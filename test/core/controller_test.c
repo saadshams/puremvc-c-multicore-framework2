@@ -2,7 +2,7 @@
 #include "controller_test_command.h"
 #include "controller_test_command2.h"
 #include "controller_test_vo.h"
-#include "../../include/controller.h"
+#include "controller.h"
 #include <assert.h>
 #include <stdio.h>
 

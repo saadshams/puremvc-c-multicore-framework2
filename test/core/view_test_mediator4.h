@@ -1,7 +1,7 @@
 #ifndef PUREMVC_VIEW_TEST_MEDIATOR4_H
 #define PUREMVC_VIEW_TEST_MEDIATOR4_H
 
-#include "../../include/mediator.h"
+#include "mediator.h"
 #include "view_test_component.h"
 
 typedef struct ViewTestMediator4 ViewTestMediator4;

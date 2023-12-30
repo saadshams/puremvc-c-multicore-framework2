@@ -1,7 +1,6 @@
 #include "macro_command_test_command.h"
 #include "macro_command_test_vo.h"
-#include "../../../include/notification.h"
-#include "../../../include/notifier.h"
+#include "notifier.h"
 #include <assert.h>
 #include <stdio.h>
 

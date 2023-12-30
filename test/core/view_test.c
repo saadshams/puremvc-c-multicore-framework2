@@ -1,5 +1,5 @@
 #include "view_test.h"
-#include "../../include/view.h"
+#include "view.h"
 #include "view_test_component.h"
 #include "view_test_mediator.h"
 #include "view_test_mediator2.h"

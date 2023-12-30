@@ -1,4 +1,4 @@
-#include "../../../include/simple_command.h"
+#include "simple_command.h"
 #include <assert.h>
 #include <stdio.h>
 

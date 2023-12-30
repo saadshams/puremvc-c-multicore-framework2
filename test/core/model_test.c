@@ -1,6 +1,6 @@
 #include "model_test.h"
 #include "model_test_proxy.h"
-#include "../../include/model.h"
+#include "model.h"
 #include <assert.h>
 #include <string.h>
 

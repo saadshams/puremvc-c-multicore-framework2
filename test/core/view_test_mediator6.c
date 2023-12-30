@@ -1,6 +1,6 @@
 #include "view_test_mediator6.h"
-#include "../../include/facade.h"
-#include "../../include/notifier.h"
+#include "facade.h"
+#include "notifier.h"
 #include <stdlib.h>
 #include <string.h>
 

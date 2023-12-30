@@ -1,4 +1,4 @@
-#include "../../../include/notification.h"
+#include "notification.h"
 #include <assert.h>
 #include <string.h>
 

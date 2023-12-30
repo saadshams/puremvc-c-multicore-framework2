@@ -1,5 +1,5 @@
-#include "../../../include/notification.h"
-#include "../../../include/observer.h"
+#include "notification.h"
+#include "observer.h"
 #include <assert.h>
 #include <stdio.h>
 

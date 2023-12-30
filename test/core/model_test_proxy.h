@@ -1,7 +1,7 @@
 #ifndef PUREMVC_MODEL_TEST_PROXY_H
 #define PUREMVC_MODEL_TEST_PROXY_H
 
-#include "../../include/proxy.h"
+#include "proxy.h"
 
 #define ON_REGISTER_CALLED "onRegister Called"
 #define ON_REMOVE_CALLED "onRemove Called"

@@ -1,4 +1,4 @@
-#include "../../../include/facade.h"
+#include "facade.h"
 #include "facade_test_command.h"
 #include "facade_test_vo.h"
 #include <pthread.h>
