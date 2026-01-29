@@ -7,9 +7,19 @@
 */
 #pragma once
 
-#define MAX_NAME_LEN 32
-#define MAX_KEY_LEN 32
+#define NAME_SIZE 32
+#define KEY_SIZE 32
 
-#define MAX_INSTANCES 10
-#define MAX_PROXIES 10
-#define MAX_COMMANDS 10
+#define INSTANCE_MAP_SIZE 10
+
+#define MACRO_COMMAND_ARRAY_SIZE 10
+
+#define PROXIES_MAP_SIZE 10
+
+#define MEDIATORS_MAP_SIZE 10
+#define MEDIATORS_ARRAY_SIZE 10
+
+#define OBSERVER_MAP_SIZE 10
+#define OBSERVERS_ARRAY_SIZE 10
+
+#define MAX_KEYS_LEN 10

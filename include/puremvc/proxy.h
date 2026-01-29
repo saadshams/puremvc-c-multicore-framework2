@@ -14,7 +14,7 @@
 #define PROXY_NAME "Proxy"
 
 struct Proxy {
-    char name[MAX_NAME_LEN];
+    char name[NAME_SIZE];
     void* data;
 
     struct Notifier notifier;

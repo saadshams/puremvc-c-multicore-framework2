@@ -14,7 +14,7 @@ struct MacroCommand {
     struct SimpleCommand simple_command;
     struct Notifier notifier;
 
-    struct SimpleCommand (*subCommands[MAX_COMMANDS])();
+    struct SimpleCommand (*subCommands[MACRO_COMMAND_ARRAY_SIZE])();
     size_t count;
 
     void (*initializeMacroCommand)(struct MacroCommand *self);

@@ -12,9 +12,9 @@
 #include "puremvc/constants.h"
 
 struct Notification {
-    char name[MAX_NAME_LEN];
+    char name[NAME_SIZE];
     void *body;
-    char type[MAX_NAME_LEN];
+    char type[NAME_SIZE];
     
     const char *(*getName)(const struct Notification *self);
 

@@ -14,7 +14,7 @@
 #define MEDIATOR_NAME "mediator"
 
 struct Mediator {
-    char name[MAX_NAME_LEN];
+    char name[NAME_SIZE];
     void *component;
 
     struct Notifier notifier;
@@ -23,7 +23,7 @@ struct Mediator {
     void (*setComponent)(struct Mediator *self, void *component);
     void *(*getComponent)(const struct Mediator *self);
 
-    const char **(*listNotificationInterests)(const struct Mediator *self, const char **error);
+    const char **(*listNotificationInterests)(const struct Mediator *self);
     void (*handleNotification)(const struct Mediator *self, struct Notification *notification);
 
     void (*onRegister)(struct Mediator *self);

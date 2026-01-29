@@ -15,7 +15,7 @@ static void initializeMacroCommand(struct MacroCommand *self) {
 }
 
 static void addSubCommand(struct MacroCommand *self, struct SimpleCommand(*factory)()) {
-    if (self->count >= MAX_COMMANDS) return;
+    if (self->count >= MACRO_COMMAND_ARRAY_SIZE) return;
     self->subCommands[self->count] = factory;
     self->count++;
 }

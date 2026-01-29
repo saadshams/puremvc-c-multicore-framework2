@@ -12,8 +12,8 @@
 #include "puremvc/model.h"
 
 // The Multiton Model instanceMap.
-static struct Model instanceMap[MAX_INSTANCES];
-static size_t count = 0;  // number of instances
+static struct Model instanceMap[INSTANCE_MAP_SIZE];
+static size_t instanceMapCount = 0;  // number of instances
 
 // mutex for instanceMap
 // static MutexOnce token = MUTEX_ONCE_NT;
@@ -23,78 +23,90 @@ static void initializeModel(struct Model *self) {
 
 }
 
-static void registerProxy(struct Model *self, struct Proxy *proxy) {
+static void registerProxy(struct Model *self, struct Proxy proxy) {
     // mutex_lock(&this->proxyMapMutex);
-    proxy->notifier.initializeNotifier(&proxy->notifier, self->multitonKey);
+    struct ProxyMap *slot = NULL;
+    proxy.notifier.initializeNotifier(&proxy.notifier, self->multitonKey);
 
-    for (size_t i =  0; i < self->proxyCount; i++) { // replace
-        if (strcmp(self->proxyMap[i].getName(&self->proxyMap[i]), proxy->getName(proxy)) == 0) {
-            self->proxyMap[i] = *proxy;
-            proxy->onRegister(proxy);
+    for (size_t i = 0; i < self->proxyMapCount; i++) { // replace
+        if (strcmp(self->proxyMap[i].key, proxy.getName(&proxy)) == 0) {
+            slot = &self->proxyMap[i];
+            slot->proxy.onRemove(&slot->proxy); // notify old proxy
+            slot->proxy = proxy;
+            slot->proxy.onRegister(&slot->proxy);
             return;
         }
     }
 
-    if (self->proxyCount < MAX_PROXIES) { // insert
-        self->proxyMap[self->proxyCount++] = *proxy;
-        proxy->onRegister(proxy);
-    }
+    if (self->proxyMapCount >= PROXIES_MAP_SIZE) return;
+
+    slot = &self->proxyMap[self->proxyMapCount];
+    snprintf(slot->key, KEY_SIZE, "%s", proxy.name);
+    slot->proxy = proxy; // insert
+    slot->proxy.onRegister(&slot->proxy);
+    self->proxyMapCount++;
     // mutex_unlock(&this->proxyMapMutex);
 }
 
 static struct Proxy *retrieveProxy(struct Model *self, const char *proxyName) {
     // mutex_lock_shared(&this->proxyMapMutex);
-    // struct Proxy *proxy = (struct Proxy *) this->proxyMap->get(this->proxyMap, proxyName);
-    for (size_t i = 0; i < self->proxyCount; i++) {
-        if (strcmp(self->proxyMap[i].getName(&self->proxyMap[i]), proxyName) == 0) {
-            return &self->proxyMap[i];
+    for (size_t i = 0; i < self->proxyMapCount; i++) {
+        if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
+            return &self->proxyMap[i].proxy;
         }
     }
     // mutex_unlock(&this->proxyMapMutex);
-    // return proxy;
     return NULL;
 }
 
 static bool hasProxy(const struct Model *self, const char *proxyName) {
     // mutex_lock_shared(&this->proxyMapMutex);
-    // const bool exists = this->proxyMap->containsKey(this->proxyMap, proxyName);
     bool exists = false;
-    for (size_t i = 0; i < self->proxyCount; i++) {
-        if (strcmp(self->proxyMap[i].getName(&self->proxyMap[i]), proxyName) == 0) {
+    for (size_t i = 0; i < self->proxyMapCount; i++) {
+        if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
             exists = true;
             break;
         }
-
     }
     // mutex_unlock(&this->proxyMapMutex);
     return exists;
 }
 
-static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
+// suggestion is to return value
+// model is passing all tests with pointer though
+static struct Proxy *removeProxy(struct Model *self, const char *proxyName) {
     // mutex_lock(&this->proxyMapMutex);
-    // struct Proxy *proxy = this->proxyMap->removeItem(this->proxyMap, proxyName);
-    for (size_t i = 0; i < self->proxyCount; i++) { // remove
-        if (strcmp(self->proxyMap[i].getName(&self->proxyMap[i]), proxyName) == 0) {
-            struct Proxy proxy = self->proxyMap[i];
+    struct Proxy *proxy = NULL; // have to do call by value
+    // conflict with mediator implementation that likes by reference
 
-            for (size_t j = i + 1; j < self->proxyCount; j++) { // shift left
-                self->proxyMap[j-1] = self->proxyMap[j];
+    size_t index = 0; // One-pass removal (Filter pattern)
+    for (size_t i = 0; i < self->proxyMapCount; i++) {
+        if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
+            proxy = &self->proxyMap[i].proxy;
+            self->proxyMapCount--;
+            // memset(&self->proxyMap[i], 0, sizeof(struct Proxy)); // bug remove the returned as well
+        } else {
+            if (index != i) { // shift left not getting iterated
+                memmove(&self->proxyMap[index], &self->proxyMap[i], sizeof(struct Proxy));
+                memset(&self->proxyMap[i], 0, sizeof(struct Proxy));
             }
-
-            self->proxyCount--;
-            proxy.onRemove(&proxy);
-            return proxy;
+            index++;
         }
     }
+
     // mutex_unlock(&this->proxyMapMutex);
-    struct Proxy empty = {0}; // default return if not found
-    return empty;
+
+    if (proxy != NULL) {
+        proxy->onRemove(proxy);
+    }
+
+    return proxy;
 }
 
 struct Model puremvc_model(const char *key) {
-    struct Model model = {};
+    struct Model model = {0};
 
-    snprintf(model.multitonKey, MAX_NAME_LEN, "%s", key);
+    snprintf(model.multitonKey, KEY_SIZE, "%s", key);
 
     model.initializeModel = initializeModel;
     model.registerProxy = registerProxy;
@@ -110,35 +122,36 @@ static void dispatchOnce() {
 }
 
 struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(const char *key)) {
+    if (key == NULL || factory == NULL) return NULL;
     // mutex_once(&token, dispatchOnce);
     // mutex_lock(&mutex);
 
-    for (size_t i = 0; i < count; i++) { // get
-        if (strncmp(instanceMap[i].multitonKey, key, MAX_NAME_LEN) == 0) {
+    for (size_t i = 0; i < instanceMapCount; i++) { // get
+        if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
             return &instanceMap[i];
         }
     }
 
-    if (count >= MAX_INSTANCES) return NULL;
+    if (instanceMapCount >= INSTANCE_MAP_SIZE) return NULL;
 
-    instanceMap[count] = factory(key);
+    instanceMap[instanceMapCount] = factory(key);
 
     // mutex_unlock(&mutex);
-    return &instanceMap[count++];
+    return &instanceMap[instanceMapCount++];
 }
 
 void puremvc_model_removeModel(const char *key) {
     if (key == NULL) return;
     // mutex_once(&token, dispatchOnce);
     // mutex_lock(&mutex);
-    for (size_t i = 0; i < count; i++) {
-        if (strncmp(instanceMap[i].multitonKey, key, MAX_NAME_LEN) == 0) { // remove
-            memset(&instanceMap[i], 0, sizeof(struct Model));
+    for (size_t i = 0; i < instanceMapCount; i++) {
+        if (strcmp(instanceMap[i].multitonKey, key) == 0) {
+            memset(&instanceMap[i], 0, sizeof(struct Model)); // remove
 
-            for (size_t j = i + 1; j < count; j++) // shift left
+            for (size_t j = i + 1; j < instanceMapCount; j++) // shift left
                 instanceMap[j-1] = instanceMap[j];
 
-            count--;
+            instanceMapCount--;
             break;
         }
     }

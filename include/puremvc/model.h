@@ -1,6 +1,5 @@
 /**
 * @file model.h
-* @internal
 * @brief Model Header
 *
 * @author Saad Shams <saad.shams@puremvc.org>
@@ -15,22 +14,24 @@
 #include "proxy.h"
 
 struct Model {
-    char multitonKey[MAX_NAME_LEN];
+    char multitonKey[KEY_SIZE];
 
     // Mutex proxyMapMutex;
-    // struct Dictionary *proxyMap;
-    struct Proxy proxyMap[MAX_PROXIES];
-    size_t proxyCount;
+    struct ProxyMap {
+        char key[KEY_SIZE];
+        struct Proxy proxy;
+    } proxyMap[PROXIES_MAP_SIZE];
+    size_t proxyMapCount;
     
     void (*initializeModel)(struct Model *self);
 
-    void (*registerProxy)(struct Model *self, struct Proxy *proxy);
+    void (*registerProxy)(struct Model *self, struct Proxy proxy);
 
     struct Proxy *(*retrieveProxy)(struct Model *self, const char *proxyName);
     
     bool (*hasProxy)(const struct Model *self, const char *proxyName);
     
-    struct Proxy(*removeProxy)(struct Model *self, const char *proxyName);
+    struct Proxy *(*removeProxy)(struct Model *self, const char *proxyName);
 };
 
 struct Model puremvc_model(const char *key);

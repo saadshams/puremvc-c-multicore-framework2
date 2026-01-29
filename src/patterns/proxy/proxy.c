@@ -33,7 +33,7 @@ static void onRemove(struct Proxy *self) {
 struct Proxy puremvc_proxy(const char *name, void *data) {
     struct Proxy proxy = {0};
 
-    snprintf(proxy.name, MAX_NAME_LEN, "%s", name ? name : PROXY_NAME);
+    snprintf(proxy.name, NAME_SIZE, "%s", name ? name : PROXY_NAME);
     proxy.data = data;
 
     proxy.notifier = puremvc_notifier();

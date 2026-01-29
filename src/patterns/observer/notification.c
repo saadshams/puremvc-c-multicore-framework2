@@ -27,7 +27,7 @@ static const char *getType(const struct Notification *self) {
 }
 
 static void setType(struct Notification *self, const char *type) {
-    snprintf(self->type, MAX_NAME_LEN, "%s", type);
+    snprintf(self->type, NAME_SIZE, "%s", type);
 }
 
 void toString(const struct Notification *self, char *buffer, size_t buffer_size) {
@@ -37,9 +37,9 @@ void toString(const struct Notification *self, char *buffer, size_t buffer_size)
 struct Notification puremvc_notification(const char *name, void *body, const char *type) {
     struct Notification notification = {0};
 
-    snprintf(notification.name, MAX_NAME_LEN, "%s", name);
+    snprintf(notification.name, NAME_SIZE, "%s", name);
     notification.body = body;
-    if (type != NULL) snprintf(notification.type, MAX_NAME_LEN, "%s", type);
+    if (type != NULL) snprintf(notification.type, NAME_SIZE, "%s", type);
 
     notification.getName = getName;
     notification.getBody = getBody;

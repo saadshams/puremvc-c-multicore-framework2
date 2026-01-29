@@ -22,7 +22,7 @@ static void *getComponent(const struct Mediator *self) {
     return self->component;
 }
 
-static const char **listNotificationInterests(const struct Mediator *self, const char **error) {
+static const char **listNotificationInterests(const struct Mediator *self) {
     static const char *interests[] = { NULL };
     return interests;
 }
@@ -42,7 +42,7 @@ static void onRemove(struct Mediator *self) {
 struct Mediator puremvc_mediator(const char *name, void *component) {
     struct Mediator mediator = {0};
 
-    snprintf(mediator.name, MAX_NAME_LEN, "%s", name ? name : MEDIATOR_NAME);
+    snprintf(mediator.name, NAME_SIZE, "%s", name ? name : MEDIATOR_NAME);
     mediator.component = component;
 
     mediator.notifier = puremvc_notifier();

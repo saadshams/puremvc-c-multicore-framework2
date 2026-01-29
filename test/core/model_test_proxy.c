@@ -1,5 +1,3 @@
-#include <string.h>
-
 #include "model_test_proxy.h"
 
 static void onRegister(struct Proxy *self) {

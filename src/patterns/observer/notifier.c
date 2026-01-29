@@ -28,7 +28,7 @@ const char *getMultitonKey(const struct Notifier *self) {
 }
 
 static void initializeNotifier(struct Notifier *self, const char *key) {
-    snprintf(self->key, MAX_KEY_LEN, "%s", key);
+    snprintf(self->key, KEY_SIZE, "%s", key);
 }
 
 static void sendNotification(const struct Notifier *self, const char *notificationName, void *body, const char *type) {

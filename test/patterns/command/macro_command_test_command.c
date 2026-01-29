@@ -3,8 +3,8 @@
 #include <stdio.h>
 
 #include "macro_command_test_command2.h"
-#include "macro_command_test_sub1_command.h"
-#include "macro_command_test_sub2_command.h"
+// #include "macro_command_test_sub1_command.h"
+// #include "macro_command_test_sub2_command.h"
 
 static void initializeMacroCommand(struct MacroCommand *self) {
     // self->addSubCommand(self, macro_command_test_sub1_command);

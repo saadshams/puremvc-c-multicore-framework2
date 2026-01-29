@@ -10,7 +10,7 @@
 #include "constants.h"
 
 struct Notifier {
-    char key[MAX_NAME_LEN];
+    char key[NAME_SIZE];
     
     // struct IFacade *(*getFacade)(const struct Notifier *self);
     
