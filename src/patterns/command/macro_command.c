@@ -21,8 +21,6 @@ static void addSubCommand(struct MacroCommand *self, struct SimpleCommand(*facto
 }
 
 static void execute(struct MacroCommand *self, struct Notification *notification) { // a macro command runs command collection, or it can run another macro command (collection of commands)
-    printf("macro command executing\n");
-    fflush(stdout);
     self->initializeMacroCommand(self);
 
     for (size_t i = 0; i < self->count; i++) {
@@ -30,10 +28,8 @@ static void execute(struct MacroCommand *self, struct Notification *notification
         struct SimpleCommand command = factory(); // crashes or unit test fails here
         command.notifier.initializeNotifier(&command.notifier, "MacroCommandTestkey1");
         command.execute(&command, notification);
+        self->count--;
     }
-
-    self->count = 0;
-    printf("end macro command execution\n");
 }
 
 struct MacroCommand puremvc_macro_command() {
