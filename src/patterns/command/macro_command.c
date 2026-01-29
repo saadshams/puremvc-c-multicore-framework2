@@ -40,7 +40,9 @@ struct MacroCommand puremvc_macro_command() {
 
     command.initializeMacroCommand = initializeMacroCommand;
     command.addSubCommand = addSubCommand;
+
     command.simple_command.execute = (void (*)(const struct SimpleCommand *, struct Notification *)) execute;
     command.execute = (void (*)(const struct MacroCommand *, struct Notification *)) execute;
+
     return command;
 }
