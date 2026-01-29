@@ -1,6 +1,4 @@
 #include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 #include "puremvc/macro_command.h"
 
@@ -19,21 +17,15 @@ void testMacroCommandExecute() {
 
     struct Notification notification = puremvc_notification("MacroCommandTest", &vo, NULL);
 
-    struct MacroCommand command = macro_command_test_command();
+    struct SimpleCommand command = macro_command_test_command();
 
     command.notifier.initializeNotifier(&command.notifier, "MacroCommandTestkey1");
-    command.simple_command.notifier.initializeNotifier(&command.simple_command.notifier, "MacroCommandTestkey1");
-
-    printf("begin unit test\n");
-    fflush(stdout);
 
     command.execute(&command, &notification);
 
-    printf("end unit test\n");
-
-    // assert(vo.result1 == 10);
-    // assert(vo.result2 == 25);
-    // assert(vo.result3 == 125);
+    assert(vo.result1 == 10);
+    assert(vo.result2 == 25);
+    assert(vo.result3 == 125);
 }
 
 // void testRegisterAndExecuteCommand() {

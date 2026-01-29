@@ -1,5 +1,5 @@
 #pragma once
 
-#include "puremvc/macro_command.h"
+#include "puremvc/simple_command.h"
 
-struct MacroCommand macro_command_test_command();
+struct SimpleCommand macro_command_test_command();

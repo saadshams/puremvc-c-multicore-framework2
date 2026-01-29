@@ -25,25 +25,25 @@ static void initializeModel(struct Model *self) {
 
 static void registerProxy(struct Model *self, struct Proxy proxy) {
     // mutex_lock(&this->proxyMapMutex);
-    struct ProxyMap *slot = NULL;
+    struct ProxyMap *proxyMap = NULL;
     proxy.notifier.initializeNotifier(&proxy.notifier, self->multitonKey);
 
     for (size_t i = 0; i < self->proxyMapCount; i++) { // replace
         if (strcmp(self->proxyMap[i].key, proxy.getName(&proxy)) == 0) {
-            slot = &self->proxyMap[i];
-            slot->proxy.onRemove(&slot->proxy); // notify old proxy
-            slot->proxy = proxy;
-            slot->proxy.onRegister(&slot->proxy);
+            proxyMap = &self->proxyMap[i];
+            proxyMap->proxy.onRemove(&proxyMap->proxy); // notify old proxy
+            proxyMap->proxy = proxy;
+            proxyMap->proxy.onRegister(&proxyMap->proxy);
             return;
         }
     }
 
     if (self->proxyMapCount >= PROXIES_MAP_SIZE) return;
 
-    slot = &self->proxyMap[self->proxyMapCount];
-    snprintf(slot->key, KEY_SIZE, "%s", proxy.name);
-    slot->proxy = proxy; // insert
-    slot->proxy.onRegister(&slot->proxy);
+    proxyMap = &self->proxyMap[self->proxyMapCount];
+    snprintf(proxyMap->key, KEY_SIZE, "%s", proxy.name);
+    proxyMap->proxy = proxy; // insert
+    proxyMap->proxy.onRegister(&proxyMap->proxy);
     self->proxyMapCount++;
     // mutex_unlock(&this->proxyMapMutex);
 }

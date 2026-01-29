@@ -1,6 +1,5 @@
 /**
 * @file macro_command.c
-* @internal
 * @brief MacroCommand Implementation
 *
 * @author Saad Shams <saad.shams@puremvc.org>
@@ -9,40 +8,21 @@
 #include <stdio.h>
 
 #include "puremvc/macro_command.h"
+#include "puremvc/constants.h"
 
-static void initializeMacroCommand(struct MacroCommand *self) {
+static void execute(const struct SimpleCommand *self, struct Notification *notification) {
+    struct SimpleCommand (*subCommands[MACRO_COMMAND_ARRAY_SIZE])() = { NULL };
 
-}
-
-static void addSubCommand(struct MacroCommand *self, struct SimpleCommand(*factory)()) {
-    if (self->count >= MACRO_COMMAND_ARRAY_SIZE) return;
-    self->subCommands[self->count] = factory;
-    self->count++;
-}
-
-static void execute(struct MacroCommand *self, struct Notification *notification) { // a macro command runs command collection, or it can run another macro command (collection of commands)
-    self->initializeMacroCommand(self);
-
-    for (size_t i = 0; i < self->count; i++) {
-        struct SimpleCommand (*factory)() = self->subCommands[i];
-        struct SimpleCommand command = factory(); // crashes or unit test fails here
-        command.notifier.initializeNotifier(&command.notifier, "MacroCommandTestkey1");
+    for (size_t i = 0; subCommands[i] != NULL; i++) {
+        struct SimpleCommand (*factory)() = subCommands[i];
+        struct SimpleCommand command = factory();
+        command.notifier.initializeNotifier(&command.notifier, self->notifier.getMultitonKey(&self->notifier));
         command.execute(&command, notification);
-        self->count--;
     }
 }
 
-struct MacroCommand puremvc_macro_command() {
-    struct MacroCommand command = {0};
-
-    command.simple_command = puremvc_simple_command();
-    command.notifier = puremvc_notifier();
-
-    command.initializeMacroCommand = initializeMacroCommand;
-    command.addSubCommand = addSubCommand;
-
-    command.simple_command.execute = (void (*)(const struct SimpleCommand *, struct Notification *)) execute;
-    command.execute = (void (*)(const struct MacroCommand *, struct Notification *)) execute;
-
+struct SimpleCommand puremvc_macro_command() {
+    struct SimpleCommand command = puremvc_simple_command();
+    command.execute = execute;
     return command;
 }
