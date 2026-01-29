@@ -5,10 +5,7 @@
 #include "macro_command_test_sub3_command.h"
 
 static void initializeMacroCommand(struct MacroCommand *self) {
-    printf("child initializeMacroCommand\n");
-    fflush(stdout);
     self->addSubCommand(self, macro_command_test_sub3_command);
-    printf("child end initializeMacroCommand\n");
 }
 
 struct MacroCommand macro_command_test_command2() {

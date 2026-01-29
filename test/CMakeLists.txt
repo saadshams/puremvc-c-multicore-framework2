@@ -21,14 +21,14 @@
 #target_link_libraries(SimpleCommandTest PRIVATE puremvc)
 #add_test(NAME PureMVC.SimpleCommandTest COMMAND SimpleCommandTest)
 
-#add_executable(MacroCommandTest patterns/command/macro_command_test.c
-#        patterns/command/macro_command_test_command.c
-#        patterns/command/macro_command_test_sub1_command.c
-#        patterns/command/macro_command_test_sub2_command.c
-#        patterns/command/macro_command_test_command2.c
-#        patterns/command/macro_command_test_sub3_command.c)
-#target_link_libraries(MacroCommandTest PRIVATE puremvc)
-#add_test(NAME PureMVC.MacroCommandTest COMMAND MacroCommandTest)
+add_executable(MacroCommandTest patterns/command/macro_command_test.c
+        patterns/command/macro_command_test_command.c
+        patterns/command/macro_command_test_sub1_command.c
+        patterns/command/macro_command_test_sub2_command.c
+        patterns/command/macro_command_test_command2.c
+        patterns/command/macro_command_test_sub3_command.c)
+target_link_libraries(MacroCommandTest PRIVATE puremvc)
+add_test(NAME PureMVC.MacroCommandTest COMMAND MacroCommandTest)
 
 #add_executable(FacadeTest patterns/facade/FacadeTest.c
 #        patterns/facade/FacadeTestCommand.c)
@@ -47,9 +47,9 @@
 #target_link_libraries(NotifierTest PRIVATE puremvc)
 #add_test(NAME PureMVC.NotifierTest COMMAND NotifierTest)
 #
-add_executable(ObserverTest patterns/observer/observer_test.c)
-target_link_libraries(ObserverTest PRIVATE puremvc)
-add_test(NAME PureMVC.ObserverTest COMMAND ObserverTest)
+#add_executable(ObserverTest patterns/observer/observer_test.c)
+#target_link_libraries(ObserverTest PRIVATE puremvc)
+#add_test(NAME PureMVC.ObserverTest COMMAND ObserverTest)
 #
 #add_executable(ProxyTest patterns/proxy/proxy_test.c)
 #target_link_libraries(ProxyTest PRIVATE puremvc)

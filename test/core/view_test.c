@@ -15,18 +15,18 @@
 #include "view_test_mediator6.h"
 
 int main() {
-    // testGetInstance();
-    // testRegisterAndNotifyObserver();
-    // testRegisterAndRetrieveMediator();
-    // testHasMediator();
-    // testRegisterAndRemoveMediator();
-    // testOnRegisterAndOnRemove();
-    // testSuccessiveRegisterAndRemoveMediator();
+    testGetInstance();
+    testRegisterAndNotifyObserver();
+    testRegisterAndRetrieveMediator();
+    testHasMediator();
+    testRegisterAndRemoveMediator();
+    testOnRegisterAndOnRemove();
+    testSuccessiveRegisterAndRemoveMediator();
     testRemoveMediatorAndSubsequentNotify();
-    // testRemoveOneOfTwoMediatorsAndSubsequentNotify();
-    // testMediatorReregistration();
+    testRemoveOneOfTwoMediatorsAndSubsequentNotify();
+    testMediatorReregistration();
     // testModifyObserverListDuringNotification();
-    // testRemoveView();
+    testRemoveView();
     return 0;
 }
 

@@ -31,7 +31,7 @@ struct Model {
     
     bool (*hasProxy)(const struct Model *self, const char *proxyName);
     
-    struct Proxy *(*removeProxy)(struct Model *self, const char *proxyName);
+    struct Proxy(*removeProxy)(struct Model *self, const char *proxyName);
 };
 
 struct Model puremvc_model(const char *key);

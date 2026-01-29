@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <stdlib.h>
 
 #include "observer_test.h"
 #include "puremvc/observer.h"
@@ -33,13 +32,14 @@ void testObserverConstructor() {
     struct Object { int x; } object = { 0 };
     struct Observer observer = puremvc_observer(handleNotification, &object);
 
-    struct ObserverTestVar *var = malloc(sizeof(struct ObserverTestVar));
-    if (var) *var = (struct ObserverTestVar){ .value = 5 };
-    struct Notification notification = puremvc_notification("ObserverTestNote", var, NULL);
+    struct ObserverTestVar var = {.value = 5};
+    struct Notification notification = puremvc_notification("ObserverTestNote", &var, NULL);
     observer.notifyObserver(&observer, &notification);
 
     // test assertions
     assert(observerTestVar.value == 5);
+    assert(&object == observer.getContext(&observer));
+    assert(&object == observer.context);
 }
 
 /**
@@ -62,9 +62,8 @@ void testObserverAccessors() {
     // successful notification will result in our local
     // observerTestVar being set to the value we pass in
     // on the note body.
-    struct ObserverTestVar *vo = malloc(sizeof(struct ObserverTestVar));
-    if (vo) *vo = (struct ObserverTestVar){ .value = 10 };
-    struct Notification notification = puremvc_notification("ObserverTestNote", vo, NULL);
+    struct ObserverTestVar vo = {.value = 10};
+    struct Notification notification = puremvc_notification("ObserverTestNote", &vo, NULL);
     observer.notifyObserver(&observer, &notification);
 }
 

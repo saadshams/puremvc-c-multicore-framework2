@@ -74,17 +74,17 @@ static bool hasProxy(const struct Model *self, const char *proxyName) {
 
 // suggestion is to return value
 // model is passing all tests with pointer though
-static struct Proxy *removeProxy(struct Model *self, const char *proxyName) {
+static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
     // mutex_lock(&this->proxyMapMutex);
-    struct Proxy *proxy = NULL; // have to do call by value
-    // conflict with mediator implementation that likes by reference
+    struct ProxyMap *proxyMap = NULL;
+    struct Proxy *proxy = NULL;
+    struct Proxy value = {0};
 
     size_t index = 0; // One-pass removal (Filter pattern)
     for (size_t i = 0; i < self->proxyMapCount; i++) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
+            proxyMap = &self->proxyMap[i];
             proxy = &self->proxyMap[i].proxy;
-            self->proxyMapCount--;
-            // memset(&self->proxyMap[i], 0, sizeof(struct Proxy)); // bug remove the returned as well
         } else {
             if (index != i) { // shift left not getting iterated
                 memmove(&self->proxyMap[index], &self->proxyMap[i], sizeof(struct Proxy));
@@ -98,9 +98,13 @@ static struct Proxy *removeProxy(struct Model *self, const char *proxyName) {
 
     if (proxy != NULL) {
         proxy->onRemove(proxy);
+        value = *proxy;
+
+        memset(proxyMap, 0, sizeof(struct ProxyMap));
+        self->proxyMapCount--;
     }
 
-    return proxy;
+    return value;
 }
 
 struct Model puremvc_model(const char *key) {

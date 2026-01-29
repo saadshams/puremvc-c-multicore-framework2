@@ -141,16 +141,16 @@ static bool hasMediator(const struct View *self, const char *mediatorName) {
 // pointer is passing all the tests
 static struct Mediator removeMediator(struct View *self, const char *mediatorName) {
     // mutex_lock(&this->mediatorMapMutex);
-    // struct Mediator *mediator = NULL;
-    struct Mediator mediator = {0};
+    struct MediatorMap *mediatorMap = NULL;
+    struct Mediator *mediator = NULL;
+    struct Mediator value = {0};
 
     size_t index = 0;
     for (size_t i = 0; i < self->mediatorsCount; i++) { // One-pass removal (Filter pattern)
         if (strcmp(self->mediatorMap[i].key, mediatorName) == 0) { // check
-            mediator = self->mediatorMap[i].mediator;
-            memset(&self->mediatorMap[i], 0, sizeof(struct Mediator)); // remove, problem clearing the removed one
-            // bring it back after changing to value
-            self->mediatorsCount--;
+            mediatorMap = &self->mediatorMap[i];
+            mediator = &self->mediatorMap[i].mediator;
+            value = self->mediatorMap[i].mediator;
         } else {
             if (index != i) { // shift left
                 memmove(&self->mediatorMap[index], &self->mediatorMap[i], sizeof(struct Mediator));
@@ -161,15 +161,19 @@ static struct Mediator removeMediator(struct View *self, const char *mediatorNam
     }
     // mutex_unlock(&this->mediatorMapMutex);
 
-    if (mediator.name[0] != '\0') {
-        const char **interests = mediator.listNotificationInterests(&mediator);
+    if (mediator != NULL) {
+        const char **interests = mediator->listNotificationInterests(mediator);
         for (const char **cursor = interests; *cursor; cursor++) {
-            self->removeObserver(self, *cursor, &mediator);
+            self->removeObserver(self, *cursor, mediator);
         }
-        mediator.onRemove(&mediator);
+        mediator->onRemove(mediator);
+        value = *mediator;
+
+        memset(mediatorMap, 0, sizeof(struct MediatorMap));
+        self->mediatorsCount--;
     }
 
-    return mediator;
+    return value;
 }
 
 struct View puremvc_view(const char *key) {

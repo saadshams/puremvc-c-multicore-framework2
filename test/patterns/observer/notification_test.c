@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "notification_test.h"
@@ -44,15 +43,14 @@ void testNameAccessors() {
  */
 void testBodyAccessors() {
     // Create a new Notification and use accessors to set the body
-    struct { int value; } *vo = malloc(sizeof(*vo));
-    if (vo) vo->value = 5;
+    struct { int value; } vo = {.value = 5};
 
     // Create a new Notification and use accessors to set the body
     struct Notification notification = puremvc_notification("TestNote", NULL, NULL);
-    notification.setBody(&notification, vo);
+    notification.setBody(&notification, &vo);
 
     // test assertions
-    assert(notification.getBody(&notification) == vo);
+    assert(notification.getBody(&notification) == &vo);
 }
 
 /**
@@ -69,10 +67,9 @@ void testTypeAccessors() {
 
 /** Node Notifications */
 void testToString() {
-    struct { int value; } *test = malloc(sizeof(*test));
-    if (test) test->value = 5;
+    struct { int value; } test = {.value = 5};
 
-    struct Notification notification = puremvc_notification("TestNote", test, "TestNoteType");
+    struct Notification notification = puremvc_notification("TestNote", &test, "TestNoteType");
 
     char buffer[256];
     notification.toString(&notification, buffer, sizeof(buffer));
