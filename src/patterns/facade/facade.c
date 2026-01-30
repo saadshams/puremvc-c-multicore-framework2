@@ -50,12 +50,12 @@ static void registerCommand(const struct Facade *self, const char *notificationN
     self->controller->registerCommand(self->controller, notificationName, factory);
 }
 
-static void removeCommand(const struct Facade *self, const char *notificationName) {
-    self->controller->removeCommand(self->controller, notificationName);
-}
-
 static bool hasCommand(const struct Facade *self, const char *notificationName) {
     return self->controller->hasCommand(self->controller, notificationName);
+}
+
+static void removeCommand(const struct Facade *self, const char *notificationName) {
+    self->controller->removeCommand(self->controller, notificationName);
 }
 
 static void registerProxy(const struct Facade *self, struct Proxy proxy) {
@@ -66,12 +66,12 @@ static struct Proxy *retrieveProxy(const struct Facade *self, const char *proxyN
     return self->model->retrieveProxy(self->model, proxyName);
 }
 
-static struct Proxy removeProxy(const struct Facade *self, const char *proxyName) {
-    return self->model->removeProxy(self->model, proxyName);
-}
-
 static bool hasProxy(const struct Facade *self, const char *proxyName) {
     return self->model->hasProxy(self->model, proxyName);
+}
+
+static struct Proxy removeProxy(const struct Facade *self, const char *proxyName) {
+    return self->model->removeProxy(self->model, proxyName);
 }
 
 static void registerMediator(const struct Facade *self, const struct Mediator mediator) {
@@ -82,12 +82,12 @@ static struct Mediator *retrieveMediator(const struct Facade *self, const char *
     return self->view->retrieveMediator(self->view, mediatorName);
 }
 
-static struct Mediator removeMediator(const struct Facade *self, const char *mediatorName) {
-    return self->view->removeMediator(self->view, mediatorName);
-}
-
 static bool hasMediator(const struct Facade *self, const char *mediatorName) {
     return self->view->hasMediator(self->view, mediatorName);
+}
+
+static struct Mediator removeMediator(const struct Facade *self, const char *mediatorName) {
+    return self->view->removeMediator(self->view, mediatorName);
 }
 
 static void notifyObservers(const struct Facade *self, const struct Notification notification) {
@@ -100,27 +100,27 @@ static void sendNotification(const struct Facade *self, const char *notification
 }
 
 struct Facade puremvc_facade(const char *key) {
-    struct Facade facade = {0};
+    struct Facade facade = {
+        .initializeFacade = initializeFacade,
+        .initializeController = initializeController,
+        .initializeModel = initializeModel,
+        .initializeView = initializeView,
+        .registerCommand = registerCommand,
+        .hasCommand = hasCommand,
+        .removeCommand = removeCommand,
+        .registerProxy = registerProxy,
+        .retrieveProxy = retrieveProxy,
+        .hasProxy = hasProxy,
+        .removeProxy = removeProxy,
+        .registerMediator = registerMediator,
+        .retrieveMediator = retrieveMediator,
+        .hasMediator = hasMediator,
+        .removeMediator = removeMediator,
+        .notifyObservers = notifyObservers,
+        .sendNotification = sendNotification
+    };
 
     snprintf(facade.multitonKey, KEY_SIZE, "%s", key);
-
-    facade.initializeFacade = initializeFacade;
-    facade.initializeController = initializeController;
-    facade.initializeModel = initializeModel;
-    facade.initializeView = initializeView;
-    facade.registerCommand = registerCommand;
-    facade.removeCommand = removeCommand;
-    facade.hasCommand = hasCommand;
-    facade.registerProxy = registerProxy;
-    facade.retrieveProxy = retrieveProxy;
-    facade.removeProxy = removeProxy;
-    facade.hasProxy = hasProxy;
-    facade.registerMediator = registerMediator;
-    facade.retrieveMediator = retrieveMediator;
-    facade.removeMediator = removeMediator;
-    facade.hasMediator = hasMediator;
-    facade.notifyObservers = notifyObservers;
-    facade.sendNotification = sendNotification;
     return facade;
 }
 
