@@ -18,8 +18,8 @@ int main() {
     testRegisterRetrieveAndRemoveMediator();
     testHasProxy();
     testHasMediator();
-    // testHasCommand();
-    // testHasCoreAndRemoveCore();
+    testHasCommand();
+    testHasCoreAndRemoveCore();
     return 0;
 }
 
