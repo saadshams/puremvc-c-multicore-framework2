@@ -22,17 +22,14 @@ struct View {
     struct MediatorMap {
         char key[KEY_SIZE];
         struct Mediator mediator;
-    } mediatorMap[MEDIATORS_MAP_SIZE];
-    size_t mediatorsMapCount;
+    } mediatorMap[MEDIATOR_MAP_SIZE];
 
     // mutex for observerMap
     // Mutex observerMapMutex;
     struct ObserverMap {
         char key[KEY_SIZE];
-        struct Observer observers[OBSERVERS_ARRAY_SIZE];
-        size_t observersCount;
+        struct Observer observers[OBSERVER_ARRAY_SIZE];
     } observerMap[OBSERVER_MAP_SIZE];
-    size_t observersMapCount;
 
     void (*initializeView)(struct View *self);
 

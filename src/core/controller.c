@@ -25,7 +25,7 @@ static void initializeController(struct Controller *self) {
 
 static void executeCommand(const struct Controller *self, struct Notification notification) {
     // mutex_lock_shared(&this->commandMapMutex);
-    for (size_t i = 0; i < self->commandMapCount; i++) {
+    for (size_t i = 0; i < COMMAND_MAP_SIZE && self->commandMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->commandMap[i].key, notification.name) == 0) {
             struct SimpleCommand (*factory)() = self->commandMap[i].factory;
             struct SimpleCommand command = factory();
@@ -38,27 +38,28 @@ static void executeCommand(const struct Controller *self, struct Notification no
 
 static void registerCommand(struct Controller *self, const char *notificationName, struct SimpleCommand(*factory)()) {
     // mutex_lock(&this->commandMapMutex);
-
-    for (size_t i = 0; i < self->commandMapCount; i++) {
-        if (strcmp(self->commandMap[i].key, notificationName) == 0) { // search
-            self->commandMap[i].factory = factory; // replace
+    size_t i = 0;
+    for (; i < COMMAND_MAP_SIZE && self->commandMap[i].key[0] != '\0'; i++) { // search
+        if (strcmp(self->commandMap[i].key, notificationName) == 0) {
+            self->commandMap[i].factory = factory; // update
             return;
         }
     }
 
-    const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification))executeCommand, self);
+    if (i >= COMMAND_MAP_SIZE) return; // commandMap is full
+
+    const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification)) executeCommand, self);
     self->view->registerObserver(self->view, notificationName, observer);
 
-    snprintf(self->commandMap[self->commandMapCount].key, NAME_SIZE, "%s", notificationName);
-    self->commandMap[self->commandMapCount].factory = factory;
-    self->commandMapCount++;
+    snprintf(self->commandMap[i].key, NAME_SIZE, "%s", notificationName); // insert
+    self->commandMap[i].factory = factory;
     // mutex_unlock(&this->commandMapMutex);
 }
 
 static bool hasCommand(const struct Controller *self, const char *notificationName) {
     // mutex_lock_shared(&self->commandMapMutex);
     bool exists = false;
-    for (size_t i = 0; i < self->commandMapCount; i++) {
+    for (size_t i = 0; i < COMMAND_MAP_SIZE && self->commandMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->commandMap[i].key, notificationName) == 0) {
             exists = true;
             break;
@@ -71,11 +72,10 @@ static bool hasCommand(const struct Controller *self, const char *notificationNa
 static void removeCommand(struct Controller *self, const char *notificationName) {
     // mutex_lock(&self->commandMapMutex);
     size_t index = 0; // One-pass removal (Filter pattern)
-    for (size_t i = 0; i < self->commandMapCount; i++) {
+    for (size_t i = 0; i < COMMAND_MAP_SIZE && i < self->commandMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->commandMap[i].key, notificationName) == 0) {
             self->view->removeObserver(self->view, notificationName, self);
             memset(&self->commandMap, 0, sizeof(struct CommandMap));
-            self->commandMapCount--;
         } else {
             if (index != i) { // shift left
                 memmove(&self->commandMap[index], &self->commandMap[i], sizeof(struct SimpleCommand));

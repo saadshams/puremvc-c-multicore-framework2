@@ -25,9 +25,8 @@ struct Controller {
     struct CommandMap {
         char key[KEY_SIZE];
         struct SimpleCommand (*factory)();
-    } commandMap[COMMANDS_MAP_SIZE];
-    size_t commandMapCount;
-    
+    } commandMap[COMMAND_MAP_SIZE];
+
     void (*initializeController)(struct Controller *self);
     
     void (*registerCommand)(struct Controller *self, const char *notificationName, struct SimpleCommand(*factory)());

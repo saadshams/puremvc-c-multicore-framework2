@@ -24,32 +24,28 @@ static void initializeModel(struct Model *self) {
 
 static void registerProxy(struct Model *self, struct Proxy proxy) {
     // mutex_lock(&this->proxyMapMutex);
-    struct ProxyMap *proxyMap = NULL;
-    proxy.notifier.initializeNotifier(&proxy.notifier, self->multitonKey);
-
-    for (size_t i = 0; i < self->proxyMapCount; i++) { // replace
+    size_t i = 0;
+    for (; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) { // search
         if (strcmp(self->proxyMap[i].key, proxy.getName(&proxy)) == 0) {
-            proxyMap = &self->proxyMap[i];
-            proxyMap->proxy.onRemove(&proxyMap->proxy); // notify old proxy
-            proxyMap->proxy = proxy;
-            proxyMap->proxy.onRegister(&proxyMap->proxy);
-            return;
+            self->proxyMap[i].proxy.onRemove(&self->proxyMap[i].proxy); // remove
+            break;
         }
     }
 
-    if (self->proxyMapCount >= PROXIES_MAP_SIZE) return;
+    if (i >= PROXY_MAP_SIZE) return; // proxyMap is full
 
-    proxyMap = &self->proxyMap[self->proxyMapCount];
-    snprintf(proxyMap->key, KEY_SIZE, "%s", proxy.name);
-    proxyMap->proxy = proxy; // insert
-    proxyMap->proxy.onRegister(&proxyMap->proxy);
-    self->proxyMapCount++;
+    proxy.notifier.initializeNotifier(&proxy.notifier, self->multitonKey);
+
+    snprintf(self->proxyMap[i].key, KEY_SIZE, "%s", proxy.name); // upsert
+    self->proxyMap[i].proxy = proxy;
+    self->proxyMap[i].proxy.onRegister(&self->proxyMap[i].proxy);
+
     // mutex_unlock(&this->proxyMapMutex);
 }
 
 static struct Proxy *retrieveProxy(struct Model *self, const char *proxyName) {
     // mutex_lock_shared(&this->proxyMapMutex);
-    for (size_t i = 0; i < self->proxyMapCount; i++) {
+    for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
             return &self->proxyMap[i].proxy;
         }
@@ -61,7 +57,7 @@ static struct Proxy *retrieveProxy(struct Model *self, const char *proxyName) {
 static bool hasProxy(const struct Model *self, const char *proxyName) {
     // mutex_lock_shared(&this->proxyMapMutex);
     bool exists = false;
-    for (size_t i = 0; i < self->proxyMapCount; i++) {
+    for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
             exists = true;
             break;
@@ -71,8 +67,6 @@ static bool hasProxy(const struct Model *self, const char *proxyName) {
     return exists;
 }
 
-// suggestion is to return value
-// model is passing all tests with pointer though
 static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
     // mutex_lock(&this->proxyMapMutex);
     struct ProxyMap *proxyMap = NULL;
@@ -80,7 +74,7 @@ static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
     struct Proxy value = {0};
 
     size_t index = 0; // One-pass removal (Filter pattern)
-    for (size_t i = 0; i < self->proxyMapCount; i++) {
+    for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
             proxyMap = &self->proxyMap[i];
             proxy = &self->proxyMap[i].proxy;
@@ -99,7 +93,6 @@ static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
         value = *proxy;
 
         memset(proxyMap, 0, sizeof(struct ProxyMap));
-        self->proxyMapCount--;
     }
 
     return value;

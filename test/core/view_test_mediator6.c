@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "view_test_mediator6.h"
+#include "puremvc/facade.h"
 
 static const char **listNotificationInterests(const struct Mediator *self) {
     static const char *interests[] = { NOTE6, NULL };
@@ -8,8 +9,8 @@ static const char **listNotificationInterests(const struct Mediator *self) {
 }
 
 static void handleNotification(const struct Mediator *self, struct Notification notification) {
-    // const struct IFacade *facade = self->notifier->getFacade(self->notifier);
-    // struct Mediator *mediator = facade->removeMediator(facade, self->getName(self));
+    const struct Facade *facade = self->notifier.getFacade(&self->notifier);
+    facade->removeMediator(facade, self->getName(self));
 }
 
 static void onRemove(struct Mediator *self) {

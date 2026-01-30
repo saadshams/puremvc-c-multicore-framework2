@@ -35,8 +35,7 @@ void testRegisterAndRetrieveProxy() {
     model->initializeModel(model);
 
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
-    struct Proxy p = puremvc_proxy("colors", colors);
-    model->registerProxy(model, p);
+    model->registerProxy(model, puremvc_proxy("colors", colors));
 
     const struct Proxy *proxy = model->retrieveProxy(model, "colors");
     assert(proxy != NULL);
@@ -50,7 +49,7 @@ void testRegisterAndRetrieveProxy() {
     const struct Proxy removedProxy = model->removeProxy(model, "colors");
     assert(strcmp(removedProxy.getName(&removedProxy), "colors") == 0);
 
-    // assert(model->retrieveProxy(model, "colors") == NULL);
+    assert(model->retrieveProxy(model, "colors") == NULL);
     puremvc_model_removeModel("ModelTestKey2");
     model = NULL;
 }

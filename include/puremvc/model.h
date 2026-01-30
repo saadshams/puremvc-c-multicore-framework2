@@ -21,8 +21,7 @@ struct Model {
     struct ProxyMap {
         char key[KEY_SIZE];
         struct Proxy proxy;
-    } proxyMap[PROXIES_MAP_SIZE];
-    size_t proxyMapCount;
+    } proxyMap[PROXY_MAP_SIZE];
     
     void (*initializeModel)(struct Model *self);
 

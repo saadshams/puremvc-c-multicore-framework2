@@ -12,7 +12,7 @@
 #include "puremvc/constants.h"
 
 static void execute(const struct SimpleCommand *self, struct Notification notification) {
-    struct SimpleCommand (*subCommands[MACRO_COMMAND_SUBCOMMANDS_SIZE])() = { NULL };
+    struct SimpleCommand (*subCommands[MACRO_COMMAND_ARRAY_SIZE])() = { NULL };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {
         struct SimpleCommand (*factory)() = subCommands[i];
