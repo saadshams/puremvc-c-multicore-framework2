@@ -4,12 +4,12 @@
  */
 #pragma once
 
-// #include "IController.h"
+#include "controller.h"
 #include "model.h"
-// #include "IView.h"
+#include "view.h"
 #include "simple_command.h"
 #include "macro_command.h"
-// #include "IFacade.h"
+#include "facade.h"
 #include "mediator.h"
 #include "notification.h"
 #include "notifier.h"
