@@ -13,7 +13,6 @@
 
 // The Multiton Controller instanceMap.
 static struct Controller instanceMap[INSTANCE_MAP_SIZE];
-static size_t instanceMapCount = 0;
 
 // mutex for controller instanceMap
 // static MutexOnce token = MUTEX_ONCE_INIT;
@@ -111,18 +110,19 @@ struct Controller *puremvc_controller_getInstance(const char *key, struct Contro
     // mutex_once(&token, dispatchOnce);
     // mutex_lock(&mutex);
 
-    for (size_t i = 0; i < instanceMapCount; i++) { // get
+    size_t i = 0;
+    for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
         if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
             return &instanceMap[i];
         }
     }
 
-    if (instanceMapCount >= INSTANCE_MAP_SIZE) return NULL;
+    if (i >= INSTANCE_MAP_SIZE) return NULL;
 
-    instanceMap[instanceMapCount] = factory(key);
+    instanceMap[i] = factory(key);
 
     // mutex_unlock(&mutex);
-    return &instanceMap[instanceMapCount++];
+    return &instanceMap[i];
 }
 
 void puremvc_controller_removeController(const char *key) {
@@ -130,14 +130,13 @@ void puremvc_controller_removeController(const char *key) {
     // mutex_once(&token, dispatchOnce);
     // mutex_lock(&mutex);
 
-    for (size_t i = 0; i < instanceMapCount; i++) {
+    for (size_t i = 0; i < INSTANCE_MAP_SIZE; i++) {
         if (strcmp(instanceMap[i].multitonKey, key) == 0) {
             memset(&instanceMap[i], 0, sizeof(struct Controller)); // remove
 
-            for (size_t j = i + 1; j < instanceMapCount; j++) // shift left
+            for (size_t j = i + 1; j < INSTANCE_MAP_SIZE; j++) // shift left
                 instanceMap[j-1] = instanceMap[j];
-
-            instanceMapCount--;
+            // memmove(&instanceMap[i], &instanceMap[i + 1], sizeof(instanceMap[0]) * (INSTANCE_MAP_SIZE - i));
             break;
         }
     }

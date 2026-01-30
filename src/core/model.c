@@ -13,7 +13,6 @@
 
 // The Multiton Model instanceMap.
 static struct Model instanceMap[INSTANCE_MAP_SIZE];
-static size_t instanceMapCount = 0;
 
 // mutex for instanceMap
 // static MutexOnce token = MUTEX_ONCE_NT;
@@ -129,32 +128,33 @@ struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(
     // mutex_once(&token, dispatchOnce);
     // mutex_lock(&mutex);
 
-    for (size_t i = 0; i < instanceMapCount; i++) { // get
+    size_t i = 0;
+    for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
         if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
             return &instanceMap[i];
         }
     }
 
-    if (instanceMapCount >= INSTANCE_MAP_SIZE) return NULL;
+    if (i >= INSTANCE_MAP_SIZE) return NULL;
 
-    instanceMap[instanceMapCount] = factory(key);
+    instanceMap[i] = factory(key);
 
     // mutex_unlock(&mutex);
-    return &instanceMap[instanceMapCount++];
+    return &instanceMap[i];
 }
 
 void puremvc_model_removeModel(const char *key) {
     if (key == NULL) return;
     // mutex_once(&token, dispatchOnce);
     // mutex_lock(&mutex);
-    for (size_t i = 0; i < instanceMapCount; i++) {
+
+    for (size_t i = 0; i < INSTANCE_MAP_SIZE; i++) {
         if (strcmp(instanceMap[i].multitonKey, key) == 0) {
             memset(&instanceMap[i], 0, sizeof(struct Model)); // remove
 
-            for (size_t j = i + 1; j < instanceMapCount; j++) // shift left
+            for (size_t j = i + 1; j < INSTANCE_MAP_SIZE; j++) // shift left
                 instanceMap[j-1] = instanceMap[j];
-
-            instanceMapCount--;
+            // memmove(&instanceMap[i], &instanceMap[i + 1], sizeof(instanceMap[0]) * (INSTANCE_MAP_SIZE - i));
             break;
         }
     }
