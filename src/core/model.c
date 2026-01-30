@@ -13,7 +13,7 @@
 
 // The Multiton Model instanceMap.
 static struct Model instanceMap[INSTANCE_MAP_SIZE];
-static size_t instanceMapCount = 0;  // number of instances
+static size_t instanceMapCount = 0;
 
 // mutex for instanceMap
 // static MutexOnce token = MUTEX_ONCE_NT;
@@ -86,14 +86,13 @@ static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
             proxyMap = &self->proxyMap[i];
             proxy = &self->proxyMap[i].proxy;
         } else {
-            if (index != i) { // shift left not getting iterated
+            if (index != i) { // shift left
                 memmove(&self->proxyMap[index], &self->proxyMap[i], sizeof(struct Proxy));
                 memset(&self->proxyMap[i], 0, sizeof(struct Proxy));
             }
             index++;
         }
     }
-
     // mutex_unlock(&this->proxyMapMutex);
 
     if (proxy != NULL) {

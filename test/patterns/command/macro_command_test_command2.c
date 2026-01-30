@@ -2,7 +2,7 @@
 #include "macro_command_test_sub3_command.h"
 
 static void execute(const struct SimpleCommand *self, struct Notification *notification) {
-    struct SimpleCommand (*subCommands[MACRO_COMMAND_ARRAY_SIZE])() = { macro_command_test_sub3_command };
+    struct SimpleCommand (*subCommands[MACRO_COMMAND_SUBCOMMANDS_SIZE])() = { macro_command_test_sub3_command };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {
         struct SimpleCommand (*factory)() = subCommands[i];

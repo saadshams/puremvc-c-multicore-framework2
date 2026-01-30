@@ -8,6 +8,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "constants.h"
 #include "mediator.h"
@@ -22,7 +23,7 @@ struct View {
         char key[KEY_SIZE];
         struct Mediator mediator;
     } mediatorMap[MEDIATORS_MAP_SIZE];
-    size_t mediatorsCount;
+    size_t mediatorsMapCount;
 
     // mutex for observerMap
     // Mutex observerMapMutex;

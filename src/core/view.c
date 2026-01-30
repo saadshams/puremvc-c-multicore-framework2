@@ -91,17 +91,17 @@ void removeObserver(struct View *self, const char *notificationName, const void 
 
 static void registerMediator(struct View *self, struct Mediator mediator) {
     // mutex_lock(&this->mediatorMapMutex);
-    for (size_t i = 0; i < self->mediatorsCount; i++) { // search existing
+    for (size_t i = 0; i < self->mediatorsMapCount; i++) { // search existing
         if (strcmp(self->mediatorMap[i].key, mediator.getName(&mediator)) == 0) return;
     }
 
-    struct MediatorMap *mediatorMap = &self->mediatorMap[self->mediatorsCount];
+    struct MediatorMap *mediatorMap = &self->mediatorMap[self->mediatorsMapCount];
     mediator.notifier.initializeNotifier(&mediator.notifier, self->multitonKey);
 
-    if (self->mediatorsCount < MEDIATORS_ARRAY_SIZE) { // insert
+    if (self->mediatorsMapCount < MEDIATORS_MAP_SIZE) { // insert
         snprintf(mediatorMap->key, NAME_SIZE, "%s", mediator.name);
         mediatorMap->mediator = mediator;
-        self->mediatorsCount++;
+        self->mediatorsMapCount++;
     }
     // mutex_unlock(&this->mediatorMapMutex);
 
@@ -115,7 +115,7 @@ static void registerMediator(struct View *self, struct Mediator mediator) {
 
 static struct Mediator *retrieveMediator(struct View *self, const char *mediatorName) {
     // mutex_lock_shared(&this->mediatorMapMutex);
-    for (size_t i = 0; i < self->mediatorsCount; i++) {
+    for (size_t i = 0; i < self->mediatorsMapCount; i++) {
         if (strcmp(self->mediatorMap[i].key, mediatorName) == 0) {
             return &self->mediatorMap[i].mediator;
         }
@@ -127,7 +127,7 @@ static struct Mediator *retrieveMediator(struct View *self, const char *mediator
 static bool hasMediator(const struct View *self, const char *mediatorName) {
     // mutex_lock_shared(&this->mediatorMapMutex);
     bool exists = false;
-    for (size_t i = 0; i < self->mediatorsCount; i++) {
+    for (size_t i = 0; i < self->mediatorsMapCount; i++) {
         if (strcmp(self->mediatorMap[i].key, mediatorName) == 0) {
             exists = true;
             break;
@@ -146,7 +146,7 @@ static struct Mediator removeMediator(struct View *self, const char *mediatorNam
     struct Mediator value = {0};
 
     size_t index = 0;
-    for (size_t i = 0; i < self->mediatorsCount; i++) { // One-pass removal (Filter pattern)
+    for (size_t i = 0; i < self->mediatorsMapCount; i++) { // One-pass removal (Filter pattern)
         if (strcmp(self->mediatorMap[i].key, mediatorName) == 0) { // check
             mediatorMap = &self->mediatorMap[i];
             mediator = &self->mediatorMap[i].mediator;
@@ -170,7 +170,7 @@ static struct Mediator removeMediator(struct View *self, const char *mediatorNam
         value = *mediator;
 
         memset(mediatorMap, 0, sizeof(struct MediatorMap));
-        self->mediatorsCount--;
+        self->mediatorsMapCount--;
     }
 
     return value;

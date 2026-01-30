@@ -1,17 +1,18 @@
 /**
 * @file macro_command.c
+* @internal
 * @brief MacroCommand Implementation
 *
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include <stdio.h>
+#include <stddef.h>
 
 #include "puremvc/macro_command.h"
 #include "puremvc/constants.h"
 
 static void execute(const struct SimpleCommand *self, struct Notification *notification) {
-    struct SimpleCommand (*subCommands[MACRO_COMMAND_ARRAY_SIZE])() = { NULL };
+    struct SimpleCommand (*subCommands[MACRO_COMMAND_SUBCOMMANDS_SIZE])() = { NULL };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {
         struct SimpleCommand (*factory)() = subCommands[i];

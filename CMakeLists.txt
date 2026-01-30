@@ -4,6 +4,7 @@ project(puremvc VERSION 1.0.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 
 add_library(puremvc STATIC
+        src/core/controller.c
         src/core/model.c
         src/core/view.c
         src/patterns/command/simple_command.c
