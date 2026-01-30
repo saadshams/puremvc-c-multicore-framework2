@@ -11,3 +11,4 @@ void testHasMediator();
 void testHasCommand();
 void testHasCoreAndRemoveCore();
 void testGetInstancesThreaded();
+void testAddRemoveMultipleCores();

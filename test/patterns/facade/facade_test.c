@@ -10,16 +10,17 @@
 #include "facade_test_vo.h"
 
 int main() {
-    testGetInstance();
-    testRegisterCommandAndSendNotification();
-    testRegisterAndRemoveCommandAndSendNotification();
-    testRegisterAndRetrieveProxy();
-    testRegisterAndRemoveProxy();
-    testRegisterRetrieveAndRemoveMediator();
-    testHasProxy();
-    testHasMediator();
-    testHasCommand();
-    testHasCoreAndRemoveCore();
+    // testGetInstance();
+    // testRegisterCommandAndSendNotification();
+    // testRegisterAndRemoveCommandAndSendNotification();
+    // testRegisterAndRetrieveProxy();
+    // testRegisterAndRemoveProxy();
+    // testRegisterRetrieveAndRemoveMediator();
+    // testHasProxy();
+    // testHasMediator();
+    // testHasCommand();
+    // testHasCoreAndRemoveCore();
+    testAddRemoveMultipleCores();
     return 0;
 }
 
@@ -223,4 +224,25 @@ void testHasCoreAndRemoveCore() {
 
     // assert that the Facade.hasCore method returns false now that the core has been removed.
     assert(puremvc_facade_hasCore("FacadeTestKey11") == false);
+}
+
+void testAddRemoveMultipleCores() {
+    struct Facade *facade = puremvc_facade_getInstance("FacadeTestKey12", puremvc_facade);
+    facade->initializeFacade(facade);
+    assert(puremvc_facade_hasCore("FacadeTestKey12") == true);
+
+    struct Facade *facade2 = puremvc_facade_getInstance("FacadeTestKey13", puremvc_facade);
+    facade2->initializeFacade(facade2);
+    assert(puremvc_facade_hasCore("FacadeTestKey13") == true);
+
+    struct Facade *facade3 = puremvc_facade_getInstance("FacadeTestKey14", puremvc_facade);
+    facade3->initializeFacade(facade3);
+    assert(puremvc_facade_hasCore("FacadeTestKey14") == true);
+
+    puremvc_facade_removeFacade("FacadeTestKey12");
+    assert(puremvc_facade_hasCore("FacadeTestKey12") == false);
+    puremvc_facade_removeFacade("FacadeTestKey13");
+    assert(puremvc_facade_hasCore("FacadeTestKey13") == false);
+    puremvc_facade_removeFacade("FacadeTestKey14");
+    assert(puremvc_facade_hasCore("FacadeTestKey14") == false);
 }

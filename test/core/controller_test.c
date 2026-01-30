@@ -9,14 +9,13 @@
 #include "controller_test_vo.h"
 
 int main() {
-    // testGetInstance();
-    // testRegisterAndExecuteCommand();
-    // testRegisterAndRemoveCommand();
-    // testHasCommand();
-    // testReregisterAndExecuteCommand();
-    // testRegisterAndUpdateCommand();
-    // testRemoveController();
-    testRemoveMultipleController();
+    testGetInstance();
+    testRegisterAndExecuteCommand();
+    testRegisterAndRemoveCommand();
+    testHasCommand();
+    testReregisterAndExecuteCommand();
+    testRegisterAndUpdateCommand();
+    testRemoveController();
     return 0;
 }
 
@@ -180,16 +179,4 @@ void testRemoveController() {
 
     // cleanup
     puremvc_controller_removeController("ControllerTestKey7");
-}
-
-void testRemoveMultipleController() {
-    // Get a Multiton Controller instance
-    puremvc_controller_getInstance("ControllerTestKey8", puremvc_controller);
-    puremvc_controller_getInstance("ControllerTestKey9", puremvc_controller);
-    puremvc_controller_getInstance("ControllerTestKey10", puremvc_controller);
-
-    // cleanup
-    puremvc_controller_removeController("ControllerTestKey8");
-    puremvc_controller_removeController("ControllerTestKey9");
-    puremvc_controller_removeController("ControllerTestKey10");
 }
