@@ -31,18 +31,16 @@ static void onRemove(struct Proxy *self) {
 }
 
 struct Proxy puremvc_proxy(const char *name, void *data) {
-    struct Proxy proxy = {0};
+    struct Proxy proxy = {
+        .data = data,
+        .notifier = puremvc_notifier(),
+        .getName = getName,
+        .getData = getData,
+        .setData = setData,
+        .onRegister = onRegister,
+        .onRemove = onRemove
+    };
 
     snprintf(proxy.name, NAME_SIZE, "%s", name ? name : PROXY_NAME);
-    proxy.data = data;
-
-    proxy.notifier = puremvc_notifier();
-
-    proxy.getName = getName;
-    proxy.getData = getData;
-    proxy.setData = setData;
-    proxy.onRegister = onRegister;
-    proxy.onRemove = onRemove;
-
     return proxy;
 }

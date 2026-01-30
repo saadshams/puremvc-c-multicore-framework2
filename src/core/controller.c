@@ -42,7 +42,7 @@ static void registerCommand(struct Controller *self, const char *notificationNam
     size_t i = 0;
     for (; i < COMMAND_MAP_SIZE && self->commandMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->commandMap[i].key, notificationName) == 0) {
-            self->commandMap[i].factory = factory; // update
+            self->commandMap[i].factory = factory;
             return;
         }
     }
@@ -89,16 +89,15 @@ static void removeCommand(struct Controller *self, const char *notificationName)
 }
 
 struct Controller puremvc_controller(const char *key) {
-    struct Controller controller = {0};
+    struct Controller controller = {
+        .initializeController = initializeController,
+        .executeCommand = executeCommand,
+        .registerCommand = registerCommand,
+        .hasCommand = hasCommand,
+        .removeCommand = removeCommand
+    };
 
     snprintf(controller.multitonKey, KEY_SIZE, "%s", key);
-
-    controller.initializeController = initializeController;
-    controller.executeCommand = executeCommand;
-    controller.registerCommand = registerCommand;
-    controller.hasCommand = hasCommand;
-    controller.removeCommand = removeCommand;
-
     return controller;
 }
 

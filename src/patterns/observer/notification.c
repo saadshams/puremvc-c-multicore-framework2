@@ -35,18 +35,18 @@ void toString(const struct Notification *self, char *buffer, size_t buffer_size)
 }
 
 struct Notification puremvc_notification(const char *name, void *body, const char *type) {
-    struct Notification notification = {0};
+    struct Notification notification = {
+        .body = body,
+        .getName = getName,
+        .getBody = getBody,
+        .setBody = setBody,
+        .getType = getType,
+        .setType = setType,
+        .toString = toString
+    };
 
     snprintf(notification.name, NAME_SIZE, "%s", name);
-    notification.body = body;
     if (type != NULL) snprintf(notification.type, NAME_SIZE, "%s", type);
-
-    notification.getName = getName;
-    notification.getBody = getBody;
-    notification.setBody = setBody;
-    notification.getType = getType;
-    notification.setType = setType;
-    notification.toString = toString;
 
     return notification;
 }

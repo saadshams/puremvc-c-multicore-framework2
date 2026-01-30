@@ -69,13 +69,12 @@ static bool hasProxy(const struct Model *self, const char *proxyName) {
 
 static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
     // mutex_lock(&this->proxyMapMutex);
-    struct ProxyMap *proxyMap = NULL;
     struct Proxy proxy = {0};
-
     size_t index = 0; // One-pass removal (Filter pattern)
     for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
-            proxyMap = &self->proxyMap[i];
+            proxy = self->proxyMap[i].proxy;
+            proxy.onRemove(&proxy);
         } else {
             if (index != i) { // shift left
                 memmove(&self->proxyMap[index], &self->proxyMap[i], sizeof(struct Proxy));
@@ -86,26 +85,22 @@ static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
     }
     // mutex_unlock(&this->proxyMapMutex);
 
-    if (proxyMap != NULL) {
-        proxyMap->proxy.onRemove(&proxyMap->proxy);
-        proxy = proxyMap->proxy;
-        memset(proxyMap, 0, sizeof(struct ProxyMap));
-    }
+    if (proxy.name[0] != '\0')
+        memset(&self->proxyMap[index], 0, sizeof(struct Proxy));
 
     return proxy;
 }
 
 struct Model puremvc_model(const char *key) {
-    struct Model model = {0};
+    struct Model model = {
+        .initializeModel = initializeModel,
+        .registerProxy = registerProxy,
+        .retrieveProxy = retrieveProxy,
+        .hasProxy = hasProxy,
+        .removeProxy = removeProxy
+    };
 
     snprintf(model.multitonKey, KEY_SIZE, "%s", key);
-
-    model.initializeModel = initializeModel;
-    model.registerProxy = registerProxy;
-    model.retrieveProxy = retrieveProxy;
-    model.hasProxy = hasProxy;
-    model.removeProxy = removeProxy;
-
     return model;
 }
 

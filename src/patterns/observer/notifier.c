@@ -32,12 +32,10 @@ static void sendNotification(const struct Notifier *self, const char *notificati
 }
 
 struct Notifier puremvc_notifier() {
-    struct Notifier notifier = {0};
-
-    notifier.getFacade = getFacade;
-    notifier.getMultitonKey = getMultitonKey;
-    notifier.initializeNotifier = initializeNotifier;
-    notifier.sendNotification = sendNotification;
-
-    return notifier;
+    return (struct Notifier) {
+        .getFacade = getFacade,
+        .getMultitonKey = getMultitonKey,
+        .initializeNotifier = initializeNotifier,
+        .sendNotification = sendNotification
+    };
 }

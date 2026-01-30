@@ -32,24 +32,19 @@ static void notifyObserver(const struct Observer *self, struct Notification noti
 }
 
 static bool compareNotifyContext(const struct Observer *self, const void *context) {
-    const struct Observer *this = (struct Observer *) self;
-    if (this->context == NULL || context == NULL) return false;
-
-    return this->context == context;
+    if (self->context == NULL || context == NULL) return false;
+    return self->context == context;
 }
 
 struct Observer puremvc_observer(void (*notify)(const void *context, struct Notification notification), void *context) {
-    struct Observer observer = {0};
-
-    observer.notify = notify;
-    observer.context = context;
-
-    observer.getContext = getContext;
-    observer.setContext = setContext;
-    observer.getNotify = getNotify;
-    observer.setNotify = setNotify;
-    observer.notifyObserver = notifyObserver;
-    observer.compareNotifyContext = compareNotifyContext;
-
-    return observer;
+    return (struct Observer) {
+        .notify = notify,
+        .context = context,
+        .getContext = getContext,
+        .setContext = setContext,
+        .getNotify = getNotify,
+        .setNotify = setNotify,
+        .notifyObserver = notifyObserver,
+        .compareNotifyContext = compareNotifyContext
+    };
 }

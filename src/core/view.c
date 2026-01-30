@@ -45,11 +45,10 @@ static void registerObserver(struct View *self, const char *notificationName, co
 static void notifyObservers(const struct View *self, const struct Notification notification) {
     // mutex_lock_shared(&this->observerMapMutex);
     struct Observer observers[OBSERVER_ARRAY_SIZE];
-
     size_t count = 0;
     for (size_t i = 0; i < OBSERVER_MAP_SIZE && self->observerMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->observerMap[i].key, notification.name) == 0) {
-            for (; count < OBSERVER_ARRAY_SIZE && self->observerMap[i].observers[count].context != NULL; count++) {}
+            while (count < OBSERVER_ARRAY_SIZE && self->observerMap[i].observers[count].context != NULL) count++;
             memcpy(observers, self->observerMap[i].observers, count * sizeof(struct Observer));
             break;
         }
@@ -143,14 +142,18 @@ static bool hasMediator(const struct View *self, const char *mediatorName) {
 // pointer is passing all the tests
 static struct Mediator removeMediator(struct View *self, const char *mediatorName) {
     // mutex_lock(&this->mediatorMapMutex);
-    struct MediatorMap *mediatorMap = NULL;
     struct Mediator mediator = {0};
 
     size_t index = 0; // One-pass removal (Filter pattern)
     size_t i = 0;
     for (; i < MEDIATOR_MAP_SIZE && self->mediatorMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->mediatorMap[i].key, mediatorName) == 0) {
-            mediatorMap = &self->mediatorMap[i]; // found
+            mediator = self->mediatorMap[i].mediator;
+            const char **interests = self->mediatorMap[i].mediator.listNotificationInterests(&self->mediatorMap[i].mediator);
+            for (const char **cursor = interests; *cursor; cursor++) {
+                self->removeObserver(self, *cursor, &self->mediatorMap[i].mediator);
+            }
+            self->mediatorMap[i].mediator.onRemove(&self->mediatorMap[i].mediator);
         } else {
             if (index != i) { // shift left
                 memmove(&self->mediatorMap[index], &self->mediatorMap[i], sizeof(struct Mediator));
@@ -161,34 +164,25 @@ static struct Mediator removeMediator(struct View *self, const char *mediatorNam
     }
     // mutex_unlock(&this->mediatorMapMutex);
 
-    if (mediatorMap != NULL) {
-        const char **interests = mediatorMap->mediator.listNotificationInterests(&mediatorMap->mediator);
-        for (const char **cursor = interests; *cursor; cursor++) {
-            self->removeObserver(self, *cursor, &mediatorMap->mediator);
-        }
-        mediatorMap->mediator.onRemove(&mediatorMap->mediator);
-        mediator = mediatorMap->mediator;
-
-        memset(mediatorMap, 0, sizeof(struct MediatorMap));
-    }
+    if (mediator.name[0] != '\0')
+        memset(&self->mediatorMap[index], 0, sizeof(struct MediatorMap));
 
     return mediator;
 }
 
 struct View puremvc_view(const char *key) {
-    struct View view = {0};
+    struct View view = {
+        .initializeView = initializeView,
+        .registerObserver = registerObserver,
+        .notifyObservers = notifyObservers,
+        .removeObserver = removeObserver,
+        .registerMediator = registerMediator,
+        .retrieveMediator = retrieveMediator,
+        .hasMediator = hasMediator,
+        .removeMediator = removeMediator
+    };
 
     snprintf(view.multitonKey, KEY_SIZE, "%s", key);
-
-    view.initializeView = initializeView;
-    view.registerObserver = registerObserver;
-    view.notifyObservers = notifyObservers;
-    view.removeObserver = removeObserver;
-    view.registerMediator = registerMediator;
-    view.retrieveMediator = retrieveMediator;
-    view.hasMediator = hasMediator;
-    view.removeMediator = removeMediator;
-
     return view;
 }
 

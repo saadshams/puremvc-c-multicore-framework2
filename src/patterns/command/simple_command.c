@@ -13,8 +13,8 @@ static void execute(const struct SimpleCommand *self, struct Notification notifi
 }
 
 struct SimpleCommand puremvc_simple_command() {
-    struct SimpleCommand command = {0};
-    command.notifier = puremvc_notifier();
-    command.execute = execute;
-    return command;
+    return (struct SimpleCommand) {
+        .notifier = puremvc_notifier(),
+        .execute = execute
+    };
 }

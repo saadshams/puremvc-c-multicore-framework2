@@ -40,20 +40,18 @@ static void onRemove(struct Mediator *self) {
 }
 
 struct Mediator puremvc_mediator(const char *name, void *component) {
-    struct Mediator mediator = {0};
+    struct Mediator mediator = {
+        .component = component,
+        .notifier = puremvc_notifier(),
+        .getName = getName,
+        .setComponent = setComponent,
+        .getComponent = getComponent,
+        .listNotificationInterests = listNotificationInterests,
+        .handleNotification = handleNotification,
+        .onRegister = onRegister,
+        .onRemove = onRemove
+    };
 
     snprintf(mediator.name, NAME_SIZE, "%s", name ? name : MEDIATOR_NAME);
-    mediator.component = component;
-
-    mediator.notifier = puremvc_notifier();
-    
-    mediator.getName = getName;
-    mediator.setComponent = setComponent;
-    mediator.getComponent = getComponent;
-    mediator.listNotificationInterests = listNotificationInterests;
-    mediator.handleNotification = handleNotification;
-    mediator.onRegister = onRegister;
-    mediator.onRemove = onRemove;
-
     return mediator;
 }
