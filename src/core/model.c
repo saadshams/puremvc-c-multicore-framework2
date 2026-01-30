@@ -26,8 +26,9 @@ static void registerProxy(struct Model *self, struct Proxy proxy) {
     // mutex_lock(&this->proxyMapMutex);
     size_t i = 0;
     for (; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) { // search
-        if (strcmp(self->proxyMap[i].key, proxy.getName(&proxy)) == 0) {
-            self->proxyMap[i].proxy.onRemove(&self->proxyMap[i].proxy); // remove
+        if (strcmp(self->proxyMap[i].key, proxy.getName(&proxy)) == 0) { // existing
+            self->proxyMap[i].proxy.onRemove(&self->proxyMap[i].proxy);
+            memset(&self->proxyMap[i].proxy, 0, sizeof(struct Proxy)); // remove
             break;
         }
     }
@@ -36,10 +37,9 @@ static void registerProxy(struct Model *self, struct Proxy proxy) {
 
     proxy.notifier.initializeNotifier(&proxy.notifier, self->multitonKey);
 
-    snprintf(self->proxyMap[i].key, KEY_SIZE, "%s", proxy.name); // upsert
-    self->proxyMap[i].proxy = proxy;
+    snprintf(self->proxyMap[i].key, KEY_SIZE, "%s", proxy.name); // new key
+    self->proxyMap[i].proxy = proxy; // insert
     self->proxyMap[i].proxy.onRegister(&self->proxyMap[i].proxy);
-
     // mutex_unlock(&this->proxyMapMutex);
 }
 
@@ -70,32 +70,29 @@ static bool hasProxy(const struct Model *self, const char *proxyName) {
 static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
     // mutex_lock(&this->proxyMapMutex);
     struct ProxyMap *proxyMap = NULL;
-    struct Proxy *proxy = NULL;
-    struct Proxy value = {0};
+    struct Proxy proxy = {0};
 
     size_t index = 0; // One-pass removal (Filter pattern)
-    for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
-        if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
+    for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) { // search
+        if (strcmp(self->proxyMap[i].key, proxyName) == 0) { // match
             proxyMap = &self->proxyMap[i];
-            proxy = &self->proxyMap[i].proxy;
         } else {
             if (index != i) { // shift left
                 memmove(&self->proxyMap[index], &self->proxyMap[i], sizeof(struct Proxy));
-                memset(&self->proxyMap[i], 0, sizeof(struct Proxy));
+                memset(&self->proxyMap[i], 0, sizeof(struct ProxyMap));
             }
             index++;
         }
     }
     // mutex_unlock(&this->proxyMapMutex);
 
-    if (proxy != NULL) {
-        proxy->onRemove(proxy);
-        value = *proxy;
-
+    if (proxyMap != NULL) {
+        proxyMap->proxy.onRemove(&proxyMap->proxy);
+        proxy = proxyMap->proxy;
         memset(proxyMap, 0, sizeof(struct ProxyMap));
     }
 
-    return value;
+    return proxy;
 }
 
 struct Model puremvc_model(const char *key) {

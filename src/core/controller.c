@@ -31,6 +31,7 @@ static void executeCommand(const struct Controller *self, struct Notification no
             struct SimpleCommand command = factory();
             command.notifier.initializeNotifier(&command.notifier, self->multitonKey);
             command.execute(&command, notification);
+            break;
         }
     }
     // mutex_unlock(&this->commandMapMutex);
@@ -40,7 +41,7 @@ static void registerCommand(struct Controller *self, const char *notificationNam
     // mutex_lock(&this->commandMapMutex);
     size_t i = 0;
     for (; i < COMMAND_MAP_SIZE && self->commandMap[i].key[0] != '\0'; i++) { // search
-        if (strcmp(self->commandMap[i].key, notificationName) == 0) {
+        if (strcmp(self->commandMap[i].key, notificationName) == 0) { // existing
             self->commandMap[i].factory = factory; // update
             return;
         }
@@ -51,8 +52,8 @@ static void registerCommand(struct Controller *self, const char *notificationNam
     const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification)) executeCommand, self);
     self->view->registerObserver(self->view, notificationName, observer);
 
-    snprintf(self->commandMap[i].key, NAME_SIZE, "%s", notificationName); // insert
-    self->commandMap[i].factory = factory;
+    snprintf(self->commandMap[i].key, NAME_SIZE, "%s", notificationName); // new key
+    self->commandMap[i].factory = factory; // insert
     // mutex_unlock(&this->commandMapMutex);
 }
 
@@ -72,14 +73,14 @@ static bool hasCommand(const struct Controller *self, const char *notificationNa
 static void removeCommand(struct Controller *self, const char *notificationName) {
     // mutex_lock(&self->commandMapMutex);
     size_t index = 0; // One-pass removal (Filter pattern)
-    for (size_t i = 0; i < COMMAND_MAP_SIZE && i < self->commandMap[i].key[0] != '\0'; i++) {
-        if (strcmp(self->commandMap[i].key, notificationName) == 0) {
+    for (size_t i = 0; i < COMMAND_MAP_SIZE && i < self->commandMap[i].key[0] != '\0'; i++) { // search
+        if (strcmp(self->commandMap[i].key, notificationName) == 0) { // match
             self->view->removeObserver(self->view, notificationName, self);
             memset(&self->commandMap, 0, sizeof(struct CommandMap));
         } else {
             if (index != i) { // shift left
                 memmove(&self->commandMap[index], &self->commandMap[i], sizeof(struct SimpleCommand));
-                memset(&self->commandMap[i], 0, sizeof(struct SimpleCommand));
+                memset(&self->commandMap[i], 0, sizeof(struct CommandMap));
             }
             index++;
         }
