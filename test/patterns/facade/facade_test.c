@@ -19,8 +19,8 @@ int main() {
     // testHasProxy();
     // testHasMediator();
     // testHasCommand();
-    // testHasCoreAndRemoveCore();
-    testAddRemoveMultipleCores();
+    testHasCoreAndRemoveCore();
+    // testAddAndRemoveMultipleCores();
     return 0;
 }
 
@@ -226,7 +226,7 @@ void testHasCoreAndRemoveCore() {
     assert(puremvc_facade_hasCore("FacadeTestKey11") == false);
 }
 
-void testAddRemoveMultipleCores() {
+void testAddAndRemoveMultipleCores() {
     struct Facade *facade = puremvc_facade_getInstance("FacadeTestKey12", puremvc_facade);
     facade->initializeFacade(facade);
     assert(puremvc_facade_hasCore("FacadeTestKey12") == true);

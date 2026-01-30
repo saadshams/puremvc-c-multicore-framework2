@@ -151,7 +151,7 @@ bool puremvc_facade_hasCore(const char *key) {
     if (key == NULL) return false;
     mutex_lock_shared(&mutex);
     bool exists = false;
-    for (size_t i = 0; i < instanceMap[i].multitonKey[0] != '\0'; i++) {
+    for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
         if (strcmp(instanceMap[i].multitonKey, key) == 0) {
             exists = true;
             break;
