@@ -23,10 +23,10 @@ static void initializeController(struct Controller *self) {
     self->view = puremvc_view_getInstance(self->multitonKey, puremvc_view);
 }
 
-static void executeCommand(const struct Controller *self, struct Notification notification) {
+static void executeCommand(const struct Controller *self, const struct Notification notification) {
     // mutex_lock_shared(&this->commandMapMutex);
-    for (size_t i = 0; i < COMMAND_MAP_SIZE && self->commandMap[i].key[0] != '\0'; i++) {
-        if (strcmp(self->commandMap[i].key, notification.name) == 0) {
+    for (size_t i = 0; i < COMMAND_MAP_SIZE && self->commandMap[i].key[0] != '\0'; i++) { // search
+        if (strcmp(self->commandMap[i].key, notification.name) == 0) { // match
             struct SimpleCommand (*factory)() = self->commandMap[i].factory;
             struct SimpleCommand command = factory();
             command.notifier.initializeNotifier(&command.notifier, self->multitonKey);
@@ -41,7 +41,7 @@ static void registerCommand(struct Controller *self, const char *notificationNam
     // mutex_lock(&this->commandMapMutex);
     size_t i = 0;
     for (; i < COMMAND_MAP_SIZE && self->commandMap[i].key[0] != '\0'; i++) { // search
-        if (strcmp(self->commandMap[i].key, notificationName) == 0) { // existing
+        if (strcmp(self->commandMap[i].key, notificationName) == 0) { // match
             self->commandMap[i].factory = factory; // update
             return;
         }
@@ -136,8 +136,8 @@ void puremvc_controller_removeController(const char *key) {
             memset(&instanceMap[i], 0, sizeof(struct Controller)); // remove
 
             for (size_t j = i + 1; j < INSTANCE_MAP_SIZE; j++) // shift left
-                instanceMap[j-1] = instanceMap[j];
-            // memmove(&instanceMap[i], &instanceMap[i + 1], sizeof(instanceMap[0]) * (INSTANCE_MAP_SIZE - i));
+                // instanceMap[j-1] = instanceMap[j];
+                memmove(&instanceMap[j], &instanceMap[j + 1], sizeof(struct Controller));
             break;
         }
     }

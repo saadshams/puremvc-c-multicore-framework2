@@ -75,7 +75,7 @@ static bool hasProxy(const struct Facade *self, const char *proxyName) {
     return self->model->hasProxy(self->model, proxyName);
 }
 
-static void registerMediator(const struct Facade *self, struct Mediator mediator) {
+static void registerMediator(const struct Facade *self, const struct Mediator mediator) {
     self->view->registerMediator(self->view, mediator);
 }
 
@@ -96,7 +96,7 @@ static void notifyObservers(const struct Facade *self, const struct Notification
 }
 
 static void sendNotification(const struct Facade *self, const char *notificationName, void *body, const char *type) {
-    struct Notification notification = puremvc_notification(notificationName, body, type);
+    const struct Notification notification = puremvc_notification(notificationName, body, type);
     self->notifyObservers(self, notification);
 }
 
@@ -175,8 +175,8 @@ void puremvc_facade_removeFacade(const char *key) {
             memset(&instanceMap[i], 0, sizeof(struct Model)); // remove
 
             for (size_t j = i + 1; j < INSTANCE_MAP_SIZE; j++) // shift left
-                instanceMap[j-1] = instanceMap[j];
-            // memmove(&instanceMap[i], &instanceMap[i + 1], sizeof(instanceMap[0]) * (INSTANCE_MAP_SIZE - i));
+                // instanceMap[j-1] = instanceMap[j];
+                memmove(&instanceMap[j], &instanceMap[j + 1], sizeof(struct Facade));
             break;
         }
     }

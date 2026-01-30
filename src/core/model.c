@@ -26,7 +26,7 @@ static void registerProxy(struct Model *self, struct Proxy proxy) {
     // mutex_lock(&this->proxyMapMutex);
     size_t i = 0;
     for (; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) { // search
-        if (strcmp(self->proxyMap[i].key, proxy.getName(&proxy)) == 0) { // existing
+        if (strcmp(self->proxyMap[i].key, proxy.getName(&proxy)) == 0) { // match
             self->proxyMap[i].proxy.onRemove(&self->proxyMap[i].proxy);
             memset(&self->proxyMap[i].proxy, 0, sizeof(struct Proxy)); // remove
             break;
@@ -142,9 +142,9 @@ void puremvc_model_removeModel(const char *key) {
         if (strcmp(instanceMap[i].multitonKey, key) == 0) {
             memset(&instanceMap[i], 0, sizeof(struct Model)); // remove
 
-            for (size_t j = i + 1; j < INSTANCE_MAP_SIZE; j++) // shift left
-                instanceMap[j-1] = instanceMap[j];
-            // memmove(&instanceMap[i], &instanceMap[i + 1], sizeof(instanceMap[0]) * (INSTANCE_MAP_SIZE - i));
+            for (size_t j = i; j < INSTANCE_MAP_SIZE; j++) // shift left
+                // instanceMap[j-1] = instanceMap[j];
+                memmove(&instanceMap[j], &instanceMap[j + 1], sizeof(struct Model));
             break;
         }
     }

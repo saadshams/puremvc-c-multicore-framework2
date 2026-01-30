@@ -22,11 +22,11 @@ static void initializeView(struct View *self) {
 
 }
 
-static void registerObserver(struct View *self, const char *notificationName, struct Observer observer) {
+static void registerObserver(struct View *self, const char *notificationName, const struct Observer observer) {
     // mutex_lock(&this->observerMapMutex);
     size_t i = 0;
     for (; i < OBSERVER_MAP_SIZE && self->observerMap[i].key[0] != '\0'; i++) { // search map
-        if (strcmp(self->observerMap[i].key, notificationName) == 0) { // existing match
+        if (strcmp(self->observerMap[i].key, notificationName) == 0) { // match
             size_t count = 0;
             for (; count < OBSERVER_ARRAY_SIZE && self->observerMap[i].observers[count].context != NULL; count++) {}
             if (count >= OBSERVER_ARRAY_SIZE) return; // observer array is full
@@ -42,7 +42,7 @@ static void registerObserver(struct View *self, const char *notificationName, st
     // mutex_unlock(&this->observerMapMutex);
 }
 
-static void notifyObservers(const struct View *self, struct Notification notification) {
+static void notifyObservers(const struct View *self, const struct Notification notification) {
     // mutex_lock_shared(&this->observerMapMutex);
     struct Observer observers[OBSERVER_ARRAY_SIZE];
 
@@ -95,7 +95,8 @@ static void registerMediator(struct View *self, struct Mediator mediator) {
     // mutex_lock(&this->mediatorMapMutex);
     size_t i = 0;
     for (; i < MEDIATOR_MAP_SIZE && self->mediatorMap[i].key[0] != '\0'; i++) { // search
-        if (strcmp(self->mediatorMap[i].key, mediator.getName(&mediator)) == 0) return; // existing
+        if (strcmp(self->mediatorMap[i].key, mediator.getName(&mediator)) == 0) return; // match
+        // mutex_unlock(&this->mediatorMapMutex);
     }
 
     if (i >= MEDIATOR_MAP_SIZE) return; // mediatorMap is full
@@ -225,8 +226,8 @@ void puremvc_view_removeView(const char *key) {
             memset(&instanceMap[i], 0, sizeof(struct View)); // remove
 
             for (size_t j = i + 1; j < INSTANCE_MAP_SIZE; j++) // shift left
-                instanceMap[j-1] = instanceMap[j];
-            // memmove(&instanceMap[i], &instanceMap[i + 1], sizeof(instanceMap[0]) * (INSTANCE_MAP_SIZE - i));
+                // instanceMap[j-1] = instanceMap[j];
+                memmove(&instanceMap[j], &instanceMap[j + 1], sizeof(struct View));
             break;
         }
     }
