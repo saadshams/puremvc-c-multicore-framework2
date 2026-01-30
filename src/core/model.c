@@ -23,31 +23,31 @@ static void initializeModel(struct Model *self) {
 }
 
 static void registerProxy(struct Model *self, struct Proxy proxy) {
-    // mutex_lock(&this->proxyMapMutex);
+    // mutex_lock(&self->proxyMapMutex);
     size_t i = 0;
-    for (; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) { // search
-        if (strcmp(self->proxyMap[i].key, proxy.getName(&proxy)) == 0) { // match
+    for (; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
+        if (strcmp(self->proxyMap[i].key, proxy.getName(&proxy)) == 0) {
             self->proxyMap[i].proxy.onRemove(&self->proxyMap[i].proxy);
-            memset(&self->proxyMap[i].proxy, 0, sizeof(struct Proxy)); // remove
+            memset(&self->proxyMap[i].proxy, 0, sizeof(struct Proxy));
             break;
         }
     }
 
-    if (i >= PROXY_MAP_SIZE) return; // proxyMap is full
+    if (i >= PROXY_MAP_SIZE) return; // proxyMap is full // mutex_unlock(&self->proxyMapMutex);
 
     proxy.notifier.initializeNotifier(&proxy.notifier, self->multitonKey);
 
-    snprintf(self->proxyMap[i].key, KEY_SIZE, "%s", proxy.name); // new key
-    self->proxyMap[i].proxy = proxy; // insert
+    snprintf(self->proxyMap[i].key, KEY_SIZE, "%s", proxy.name);
+    self->proxyMap[i].proxy = proxy;
     self->proxyMap[i].proxy.onRegister(&self->proxyMap[i].proxy);
-    // mutex_unlock(&this->proxyMapMutex);
+    // mutex_unlock(&self->proxyMapMutex);
 }
 
 static struct Proxy *retrieveProxy(struct Model *self, const char *proxyName) {
     // mutex_lock_shared(&this->proxyMapMutex);
     for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
-            return &self->proxyMap[i].proxy;
+            return &self->proxyMap[i].proxy; // mutex_unlock(&self->proxyMapMutex);
         }
     }
     // mutex_unlock(&this->proxyMapMutex);
@@ -73,8 +73,8 @@ static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
     struct Proxy proxy = {0};
 
     size_t index = 0; // One-pass removal (Filter pattern)
-    for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) { // search
-        if (strcmp(self->proxyMap[i].key, proxyName) == 0) { // match
+    for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
+        if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
             proxyMap = &self->proxyMap[i];
         } else {
             if (index != i) { // shift left
@@ -140,7 +140,7 @@ void puremvc_model_removeModel(const char *key) {
 
     for (size_t i = 0; i < INSTANCE_MAP_SIZE; i++) {
         if (strcmp(instanceMap[i].multitonKey, key) == 0) {
-            memset(&instanceMap[i], 0, sizeof(struct Model)); // remove
+            memset(&instanceMap[i], 0, sizeof(struct Model));
 
             for (size_t j = i; j < INSTANCE_MAP_SIZE; j++) // shift left
                 // instanceMap[j-1] = instanceMap[j];

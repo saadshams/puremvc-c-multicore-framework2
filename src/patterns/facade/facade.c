@@ -172,7 +172,7 @@ void puremvc_facade_removeFacade(const char *key) {
 
     for (size_t i = 0; i < INSTANCE_MAP_SIZE; i++) {
         if (strcmp(instanceMap[i].multitonKey, key) == 0) {
-            memset(&instanceMap[i], 0, sizeof(struct Model)); // remove
+            memset(&instanceMap[i], 0, sizeof(struct Model));
 
             for (size_t j = i + 1; j < INSTANCE_MAP_SIZE; j++) // shift left
                 // instanceMap[j-1] = instanceMap[j];
