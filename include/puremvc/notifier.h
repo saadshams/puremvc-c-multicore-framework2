@@ -9,10 +9,12 @@
 
 #include "constants.h"
 
+struct Facade; // forward declaration
+
 struct Notifier {
     char key[NAME_SIZE];
     
-    // struct IFacade *(*getFacade)(const struct Notifier *self);
+    struct Facade *(*getFacade)(const struct Notifier *self);
     
     const char *(*getMultitonKey)(const struct Notifier *self);
     
