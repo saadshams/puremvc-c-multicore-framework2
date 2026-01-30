@@ -13,7 +13,7 @@
 struct SimpleCommand {
     struct Notifier notifier;
 
-    void (*execute)(const struct SimpleCommand *self, struct Notification *notification);
+    void (*execute)(const struct SimpleCommand *self, struct Notification notification);
 };
 
 struct SimpleCommand puremvc_simple_command();

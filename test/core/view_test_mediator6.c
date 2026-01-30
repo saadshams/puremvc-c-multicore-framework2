@@ -7,7 +7,7 @@ static const char **listNotificationInterests(const struct Mediator *self) {
     return interests;
 }
 
-static void handleNotification(const struct Mediator *self, struct Notification *notification) {
+static void handleNotification(const struct Mediator *self, struct Notification notification) {
     // const struct IFacade *facade = self->notifier->getFacade(self->notifier);
     // struct Mediator *mediator = facade->removeMediator(facade, self->getName(self));
 }

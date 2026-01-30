@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "view_test_mediator3.h"
 
 static const char **listNotificationInterests(const struct Mediator *self) {
@@ -7,9 +5,9 @@ static const char **listNotificationInterests(const struct Mediator *self) {
     return interests;
 }
 
-static void handleNotification(const struct Mediator *self, struct Notification *notification) {
+static void handleNotification(const struct Mediator *self, struct Notification notification) {
     struct ViewTest *viewTest = self->getComponent(self);
-    viewTest->lastNotification = notification->getName(notification);
+    viewTest->lastNotification = notification.getName(&notification);
 }
 
 struct Mediator view_test_mediator3(struct ViewTest *component) {

@@ -1,8 +1,8 @@
 #include "controller_test_command.h"
 #include "controller_test_vo.h"
 
-static void execute(const struct SimpleCommand *self, struct Notification *notification) {
-    struct ControllerTestVO *vo = (struct ControllerTestVO *)notification->getBody(notification);
+static void execute(const struct SimpleCommand *self, struct Notification notification) {
+    struct ControllerTestVO *vo = (struct ControllerTestVO *)notification.getBody(&notification);
 
     // Fabricate a result
     vo->result = vo->result + (2 * vo->input);

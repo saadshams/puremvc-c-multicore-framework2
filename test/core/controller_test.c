@@ -44,7 +44,7 @@ void testRegisterAndExecuteCommand() {
     // Tell the controller to execute the Command associated with the note
     // the ControllerTestCommand invoked will multiply the vo.input value
     // by 2 and set the result on vo.result
-    controller->executeCommand(controller, &notification);
+    controller->executeCommand(controller, notification);
 
     // test assertions
     assert(vo.result == 24);
@@ -67,7 +67,7 @@ void testRegisterAndRemoveCommand() {
     // Tell the controller to execute the Command associated with the note
     // the ControllerTestCommand invoked will multiply the vo.input value
     // by 2 and set the result on vo.result
-    controller->executeCommand(controller, &notification);
+    controller->executeCommand(controller, notification);
 
     // test assertions
     assert(vo.result == 24);
@@ -81,7 +81,7 @@ void testRegisterAndRemoveCommand() {
     // Tell the controller to execute the Command associated with the
     // note. This time, it should not be registered, and our vo result
     // will not change
-    controller->executeCommand(controller, &notification);
+    controller->executeCommand(controller, notification);
 
     // test assertions
     assert(vo.result == 0);
@@ -126,14 +126,14 @@ void testReregisterAndExecuteCommand() {
 
     // retrieve a reference to the View from the same core.
     struct View *view = puremvc_view_getInstance("ControllerTestKey5", puremvc_view);
-    view->notifyObservers(view, &notification);
+    view->notifyObservers(view, notification);
 
     // test assertions
     // if the command is executed once the value will be 24
     assert(vo.result == 24);
 
     // Prove that accumulation works in the VO by sending the notification again
-    view->notifyObservers(view, &notification);
+    view->notifyObservers(view, notification);
 
     // if the command is executed twice the value will be 48
     assert(vo.result == 48);
@@ -156,7 +156,7 @@ void testRegisterAndUpdateCommand() {
 
     struct ControllerTestVO vo = {12, 10};
     struct Notification notification = puremvc_notification("ControllerTest2", &vo, NULL);
-    controller->executeCommand(controller, &notification);
+    controller->executeCommand(controller, notification);
 
     // second command result
     assert(vo.result == 34);

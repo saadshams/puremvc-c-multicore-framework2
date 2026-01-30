@@ -32,7 +32,7 @@ void testSimpleCommandExecute() {
     const struct SimpleCommand command = test_simple_command();
 
     // Execute the SimpleCommand
-    command.execute(&command, &note);
+    command.execute(&command, note);
 
     // test assertions
     assert(vo.result == 10);

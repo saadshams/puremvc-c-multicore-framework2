@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "view_test_mediator.h"
 
 static const char **listNotificationInterests(const struct Mediator *self) {

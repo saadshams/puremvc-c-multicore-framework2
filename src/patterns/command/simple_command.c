@@ -8,7 +8,7 @@
 */
 #include "puremvc/simple_command.h"
 
-static void execute(const struct SimpleCommand *self, struct Notification *notification) {
+static void execute(const struct SimpleCommand *self, struct Notification notification) {
 
 }
 

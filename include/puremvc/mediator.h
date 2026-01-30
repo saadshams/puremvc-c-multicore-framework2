@@ -24,7 +24,7 @@ struct Mediator {
     void *(*getComponent)(const struct Mediator *self);
 
     const char **(*listNotificationInterests)(const struct Mediator *self);
-    void (*handleNotification)(const struct Mediator *self, struct Notification *notification);
+    void (*handleNotification)(const struct Mediator *self, struct Notification notification);
 
     void (*onRegister)(struct Mediator *self);
     void (*onRemove)(struct Mediator *self);

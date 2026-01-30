@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "puremvc/view.h"
@@ -32,8 +31,8 @@ int main() {
 
 struct ViewTestVar *viewTestVar;
 
-void viewTestMethod(const void *context, const struct Notification *notification) {
-    viewTestVar = (struct ViewTestVar *)notification->getBody(notification);
+void viewTestMethod(const void *context, const struct Notification notification) {
+    viewTestVar = (struct ViewTestVar *)notification.getBody(&notification);
 }
 
 void testGetInstance() {
@@ -54,7 +53,7 @@ void testRegisterAndNotifyObserver() {
     view->initializeView(view);
 
     // Create observer, passing in notification method and context
-    struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification *)) viewTestMethod, &viewComponent);
+    struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification)) viewTestMethod, &viewComponent);
 
     // Register Observer's interest in a particular Notification with the View
     view->registerObserver(view, "ViewTestNote1", observer);
@@ -68,7 +67,7 @@ void testRegisterAndNotifyObserver() {
     // on the note body.
     struct ViewTestVar vo = {.value = 10};
     struct Notification note = puremvc_notification("ViewTestNote1", &vo, NULL);
-    view->notifyObservers(view, &note);
+    view->notifyObservers(view, note);
 
     // test assertions
     assert(viewTestVar->value == 10);
@@ -76,7 +75,7 @@ void testRegisterAndNotifyObserver() {
     // remove first observer
     viewTestVar->value = 0;
     view->removeObserver(view, "ViewTestNote1", &viewComponent);
-    view->notifyObservers(view, &note);
+    view->notifyObservers(view, note);
     assert(viewTestVar->value == 0);
 
     puremvc_view_removeView("ViewTestKey2");
@@ -230,11 +229,11 @@ void testRemoveMediatorAndSubsequentNotify() {
 
     // test that notifications work
     struct Notification notification1 = puremvc_notification(NOTE1, NULL, NULL);
-    view->notifyObservers(view, &notification1);
+    view->notifyObservers(view, notification1);
     assert(strcmp(viewTest.lastNotification, NOTE1) == 0);
 
     struct Notification notification2 = puremvc_notification(NOTE2, NULL, NULL);
-    view->notifyObservers(view, &notification2);
+    view->notifyObservers(view, notification2);
     assert(strcmp(viewTest.lastNotification, NOTE2) == 0);
 
     view->removeMediator(view, view_test_mediator2_NAME);
@@ -243,10 +242,10 @@ void testRemoveMediatorAndSubsequentNotify() {
 
     viewTest.lastNotification = "";
 
-    view->notifyObservers(view, &notification1);
+    view->notifyObservers(view, notification1);
     assert(strcmp(viewTest.lastNotification, NOTE1) != 0);
 
-    view->notifyObservers(view, &notification2);
+    view->notifyObservers(view, notification2);
     assert(strcmp(viewTest.lastNotification, NOTE2) != 0);
 
     puremvc_view_removeView("ViewTestKey8");
@@ -288,13 +287,13 @@ void testRemoveOneOfTwoMediatorsAndSubsequentNotify() {
     // for notifications 1 and 2, but still work for 3
     viewTest.lastNotification = "";
 
-    view->notifyObservers(view, &notification1);
+    view->notifyObservers(view, notification1);
     assert(strcmp(viewTest.lastNotification, NOTE1) != 0);
 
-    view->notifyObservers(view, &notification2);
+    view->notifyObservers(view, notification2);
     assert(strcmp(viewTest.lastNotification, NOTE2) != 0);
 
-    view->notifyObservers(view, &notification3);
+    view->notifyObservers(view, notification3);
     assert(strcmp(viewTest.lastNotification, NOTE3) == 0);
 
     view->removeMediator(view, view_test_mediator3_NAME);
@@ -318,7 +317,7 @@ void testMediatorReregistration() {
     // test that the counter is only incremented once (mediator 5's response)
     viewTest.counter = 0;
     struct Notification notification = puremvc_notification(NOTE5, NULL, NULL);
-    view->notifyObservers(view, &notification);
+    view->notifyObservers(view, notification);
     assert(viewTest.counter == 1);
 
     // Remove the Mediator
@@ -329,7 +328,7 @@ void testMediatorReregistration() {
 
     // test that the counter is no longer incremented
     viewTest.counter = 0;
-    view->notifyObservers(view, &notification);
+    view->notifyObservers(view, notification);
     assert(viewTest.counter == 0);
 
     puremvc_view_removeView("ViewTestKey10");
@@ -368,14 +367,14 @@ void testModifyObserverListDuringNotification() {
     // themselves and incrementing the counter by 1. This should leave us with a
     // count of 8, since 8 mediators will respond.
     struct Notification notification = puremvc_notification(NOTE6, NULL, NULL);
-    view->notifyObservers(view, &notification);
+    view->notifyObservers(view, notification);
 
     // verify the count is correct
     assert(viewTest.counter == 8);
 
     // clear the counter
     viewTest.counter = 0;
-    view->notifyObservers(view, &notification);
+    view->notifyObservers(view, notification);
 
     // verify the count is 0
     assert(viewTest.counter == 0);

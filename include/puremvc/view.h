@@ -38,7 +38,7 @@ struct View {
 
     void (*registerObserver)(struct View *self, const char *notificationName, struct Observer observer);
 
-    void (*notifyObservers)(const struct View *self, struct Notification *notification);
+    void (*notifyObservers)(const struct View *self, struct Notification notification);
 
     void (*removeObserver)(struct View *self, const char *notificationName, const void *notifyContext);
 

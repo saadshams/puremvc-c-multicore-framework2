@@ -27,7 +27,7 @@ static const char **listNotificationInterests(const struct Mediator *self) {
     return interests;
 }
 
-static void handleNotification(const struct Mediator *self, struct Notification *notification) {
+static void handleNotification(const struct Mediator *self, struct Notification notification) {
 
 }
 

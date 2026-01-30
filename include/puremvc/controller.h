@@ -32,7 +32,7 @@ struct Controller {
     
     void (*registerCommand)(struct Controller *self, const char *notificationName, struct SimpleCommand(*factory)());
 
-    void (*executeCommand)(const struct Controller *self, struct Notification *notification);
+    void (*executeCommand)(const struct Controller *self, struct Notification notification);
 
     bool (*hasCommand)(const struct Controller *self, const char *notificationName);
 

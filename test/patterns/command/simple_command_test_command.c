@@ -8,8 +8,8 @@
  * @param self
  * @param notification the <code>INotification</code> carrying the <code>SimpleCommandTestVO</code>
  */
-static void execute(const struct SimpleCommand *self, struct Notification *notification) {
-    struct SimpleCommandTestVO *vo = (struct SimpleCommandTestVO *) notification->getBody(notification);
+static void execute(const struct SimpleCommand *self, struct Notification notification) {
+    struct SimpleCommandTestVO *vo = (struct SimpleCommandTestVO *) notification.getBody(&notification);
 
     // Fabricate a result
     vo->result = 2 * vo->input;

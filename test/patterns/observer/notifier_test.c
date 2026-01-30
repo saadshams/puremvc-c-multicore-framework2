@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "notifier_test.h"
 #include "puremvc/notifier.h"

@@ -18,15 +18,15 @@ static void setContext(struct Observer *self, void *notifyContext) {
     self->context = notifyContext;
 }
 
-static void (*getNotify(const struct Observer *self))(const void *context, struct Notification *notification) {
+static void (*getNotify(const struct Observer *self))(const void *context, struct Notification notification) {
     return self->notify;
 }
 
-static void setNotify(struct Observer *self, void (*notify)(const void *context, struct Notification *notification)) {
+static void setNotify(struct Observer *self, void (*notify)(const void *context, struct Notification notification)) {
     self->notify = notify;
 }
 
-static void notifyObserver(const struct Observer *self, struct Notification *notification) {
+static void notifyObserver(const struct Observer *self, struct Notification notification) {
     if (self->notify == NULL && self->context == NULL) return;
     self->notify(self->context, notification);
 }
@@ -38,7 +38,7 @@ static bool compareNotifyContext(const struct Observer *self, const void *contex
     return this->context == context;
 }
 
-struct Observer puremvc_observer(void (*notify)(const void *context, struct Notification *notification), void *context) {
+struct Observer puremvc_observer(void (*notify)(const void *context, struct Notification notification), void *context) {
     struct Observer observer = {0};
 
     observer.notify = notify;

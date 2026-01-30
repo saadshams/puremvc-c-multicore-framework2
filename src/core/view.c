@@ -7,7 +7,6 @@
 * @copyright BSD 3-Clause License
 */
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "puremvc/view.h"
@@ -43,13 +42,13 @@ static void registerObserver(struct View *self, const char *notificationName, st
     // mutex_unlock(&this->observerMapMutex);
 }
 
-static void notifyObservers(const struct View *self, struct Notification *notification) {
+static void notifyObservers(const struct View *self, struct Notification notification) {
     // mutex_lock_shared(&this->observerMapMutex);
     struct Observer copy[OBSERVERS_ARRAY_SIZE];
     size_t copyCount = 0;
 
     for (size_t i = 0; i < self->observersMapCount; i++) { // search key
-        if (strcmp(self->observerMap[i].key, notification->name) == 0) {
+        if (strcmp(self->observerMap[i].key, notification.name) == 0) {
             memcpy(copy, self->observerMap[i].observers, self->observerMap[i].observersCount * sizeof(struct Observer));
             copyCount = self->observerMap[i].observersCount;
             break;
@@ -107,7 +106,7 @@ static void registerMediator(struct View *self, struct Mediator mediator) {
 
     const char **interests = mediatorMap->mediator.listNotificationInterests(&mediatorMap->mediator);
     for (const char **interest = interests; *interest; interest++) {
-        struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification *)) mediatorMap->mediator.handleNotification, &mediatorMap->mediator);
+        struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification)) mediatorMap->mediator.handleNotification, &mediatorMap->mediator);
         self->registerObserver(self, *interest, observer);
     }
     mediatorMap->mediator.onRegister(&mediatorMap->mediator);

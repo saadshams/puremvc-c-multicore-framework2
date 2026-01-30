@@ -24,10 +24,10 @@ static void initializeController(struct Controller *self) {
     self->view = puremvc_view_getInstance(self->multitonKey, puremvc_view);
 }
 
-static void executeCommand(const struct Controller *self, struct Notification *notification) {
+static void executeCommand(const struct Controller *self, struct Notification notification) {
     // mutex_lock_shared(&this->commandMapMutex);
     for (size_t i = 0; i < self->commandMapCount; i++) {
-        if (strcmp(self->commandMap[i].key, notification->name) == 0) {
+        if (strcmp(self->commandMap[i].key, notification.name) == 0) {
             struct SimpleCommand (*factory)() = self->commandMap[i].factory;
             struct SimpleCommand command = factory();
             command.notifier.initializeNotifier(&command.notifier, self->multitonKey);
@@ -47,7 +47,7 @@ static void registerCommand(struct Controller *self, const char *notificationNam
         }
     }
 
-    const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification *))executeCommand, self);
+    const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification))executeCommand, self);
     self->view->registerObserver(self->view, notificationName, observer);
 
     snprintf(self->commandMap[self->commandMapCount].key, NAME_SIZE, "%s", notificationName);
