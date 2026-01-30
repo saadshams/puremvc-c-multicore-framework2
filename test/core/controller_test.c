@@ -125,7 +125,7 @@ void testReregisterAndExecuteCommand() {
     const struct Notification notification = puremvc_notification("ControllerTest2", &vo, NULL);
 
     // retrieve a reference to the View from the same core.
-    const struct View *view = puremvc_view_getInstance("ControllerTestKey5", puremvc_view);
+    struct View *view = puremvc_view_getInstance("ControllerTestKey5", puremvc_view);
     view->notifyObservers(view, notification);
 
     // test assertions

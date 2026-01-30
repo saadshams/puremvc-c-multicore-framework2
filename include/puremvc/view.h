@@ -8,24 +8,22 @@
 #pragma once
 
 #include <stdbool.h>
-#include <stddef.h>
 
 #include "constants.h"
+#include "mutex.h"
 #include "mediator.h"
 #include "observer.h"
 
 struct View {
     char multitonKey[KEY_SIZE];
 
-    // mutex for mediatorMap
-    // Mutex mediatorMapMutex;
+    Mutex mediatorMapMutex;
     struct MediatorMap {
         char key[KEY_SIZE];
         struct Mediator mediator;
     } mediatorMap[MEDIATOR_MAP_SIZE];
 
-    // mutex for observerMap
-    // Mutex observerMapMutex;
+    Mutex observerMapMutex;
     struct ObserverMap {
         char key[KEY_SIZE];
         struct Observer observers[OBSERVER_ARRAY_SIZE];
@@ -35,7 +33,7 @@ struct View {
 
     void (*registerObserver)(struct View *self, const char *notificationName, struct Observer observer);
 
-    void (*notifyObservers)(const struct View *self, struct Notification notification);
+    void (*notifyObservers)(struct View *self, struct Notification notification);
 
     void (*removeObserver)(struct View *self, const char *notificationName, const void *notifyContext);
 
@@ -43,7 +41,7 @@ struct View {
 
     struct Mediator *(*retrieveMediator)(struct View *self, const char *mediatorName);
 
-    bool (*hasMediator)(const struct View *self, const char *mediatorName);
+    bool (*hasMediator)(struct View *self, const char *mediatorName);
 
     struct Mediator(*removeMediator)(struct View *self, const char *mediatorName);
 };

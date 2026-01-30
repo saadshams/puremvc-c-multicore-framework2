@@ -125,25 +125,26 @@ struct Facade puremvc_facade(const char *key) {
 }
 
 static void dispatchOnce() {
-    // mutex_init(&mutex);
+    mutex_init(&mutex);
 }
 
 struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factory)(const char *)) {
     if (key == NULL || factory == NULL) return NULL;
+    mutex_once(&token, dispatchOnce);
+    mutex_lock(&mutex);
 
     size_t i = 0;
     for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
         if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
-            return &instanceMap[i];
+            return mutex_unlock(&mutex), &instanceMap[i];
         }
     }
 
-    if (i >= INSTANCE_MAP_SIZE) return NULL;
+    if (i >= INSTANCE_MAP_SIZE) return mutex_unlock(&mutex), NULL;
 
     instanceMap[i] = factory(key);
 
-    // mutex_unlock(&mutex);
-    return &instanceMap[i];
+    return mutex_unlock(&mutex), &instanceMap[i];
 }
 
 bool puremvc_facade_hasCore(const char *key) {
@@ -156,14 +157,13 @@ bool puremvc_facade_hasCore(const char *key) {
             break;
         }
     }
-    mutex_unlock(&mutex);
-    return exists;
+    return mutex_unlock(&mutex), exists;
 }
 
 void puremvc_facade_removeFacade(const char *key) {
     if (key == NULL) return;
-    // mutex_once(&token, dispatchOnce);
-    // mutex_lock(&mutex);
+    mutex_once(&token, dispatchOnce);
+    mutex_lock(&mutex);
 
     puremvc_model_removeModel(key);
     puremvc_view_removeView(key);
@@ -178,6 +178,5 @@ void puremvc_facade_removeFacade(const char *key) {
         }
     }
     memset(&instanceMap[index], 0, sizeof(struct Facade));
-
-    // mutex_unlock(&mutex);
+    mutex_unlock(&mutex);
 }

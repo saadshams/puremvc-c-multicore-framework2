@@ -15,35 +15,35 @@
 static struct View instanceMap[INSTANCE_MAP_SIZE];
 
 // mutex for instanceMap
-// static MutexOnce token = MUTEX_ONCE_INIT;
-// static Mutex mutex;
+static MutexOnce token = MUTEX_ONCE_INIT;
+static Mutex mutex;
 
 static void initializeView(struct View *self) {
 
 }
 
 static void registerObserver(struct View *self, const char *notificationName, const struct Observer observer) {
-    // mutex_lock(&this->observerMapMutex);
+    mutex_lock(&self->observerMapMutex);
     size_t i = 0;
     for (; i < OBSERVER_MAP_SIZE && self->observerMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->observerMap[i].key, notificationName) == 0) {
             size_t count = 0;
-            for (; count < OBSERVER_ARRAY_SIZE && self->observerMap[i].observers[count].context != NULL; count++) {}
-            if (count >= OBSERVER_ARRAY_SIZE) return; // observer array is full
+            while (count < OBSERVER_ARRAY_SIZE && self->observerMap[i].observers[count].context != NULL) count++;
+            if (count >= OBSERVER_ARRAY_SIZE) return mutex_unlock(&self->observerMapMutex), (void)0; // observer array is full
             self->observerMap[i].observers[count] = observer;
-            return;
+            return mutex_unlock(&self->observerMapMutex), (void)0;
         }
     }
 
-    if (i >= OBSERVER_MAP_SIZE) return; // observerMap is full
+    if (i >= OBSERVER_MAP_SIZE) return mutex_unlock(&self->observerMapMutex), (void)0; // observerMap is full
 
     snprintf(self->observerMap[i].key, NAME_SIZE, "%s", notificationName);
     self->observerMap[i].observers[0] = observer;
-    // mutex_unlock(&this->observerMapMutex);
+    mutex_unlock(&self->observerMapMutex);
 }
 
-static void notifyObservers(const struct View *self, const struct Notification notification) {
-    // mutex_lock_shared(&this->observerMapMutex);
+static void notifyObservers(struct View *self, const struct Notification notification) {
+    mutex_lock_shared(&self->observerMapMutex);
     struct Observer observers[OBSERVER_ARRAY_SIZE];
     size_t count = 0;
     for (size_t i = 0; i < OBSERVER_MAP_SIZE && self->observerMap[i].key[0] != '\0'; i++) {
@@ -53,14 +53,14 @@ static void notifyObservers(const struct View *self, const struct Notification n
             break;
         }
     }
-    // mutex_unlock(&this->observerMapMutex);
+    mutex_unlock(&self->observerMapMutex);
 
     for (size_t i = 0; i < count; i++)
         observers[i].notifyObserver(&observers[i], notification);
 }
 
 void removeObserver(struct View *self, const char *notificationName, const void *notifyContext) {
-    // mutex_lock(&this->observerMapMutex);
+    mutex_lock(&self->observerMapMutex);
 
     size_t index = 0; // One-pass removal (Filter pattern)
     for (size_t i = 0; i < OBSERVER_MAP_SIZE && self->observerMap[i].key[0] != '\0'; i++) {
@@ -83,28 +83,27 @@ void removeObserver(struct View *self, const char *notificationName, const void 
                     memmove(&self->observerMap[k], &self->observerMap[k+1], sizeof(struct ObserverMap));
                 }
             }
-            // mutex_unlock(&this->observerMapMutex);
-            return;
+            return mutex_unlock(&self->observerMapMutex), (void)0;
         }
     }
-    // mutex_unlock(&this->observerMapMutex);
+    mutex_unlock(&self->observerMapMutex);
 }
 
 static void registerMediator(struct View *self, struct Mediator mediator) {
-    // mutex_lock(&this->mediatorMapMutex);
+    mutex_lock(&self->mediatorMapMutex);
     size_t i = 0;
     for (; i < MEDIATOR_MAP_SIZE && self->mediatorMap[i].key[0] != '\0'; i++) {
-        if (strcmp(self->mediatorMap[i].key, mediator.getName(&mediator)) == 0) return;
-        // mutex_unlock(&this->mediatorMapMutex);
+        if (strcmp(self->mediatorMap[i].key, mediator.getName(&mediator)) == 0)
+            return mutex_unlock(&self->mediatorMapMutex), (void)0;
     }
 
-    if (i >= MEDIATOR_MAP_SIZE) return; // mediatorMap is full
+    if (i >= MEDIATOR_MAP_SIZE) return mutex_unlock(&self->mediatorMapMutex), (void)0; // mediatorMap is full
 
     mediator.notifier.initializeNotifier(&mediator.notifier, self->multitonKey);
 
     snprintf(self->mediatorMap[i].key, NAME_SIZE, "%s", mediator.name);
     self->mediatorMap[i].mediator = mediator;
-    // mutex_unlock(&this->mediatorMapMutex);
+    mutex_unlock(&self->mediatorMapMutex);
 
     const char **interests = self->mediatorMap[i].mediator.listNotificationInterests(&self->mediatorMap[i].mediator);
     for (const char **interest = interests; *interest; interest++) {
@@ -115,18 +114,17 @@ static void registerMediator(struct View *self, struct Mediator mediator) {
 }
 
 static struct Mediator *retrieveMediator(struct View *self, const char *mediatorName) {
-    // mutex_lock_shared(&this->mediatorMapMutex);
+    mutex_lock_shared(&self->mediatorMapMutex);
     for (size_t i = 0; i < MEDIATOR_MAP_SIZE && self->mediatorMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->mediatorMap[i].key, mediatorName) == 0) {
-            return &self->mediatorMap[i].mediator;
+            return mutex_unlock(&self->mediatorMapMutex), &self->mediatorMap[i].mediator;
         }
     }
-    // mutex_unlock(&this->mediatorMapMutex);
-    return NULL;
+    return mutex_unlock(&self->mediatorMapMutex), NULL;
 }
 
-static bool hasMediator(const struct View *self, const char *mediatorName) {
-    // mutex_lock_shared(&this->mediatorMapMutex);
+static bool hasMediator(struct View *self, const char *mediatorName) {
+    mutex_lock_shared(&self->mediatorMapMutex);
     bool exists = false;
     for (size_t i = 0; i < MEDIATOR_MAP_SIZE && self->mediatorMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->mediatorMap[i].key, mediatorName) == 0) {
@@ -134,14 +132,11 @@ static bool hasMediator(const struct View *self, const char *mediatorName) {
             break;
         }
     }
-    // mutex_unlock(&this->mediatorMapMutex);
-    return exists;
+    return mutex_unlock(&self->mediatorMapMutex), exists;
 }
 
-// suggestion is to return value but check implications with unit tests
-// pointer is passing all the tests
 static struct Mediator removeMediator(struct View *self, const char *mediatorName) {
-    // mutex_lock(&this->mediatorMapMutex);
+    mutex_lock(&self->mediatorMapMutex);
     struct Mediator mediator = {0};
 
     size_t index = 0; // One-pass removal (Filter pattern)
@@ -162,12 +157,11 @@ static struct Mediator removeMediator(struct View *self, const char *mediatorNam
             index++;
         }
     }
-    // mutex_unlock(&this->mediatorMapMutex);
 
     if (mediator.name[0] != '\0')
         memset(&self->mediatorMap[index], 0, sizeof(struct MediatorMap));
 
-    return mediator;
+    return mutex_unlock(&self->mediatorMapMutex), mediator;
 }
 
 struct View puremvc_view(const char *key) {
@@ -186,34 +180,33 @@ struct View puremvc_view(const char *key) {
     return view;
 }
 
-// static void dispatchOnce() {
-//     mutex_init(&mutex);
-// }
+static void dispatchOnce() {
+     mutex_init(&mutex);
+}
 
 struct View *puremvc_view_getInstance(const char *key, struct View(*factory)(const char *key)) {
     if (key == NULL || factory == NULL) return NULL;
-    // mutex_once(&token, dispatchOnce);
-    // mutex_lock(&mutex);
+    mutex_once(&token, dispatchOnce);
+    mutex_lock(&mutex);
 
     size_t i = 0;
     for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
         if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
-            return &instanceMap[i];
+            return mutex_unlock(&mutex), &instanceMap[i];
         }
     }
 
-    if (i >= INSTANCE_MAP_SIZE) return NULL;
+    if (i >= INSTANCE_MAP_SIZE) return mutex_unlock(&mutex), NULL;
 
     instanceMap[i] = factory(key);
 
-    // mutex_unlock(&mutex);
-    return &instanceMap[i];
+    return mutex_unlock(&mutex), &instanceMap[i];
 }
 
 void puremvc_view_removeView(const char *key) {
     if (key == NULL) return;
-    // mutex_once(&token, dispatchOnce);
-    // mutex_lock(&mutex);
+    mutex_once(&token, dispatchOnce);
+    mutex_lock(&mutex);
 
     size_t index = 0;
     for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
@@ -224,6 +217,5 @@ void puremvc_view_removeView(const char *key) {
         }
     }
     memset(&instanceMap[index], 0, sizeof(struct View));
-
-    // mutex_unlock(&mutex);
+    mutex_unlock(&mutex);
 }

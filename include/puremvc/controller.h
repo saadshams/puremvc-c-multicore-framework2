@@ -8,20 +8,17 @@
 */
 #pragma once
 
-#include <stddef.h>
-
 #include "constants.h"
+#include "mutex.h"
 #include "view.h"
 #include "simple_command.h"
 #include "notification.h"
-
-// #include <mutex.h>
 
 struct Controller {
     char multitonKey[KEY_SIZE];
     struct View *view;
 
-    // Mutex commandMapMutex;
+    Mutex commandMapMutex;
     struct CommandMap {
         char key[KEY_SIZE];
         struct SimpleCommand (*factory)();
@@ -31,9 +28,9 @@ struct Controller {
     
     void (*registerCommand)(struct Controller *self, const char *notificationName, struct SimpleCommand(*factory)());
 
-    void (*executeCommand)(const struct Controller *self, struct Notification notification);
+    void (*executeCommand)(struct Controller *self, struct Notification notification);
 
-    bool (*hasCommand)(const struct Controller *self, const char *notificationName);
+    bool (*hasCommand)(struct Controller *self, const char *notificationName);
 
     void (*removeCommand)(struct Controller *self, const char *notificationName);
 };

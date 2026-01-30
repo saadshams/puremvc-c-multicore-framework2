@@ -8,16 +8,15 @@
 #pragma once
 
 #include <stdbool.h>
-#include <stddef.h>
 
-// #include <mutex.h>
+#include "mutex.h"
 #include "constants.h"
 #include "proxy.h"
 
 struct Model {
     char multitonKey[KEY_SIZE];
 
-    // Mutex proxyMapMutex;
+    Mutex proxyMapMutex;
     struct ProxyMap {
         char key[KEY_SIZE];
         struct Proxy proxy;
@@ -29,7 +28,7 @@ struct Model {
 
     struct Proxy *(*retrieveProxy)(struct Model *self, const char *proxyName);
     
-    bool (*hasProxy)(const struct Model *self, const char *proxyName);
+    bool (*hasProxy)(struct Model *self, const char *proxyName);
     
     struct Proxy(*removeProxy)(struct Model *self, const char *proxyName);
 };
