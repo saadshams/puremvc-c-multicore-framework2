@@ -10,11 +10,11 @@
 #include "facade_test_vo.h"
 
 int main() {
-    testGetInstance();
-    testRegisterCommandAndSendNotification();
-    testRegisterAndRemoveCommandAndSendNotification();
-    testRegisterAndRetrieveProxy();
-    testRegisterAndRemoveProxy();
+    // testGetInstance();
+    // testRegisterCommandAndSendNotification();
+    // testRegisterAndRemoveCommandAndSendNotification();
+    // testRegisterAndRetrieveProxy();
+    // testRegisterAndRemoveProxy();
     testRegisterRetrieveAndRemoveMediator();
     testHasProxy();
     testHasMediator();

@@ -170,15 +170,15 @@ void puremvc_facade_removeFacade(const char *key) {
     puremvc_view_removeView(key);
     puremvc_controller_removeController(key);
 
-    for (size_t i = 0; i < INSTANCE_MAP_SIZE; i++) {
-        if (strcmp(instanceMap[i].multitonKey, key) == 0) {
-            memset(&instanceMap[i], 0, sizeof(struct Model));
-
-            for (size_t j = i + 1; j < INSTANCE_MAP_SIZE; j++) // shift left
-                // instanceMap[j-1] = instanceMap[j];
-                memmove(&instanceMap[j], &instanceMap[j + 1], sizeof(struct Facade));
-            break;
+    size_t index = 0;
+    for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
+        if (strcmp(instanceMap[i].multitonKey, key) != 0) {
+            if (index != i)
+                memmove(&instanceMap[index], &instanceMap[i], sizeof(struct Facade));
+            index++;
         }
     }
+    memset(&instanceMap[index], 0, sizeof(struct Facade));
+
     // mutex_unlock(&mutex);
 }

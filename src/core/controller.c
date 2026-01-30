@@ -131,15 +131,15 @@ void puremvc_controller_removeController(const char *key) {
     // mutex_once(&token, dispatchOnce);
     // mutex_lock(&mutex);
 
-    for (size_t i = 0; i < INSTANCE_MAP_SIZE; i++) {
-        if (strcmp(instanceMap[i].multitonKey, key) == 0) {
-            memset(&instanceMap[i], 0, sizeof(struct Controller));
-
-            for (size_t j = i + 1; j < INSTANCE_MAP_SIZE; j++) // shift left
-                // instanceMap[j-1] = instanceMap[j];
-                memmove(&instanceMap[j], &instanceMap[j + 1], sizeof(struct Controller));
-            break;
+    size_t index = 0;
+    for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
+        if (strcmp(instanceMap[i].multitonKey, key) != 0) {
+            if (index != i)
+                memmove(&instanceMap[index], &instanceMap[i], sizeof(struct Controller));
+            index++;
         }
     }
+    memset(&instanceMap[index], 0, sizeof(struct Controller));
+
     // mutex_unlock(&mutex);
 }

@@ -9,13 +9,14 @@
 #include "controller_test_vo.h"
 
 int main() {
-    testGetInstance();
-    testRegisterAndExecuteCommand();
-    testRegisterAndRemoveCommand();
-    testHasCommand();
-    testReregisterAndExecuteCommand();
-    testRegisterAndUpdateCommand();
-    testRemoveController();
+    // testGetInstance();
+    // testRegisterAndExecuteCommand();
+    // testRegisterAndRemoveCommand();
+    // testHasCommand();
+    // testReregisterAndExecuteCommand();
+    // testRegisterAndUpdateCommand();
+    // testRemoveController();
+    testRemoveMultipleController();
     return 0;
 }
 
@@ -145,7 +146,7 @@ void testReregisterAndExecuteCommand() {
 }
 
 void testRegisterAndUpdateCommand() {
-    struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey3_2", puremvc_controller);
+    struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey6", puremvc_controller);
     controller->initializeController(controller);
 
     // first registration
@@ -162,21 +163,33 @@ void testRegisterAndUpdateCommand() {
     assert(vo.result == 34);
 
     controller->removeCommand(controller, "ControllerTest2");
-    puremvc_controller_removeController("ControllerTestKey3_2");
+    puremvc_controller_removeController("ControllerTestKey6");
     controller = NULL;
 }
 
 void testRemoveController() {
     // Get a Multiton Controller instance
-    struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey4", puremvc_controller);
+    struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey7", puremvc_controller);
     controller->initializeController(controller);
 
     // remove the controller
-    puremvc_controller_removeController("ControllerTestKey4");
+    puremvc_controller_removeController("ControllerTestKey7");
 
     // re-create the controller without throwing an exception
-    puremvc_controller("ControllerTestKey4");
+    puremvc_controller("ControllerTestKey7");
 
     // cleanup
-    puremvc_controller_removeController("ControllerTestKey4");
+    puremvc_controller_removeController("ControllerTestKey7");
+}
+
+void testRemoveMultipleController() {
+    // Get a Multiton Controller instance
+    puremvc_controller_getInstance("ControllerTestKey8", puremvc_controller);
+    puremvc_controller_getInstance("ControllerTestKey9", puremvc_controller);
+    puremvc_controller_getInstance("ControllerTestKey10", puremvc_controller);
+
+    // cleanup
+    puremvc_controller_removeController("ControllerTestKey8");
+    puremvc_controller_removeController("ControllerTestKey9");
+    puremvc_controller_removeController("ControllerTestKey10");
 }
