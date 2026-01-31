@@ -42,10 +42,6 @@ static void registerObserver(struct View *self, const char *notificationName, co
     mutex_unlock(&self->observerMapMutex);
 }
 
-static void retrieveObserver(struct View *self, const char *notificationName, const void *notifyContext) {
-    mutex_lock(&self->observerMapMutex);
-}
-
 static void notifyObservers(struct View *self, const struct Notification notification) {
     mutex_lock_shared(&self->observerMapMutex);
     struct Observer observers[OBSERVER_ARRAY_SIZE] = {0};
@@ -66,11 +62,11 @@ static void notifyObservers(struct View *self, const struct Notification notific
 void removeObserver(struct View *self, const char *notificationName, const void *notifyContext) {
     mutex_lock(&self->observerMapMutex);
 
-    size_t index = 0; // One-pass removal (Filter pattern)
+    // One-pass removal (Filter pattern)
     for (size_t i = 0; i < OBSERVER_MAP_SIZE && self->observerMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->observerMap[i].key, notificationName) == 0) {
-            size_t j = 0;
-            for (; j < OBSERVER_ARRAY_SIZE && self->observerMap[i].observers[j].context != NULL; j++) {
+            size_t index = 0;
+            for (size_t j = 0; j < OBSERVER_ARRAY_SIZE && self->observerMap[i].observers[j].context != NULL; j++) {
                 const struct Observer observer = self->observerMap[i].observers[j];
                 if (observer.compareNotifyContext(&observer, notifyContext) == true) {
                     memset(&self->observerMap[i].observers[j], 0, sizeof(struct Observer));
@@ -85,6 +81,10 @@ void removeObserver(struct View *self, const char *notificationName, const void 
 
             if (index == 0) { // empty observers
                 memset(&self->observerMap[i], 0, sizeof(struct ObserverMap));
+                for (size_t k = i; k < OBSERVER_MAP_SIZE - 1 && self->observerMap[k + 1].key[0] != '\0'; k++) { // shift left
+                    memmove(&self->observerMap[k], &self->observerMap[k + 1], sizeof(struct ObserverMap));
+                    memset(&self->observerMap[k + 1], 0, sizeof(struct ObserverMap));
+                }
             }
             return mutex_unlock(&self->observerMapMutex), (void)0;
         }

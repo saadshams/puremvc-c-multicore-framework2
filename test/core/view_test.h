@@ -22,8 +22,8 @@ void testRemoveOneOfTwoMediatorsAndSubsequentNotify();
 void testMediatorReregistration();
 void testModifyObserverListDuringNotification();
 void testRemoveView();
-void testRegisterAndRemoveMultipleMediators();
 void testRegisterAndRemoveMultipleObservers();
+void testRegisterAndRemoveMultipleMediators();
 
 struct ViewTest {
     const char *lastNotification;

@@ -187,6 +187,18 @@ void testRegisterAndRemoveMultipleCommands() {
     struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey8", puremvc_controller);
     controller->initializeController(controller);
 
+    controller->executeCommand(controller, puremvc_notification("command0", NULL, NULL)); // crash test
+    controller->executeCommand(controller, puremvc_notification("command0", NULL, NULL));
+
+    // Register one command, verify associations and remove it
+    controller->registerCommand(controller, "command0", puremvc_simple_command);
+    assert(strcmp(controller->commandMap[0].key, "command0") == 0);
+    assert(controller->commandMap[0].factory == puremvc_simple_command);
+    assert(strcmp(controller->view->observerMap[0].key, "command0") == 0);
+    assert(controller->view->observerMap[0].observers[0].context == controller);
+    controller->removeCommand(controller, "command0");
+    assert(controller->commandMap[0].key[0] == '\0');
+
     // Register four commands and verify that each is correctly associated to their dictionaries and observers
     controller->registerCommand(controller, "command1", puremvc_simple_command);
     assert(strcmp(controller->commandMap[0].key, "command1") == 0);
@@ -216,8 +228,27 @@ void testRegisterAndRemoveMultipleCommands() {
     controller->removeCommand(controller, "command2");
     assert(strcmp(controller->commandMap[0].key, "command1") == 0);
     assert(controller->commandMap[0].factory == puremvc_simple_command);
-    // assert(strcmp(controller->view->observerMap[1].key, "command3") == 0);
-    // assert(controller->view->observerMap[1].observers[0].context == controller);
+    assert(strcmp(controller->view->observerMap[1].key, "command3") == 0);
+    assert(controller->view->observerMap[1].observers[0].context == controller);
+    assert(strcmp(controller->view->observerMap[2].key, "command4") == 0);
+    assert(controller->view->observerMap[2].observers[0].context == controller);
 
+    // Remove the last command and verify the remaining command 1, 3 stay in place
+    controller->removeCommand(controller, "command4");
+    assert(strcmp(controller->commandMap[0].key, "command1") == 0);
+    assert(controller->commandMap[0].factory == puremvc_simple_command);
+    assert(strcmp(controller->view->observerMap[1].key, "command3") == 0);
+    assert(controller->view->observerMap[1].observers[0].context == controller);
 
+    // Remove the first command and verify that subsequent command 3 shift left
+    controller->removeCommand(controller, "command1");
+    assert(strcmp(controller->commandMap[0].key, "command3") == 0);
+    assert(controller->commandMap[0].factory == puremvc_simple_command);
+
+    // Remove all remaining mediators and confirm that the dictionary key is cleared
+    controller->removeCommand(controller, "command3");
+    assert(controller->commandMap[0].key[0] == '\0');
+
+    puremvc_controller_removeController("ViewTestKey8");
+    controller = NULL;
 }
