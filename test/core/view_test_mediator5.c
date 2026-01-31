@@ -6,8 +6,7 @@ static const char **listNotificationInterests(const struct Mediator *self) {
 }
 
 static void handleNotification(const struct Mediator *self, struct Notification notification) {
-    struct ViewTest *viewTest = self->getComponent(self);
-    viewTest->counter++;
+    ((struct ViewTest *) self->getComponent(self))->counter++;
 }
 
 struct Mediator view_test_mediator5(struct ViewTest *component) {

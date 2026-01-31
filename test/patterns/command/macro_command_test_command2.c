@@ -1,7 +1,7 @@
 #include "macro_command_test_command2.h"
 #include "macro_command_test_sub3_command.h"
 
-static void execute(const struct SimpleCommand *self, struct Notification notification) {
+static void execute(const struct SimpleCommand *self, const struct Notification notification) {
     struct SimpleCommand (*subCommands[MACRO_COMMAND_ARRAY_SIZE])() = { macro_command_test_sub3_command };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {

@@ -35,7 +35,7 @@ void testRegisterAndExecuteCommand() {
 
     controller->registerCommand(controller, "MacroCommandTest", macro_command_test_command);
 
-    const struct View *view = puremvc_view_getInstance("ControllerTestKey1", puremvc_view);
+    struct View *view = puremvc_view_getInstance("ControllerTestKey1", puremvc_view);
 
     struct MacroCommandTestVO vo = {.input = 5, 0, 0, 0};
     struct Notification notification = puremvc_notification("MacroCommandTest", &vo, NULL);

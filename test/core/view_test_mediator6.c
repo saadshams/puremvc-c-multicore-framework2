@@ -13,7 +13,6 @@ static void handleNotification(const struct Mediator *self, struct Notification 
     const char *name = self->getName(self);
 
     for (size_t i = 0; i < MEDIATOR_MAP_SIZE; i++) {
-        // Find the first empty slot (assumes first char is '\0')
         if (component->deferred[i][0] == '\0') {
             snprintf(component->deferred[i], NAME_SIZE, "%s", name);
             break;
