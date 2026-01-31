@@ -34,21 +34,23 @@ static BOOL CALLBACK _mutex_win_once_wrapper(PINIT_ONCE InitOnce, PVOID Paramete
 
 /* ---------- pthread Shim (Stack-based with Sync) ---------- */
 
+/* ---------- Fixed pthread Shim ---------- */
+
 typedef HANDLE pthread_t;
 
 typedef struct {
     void* (*start_routine)(void*);
     void* arg;
-    HANDLE signal; // Used to signal that data has been copied
 } _pthread_args;
 
 static DWORD WINAPI _pthread_win_start(LPVOID arg) {
     _pthread_args* args = (_pthread_args*)arg;
+
+    // Copy data to local variables so we can free the heap memory immediately
     void* (*start_routine)(void*) = args->start_routine;
     void* real_arg = args->arg;
 
-    // Signal the parent thread that we have captured the arguments
-    SetEvent(args->signal);
+    free(args); // Clean up the heap allocation
 
     start_routine(real_arg);
     return 0;
@@ -56,24 +58,20 @@ static DWORD WINAPI _pthread_win_start(LPVOID arg) {
 
 static inline int pthread_create(pthread_t* thread, const void* attr, void* (*start_routine)(void*), void* arg) {
     (void)attr;
-    _pthread_args args;
-    args.start_routine = start_routine;
-    args.arg = arg;
 
-    // Create an auto-reset event to synchronize startup
-    args.signal = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (!args.signal) return -1;
+    // Use the heap instead of the stack to ensure the data lives long enough
+    _pthread_args* args = (_pthread_args*)malloc(sizeof(_pthread_args));
+    if (!args) return -1;
 
-    *thread = CreateThread(NULL, 0, _pthread_win_start, &args, 0, NULL);
+    args->start_routine = start_routine;
+    args->arg = arg;
+
+    *thread = CreateThread(NULL, 0, _pthread_win_start, args, 0, NULL);
 
     if (!*thread) {
-        CloseHandle(args.signal);
+        free(args);
         return -1;
     }
-
-    // Wait until the child thread has copied the stack-allocated 'args'
-    WaitForSingleObject(args.signal, INFINITE);
-    CloseHandle(args.signal);
 
     return 0;
 }
