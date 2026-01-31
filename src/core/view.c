@@ -42,6 +42,10 @@ static void registerObserver(struct View *self, const char *notificationName, co
     mutex_unlock(&self->observerMapMutex);
 }
 
+static void retrieveObserver(struct View *self, const char *notificationName, const void *notifyContext) {
+    mutex_lock(&self->observerMapMutex);
+}
+
 static void notifyObservers(struct View *self, const struct Notification notification) {
     mutex_lock_shared(&self->observerMapMutex);
     struct Observer observers[OBSERVER_ARRAY_SIZE] = {0};
@@ -153,30 +157,17 @@ static struct Mediator removeMediator(struct View *self, const char *mediatorNam
             memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap));
         } else {
             if (index != i) { // shift left
-                // as mediator swaps, the observer context is still pointing to the old memory address
-                // how to make observer point to the new address
-                // remove observer but cache notify before removing
-                // give new address of mediator and pass notify again
-                // first get the notify before move
-                // then set the notify and new address after move
-                // basically updating observers
-                // observer provides accessor methods
-                // how do i know which observer corresponds to this mediator
-                // i need retrieveObserver
-                // write inline
-                // or removeObserver for all the notification before the swap and registerObserver for all the notifications after swap
-
                 const char **interests = self->mediatorMap[i].mediator.listNotificationInterests(&self->mediatorMap[i].mediator);
-                for (const char **cursor = interests; *cursor; cursor++) {
+                for (const char **cursor = interests; *cursor; cursor++) { // Remove observers to fix context before moving mediator
                     self->removeObserver(self, *cursor, &self->mediatorMap[i].mediator);
                 }
-                memmove(&self->mediatorMap[index], &self->mediatorMap[i], sizeof(struct MediatorMap));
-                for (const char **cursor = interests; *cursor; cursor++) {
+                memmove(&self->mediatorMap[index], &self->mediatorMap[i], sizeof(struct MediatorMap)); // shift mediator
+
+                for (const char **cursor = interests; *cursor; cursor++) { // Re-register observers to new mediator address
                     const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification)) self->mediatorMap[index].mediator.handleNotification, &self->mediatorMap[index].mediator);
                     self->registerObserver(self, *cursor, observer);
                 }
-
-                memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap));
+                memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap)); // clear slot
             }
             index++;
         }
