@@ -69,7 +69,7 @@ static bool hasProxy(struct Model *self, const char *proxyName) {
 static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
     mutex_lock(&self->proxyMapMutex);
     struct Proxy proxy = {0};
-    size_t index = 0; // One-pass removal (Filter pattern)
+    size_t index = 0;
     for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
             proxy = self->proxyMap[i].proxy;

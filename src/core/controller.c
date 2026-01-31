@@ -72,7 +72,7 @@ static bool hasCommand(struct Controller *self, const char *notificationName) {
 static void removeCommand(struct Controller *self, const char *notificationName) {
     mutex_lock(&self->commandMapMutex);
     size_t index = 0; // One-pass removal (Filter pattern)
-    for (size_t i = 0; i < COMMAND_MAP_SIZE && i < self->commandMap[i].key[0] != '\0'; i++) {
+    for (size_t i = 0; i < COMMAND_MAP_SIZE && self->commandMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->commandMap[i].key, notificationName) == 0) {
             self->view->removeObserver(self->view, notificationName, self);
             memset(&self->commandMap[index], 0, sizeof(struct CommandMap));
