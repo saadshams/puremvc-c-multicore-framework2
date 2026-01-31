@@ -74,6 +74,7 @@ static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
             proxy = self->proxyMap[i].proxy;
             proxy.onRemove(&proxy);
+            memset(&self->proxyMap[index], 0, sizeof(struct ProxyMap));
         } else {
             if (index != i) { // shift left
                 memmove(&self->proxyMap[index], &self->proxyMap[i], sizeof(struct ProxyMap));
@@ -82,9 +83,6 @@ static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
             index++;
         }
     }
-
-    if (proxy.name[0] != '\0')
-        memset(&self->proxyMap[index], 0, sizeof(struct Proxy));
 
     return mutex_unlock(&self->proxyMapMutex), proxy;
 }

@@ -83,10 +83,8 @@ void removeObserver(struct View *self, const char *notificationName, const void 
                 }
             }
 
-            if (j == 0) { // empty observers
-                for (size_t k = i; k < OBSERVER_MAP_SIZE; k++) { // shift left loop
-                    memmove(&self->observerMap[k], &self->observerMap[k+1], sizeof(struct ObserverMap));
-                }
+            if (i == 0) { // empty observers
+                memset(&self->observerMap[i], 0, sizeof(struct ObserverMap));
             }
             return mutex_unlock(&self->observerMapMutex), (void)0;
         }

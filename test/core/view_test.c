@@ -382,7 +382,7 @@ void testModifyObserverListDuringNotification() {
     const struct Notification notification = puremvc_notification(NOTE6, NULL, NULL);
     view->notifyObservers(view, notification);
 
-    // iterate through deferred names and call
+    // iterate through deferred names and call removeMediator
     for (size_t i = 0; i < MEDIATOR_MAP_SIZE && viewTest.deferred[i][0] != '\0'; i++) {
         view->removeMediator(view, viewTest.deferred[i]);
     }
