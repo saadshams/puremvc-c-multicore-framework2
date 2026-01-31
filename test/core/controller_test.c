@@ -18,6 +18,7 @@ int main() {
     testRegisterAndUpdateCommand();
     testRemoveController();
     testRegisterAndRemoveMultipleCommands();
+    testGetAndRemoveMultipleInstances();
     return 0;
 }
 
@@ -251,4 +252,16 @@ void testRegisterAndRemoveMultipleCommands() {
 
     puremvc_controller_removeController("ViewTestKey8");
     controller = NULL;
+}
+
+void testGetAndRemoveMultipleInstances() {
+    puremvc_controller_getInstance("controller1", puremvc_controller);
+    puremvc_controller_getInstance("controller2", puremvc_controller);
+    puremvc_controller_getInstance("controller3", puremvc_controller);
+    puremvc_controller_getInstance("controller4", puremvc_controller);
+
+    puremvc_controller_removeController("controller2"); // remove middle
+    puremvc_controller_removeController("controller4"); // remove last
+    puremvc_controller_removeController("controller1"); // remove first
+    puremvc_controller_removeController("controller3"); // remove remaining
 }

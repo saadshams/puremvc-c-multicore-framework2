@@ -9,3 +9,4 @@ void testOnRegisterAndOnRemove();
 void testRemoveModel();
 void testMultipleModels();
 void testRegisterAndRemoveMultipleProxies();
+void testGetAndRemoveMultipleInstances();

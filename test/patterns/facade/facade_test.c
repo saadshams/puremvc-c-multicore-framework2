@@ -227,22 +227,43 @@ void testHasCoreAndRemoveCore() {
 }
 
 void testAddAndRemoveMultipleCores() {
-    struct Facade *facade = puremvc_facade_getInstance("FacadeTestKey12", puremvc_facade);
-    facade->initializeFacade(facade);
-    assert(puremvc_facade_hasCore("FacadeTestKey12") == true);
+    struct Facade *facade1 = puremvc_facade_getInstance("facade1", puremvc_facade);
+    facade1->initializeFacade(facade1);
+    assert(strcmp(facade1->controller->multitonKey, "facade1") == 0);
+    assert(strcmp(facade1->model->multitonKey, "facade1") == 0);
+    assert(strcmp(facade1->view->multitonKey, "facade1") == 0);
+    assert(puremvc_facade_hasCore("facade1") == true);
 
-    struct Facade *facade2 = puremvc_facade_getInstance("FacadeTestKey13", puremvc_facade);
+    struct Facade *facade2 = puremvc_facade_getInstance("facade2", puremvc_facade);
     facade2->initializeFacade(facade2);
-    assert(puremvc_facade_hasCore("FacadeTestKey13") == true);
+    assert(strcmp(facade2->controller->multitonKey, "facade2") == 0);
+    assert(strcmp(facade2->model->multitonKey, "facade2") == 0);
+    assert(strcmp(facade2->view->multitonKey, "facade2") == 0);
+    assert(puremvc_facade_hasCore("facade2") == true);
 
-    struct Facade *facade3 = puremvc_facade_getInstance("FacadeTestKey14", puremvc_facade);
+    struct Facade *facade3 = puremvc_facade_getInstance("facade3", puremvc_facade);
     facade3->initializeFacade(facade3);
-    assert(puremvc_facade_hasCore("FacadeTestKey14") == true);
+    assert(strcmp(facade3->controller->multitonKey, "facade3") == 0);
+    assert(strcmp(facade3->model->multitonKey, "facade3") == 0);
+    assert(strcmp(facade3->view->multitonKey, "facade3") == 0);
+    assert(puremvc_facade_hasCore("facade3") == true);
 
-    puremvc_facade_removeFacade("FacadeTestKey12");
-    assert(puremvc_facade_hasCore("FacadeTestKey12") == false);
-    puremvc_facade_removeFacade("FacadeTestKey13");
-    assert(puremvc_facade_hasCore("FacadeTestKey13") == false);
-    puremvc_facade_removeFacade("FacadeTestKey14");
-    assert(puremvc_facade_hasCore("FacadeTestKey14") == false);
+    struct Facade *facade4 = puremvc_facade_getInstance("facade4", puremvc_facade);
+    facade4->initializeFacade(facade4);
+    assert(strcmp(facade4->controller->multitonKey, "facade4") == 0);
+    assert(strcmp(facade4->model->multitonKey, "facade4") == 0);
+    assert(strcmp(facade4->view->multitonKey, "facade4") == 0);
+    assert(puremvc_facade_hasCore("facade4") == true);
+
+    puremvc_facade_removeFacade("facade2"); // remove middle
+    assert(puremvc_facade_hasCore("facade2") == false);
+
+    puremvc_facade_removeFacade("facade4"); // remove last
+    assert(puremvc_facade_hasCore("facade4") == false);
+
+    puremvc_facade_removeFacade("facade1"); // remove first
+    assert(puremvc_facade_hasCore("facade1") == false);
+
+    puremvc_facade_removeFacade("facade3"); // remove remaining
+    assert(puremvc_facade_hasCore("facade3") == false);
 }

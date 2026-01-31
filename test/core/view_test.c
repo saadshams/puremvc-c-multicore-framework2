@@ -540,3 +540,15 @@ void testRegisterAndRemoveMultipleMediators() {
     puremvc_view_removeView("ViewTestKey14");
     view = NULL;
 }
+
+void testGetAndRemoveMultipleInstances() {
+    puremvc_view_getInstance("view1", puremvc_view);
+    puremvc_view_getInstance("view2", puremvc_view);
+    puremvc_view_getInstance("view3", puremvc_view);
+    puremvc_view_getInstance("view4", puremvc_view);
+
+    puremvc_view_removeView("view2"); // remove middle
+    puremvc_view_removeView("view4"); // remove last
+    puremvc_view_removeView("view1"); // remove first
+    puremvc_view_removeView("view3"); // remove remaining
+}

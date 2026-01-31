@@ -130,12 +130,15 @@ void puremvc_model_removeModel(const char *key) {
 
     size_t index = 0;
     for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strcmp(instanceMap[i].multitonKey, key) != 0) {
-            if (index != i)
+        if (strcmp(instanceMap[i].multitonKey, key) == 0) {
+            memset(&instanceMap[i], 0, sizeof(struct Model));
+        } else {
+            if (index != i) {
                 memmove(&instanceMap[index], &instanceMap[i], sizeof(struct Model));
+                memset(&instanceMap[i], 0, sizeof(struct Model));
+            }
             index++;
         }
     }
-    memset(&instanceMap[index], 0, sizeof(struct Model));
     mutex_unlock(&mutex);
 }

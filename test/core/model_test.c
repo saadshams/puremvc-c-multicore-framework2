@@ -15,6 +15,7 @@ int main() {
     testMultipleModels();
     testRegisterAndReplaceProxy();
     testRegisterAndRemoveMultipleProxies();
+    testGetAndRemoveMultipleInstances();
     return 0;
 }
 
@@ -259,4 +260,16 @@ void testRegisterAndRemoveMultipleProxies() {
 
     puremvc_model_removeModel("ModelTestKey9");
     model = NULL;
+}
+
+void testGetAndRemoveMultipleInstances() {
+    puremvc_model_getInstance("model1", puremvc_model);
+    puremvc_model_getInstance("model2", puremvc_model);
+    puremvc_model_getInstance("model3", puremvc_model);
+    puremvc_model_getInstance("model4", puremvc_model);
+
+    puremvc_model_removeModel("model2"); // remove middle
+    puremvc_model_removeModel("model4"); // remove last
+    puremvc_model_removeModel("model1"); // remove first
+    puremvc_model_removeModel("model3"); // remove remaining
 }

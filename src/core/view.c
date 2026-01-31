@@ -220,12 +220,15 @@ void puremvc_view_removeView(const char *key) {
 
     size_t index = 0;
     for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strcmp(instanceMap[i].multitonKey, key) != 0) {
-            if (index != i)
+        if (strcmp(instanceMap[i].multitonKey, key) == 0) {
+            memset(&instanceMap[i], 0, sizeof(struct View));
+        } else {
+            if (index != i) {
                 memmove(&instanceMap[index], &instanceMap[i], sizeof(struct View));
+                memset(&instanceMap[i], 0, sizeof(struct View));
+            }
             index++;
         }
     }
-    memset(&instanceMap[index], 0, sizeof(struct View));
     mutex_unlock(&mutex);
 }
