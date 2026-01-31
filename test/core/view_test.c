@@ -7,14 +7,13 @@
 
 #include "view_test.h"
 
-#include <stdio.h>
-
 #include "view_test_mediator.h"
 #include "view_test_mediator2.h"
 #include "view_test_mediator3.h"
 #include "view_test_mediator4.h"
 #include "view_test_mediator5.h"
 #include "view_test_mediator6.h"
+#include "view_test_mediator7.h"
 
 int main() {
     testGetInstance();
@@ -29,7 +28,8 @@ int main() {
     testMediatorReregistration();
     testModifyObserverListDuringNotification();
     testRemoveView();
-    testAddAndRemoveMultipleMediators();
+    testRegisterAndRemoveMultipleMediators();
+    testRegisterAndRemoveMultipleObservers();
     return 0;
 }
 
@@ -313,7 +313,7 @@ void testMediatorReregistration() {
 
     // Create and register that responds to notification 5
     struct ViewTest viewTest = {};
-    struct Mediator mediator = view_test_mediator5(&viewTest);
+    const struct Mediator mediator = view_test_mediator5(&viewTest);
 
     // try to register another instance of that mediator (uses the same NAME constant).
     view->registerMediator(view, mediator);
@@ -416,7 +416,7 @@ void testRemoveView() {
     puremvc_view_removeView("ViewTestKey12");
 }
 
-void testAddAndRemoveMultipleMediators() {
+void testRegisterAndRemoveMultipleMediators() {
     struct View *view = puremvc_view_getInstance("ViewTestKey13", puremvc_view);
     view->initializeView(view);
 
@@ -439,4 +439,75 @@ void testAddAndRemoveMultipleMediators() {
     assert(view->hasMediator(view, "view_test_mediator6") == false);
     view->removeMediator(view, "view_test_mediator4");
     assert(view->hasMediator(view, "view_test_mediator4") == false);
+
+    puremvc_view_removeView("ViewTestKey13");
+    view = NULL;
+}
+
+void testRegisterAndRemoveMultipleObservers() {
+    struct View *view = puremvc_view_getInstance("ViewTestKey14", puremvc_view);
+    view->initializeView(view);
+
+    // Register five mediators and verify that each is correctly associated to their observers
+    view->registerMediator(view, view_test_mediator7("mediator1", NULL));
+    assert(strcmp(view->mediatorMap[0].mediator.name, "mediator1") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[0].context)->name, "mediator1") == 0);
+
+    view->registerMediator(view, view_test_mediator7("mediator2", NULL));
+    assert(strcmp(view->mediatorMap[1].mediator.name, "mediator2") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[1].context)->name, "mediator2") == 0);
+
+    view->registerMediator(view, view_test_mediator7("mediator3", NULL));
+    const struct Mediator *mediator3 = view->retrieveMediator(view, "mediator3");
+    assert(strcmp(view->mediatorMap[2].mediator.name, "mediator3") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[2].context)->name, "mediator3") == 0);
+
+    view->registerMediator(view, view_test_mediator7("mediator4", NULL));
+    assert(strcmp(view->mediatorMap[3].mediator.name, "mediator4") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[3].context)->name, "mediator4") == 0);
+
+    view->registerMediator(view, view_test_mediator7("mediator5", NULL));
+    assert(strcmp(view->mediatorMap[4].mediator.name, "mediator5") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[4].context)->name, "mediator5") == 0);
+
+    // Verify the dictionary key for the map is correctly set
+    assert(strcmp(view->observerMap[0].key, NOTE7) == 0);
+
+    // Remove the second mediator (middle) and verify that remaining mediators 3, 4, 5 are shifted correctly
+    view->removeMediator(view, "mediator2");
+    assert(strcmp(view->mediatorMap[0].mediator.name, "mediator1") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[0].context)->name, "mediator1") == 0);
+    assert(strcmp(view->mediatorMap[1].mediator.name, "mediator3") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[1].context)->name, "mediator3") == 0);
+    assert(strcmp(view->mediatorMap[2].mediator.name, "mediator4") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[2].context)->name, "mediator4") == 0);
+    assert(strcmp(view->mediatorMap[3].mediator.name, "mediator5") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[3].context)->name, "mediator5") == 0);
+    assert(view->observerMap[0].key[0] != '\0'); // Key persists while observers exist
+
+    // Remove the last mediator and verify the remaining mediators 1, 3, 4 stay in place
+    view->removeMediator(view, "mediator5");
+    assert(strcmp(view->mediatorMap[0].mediator.name, "mediator1") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[0].context)->name, "mediator1") == 0);
+    assert(strcmp(view->mediatorMap[1].mediator.name, "mediator3") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[1].context)->name, "mediator3") == 0);
+    assert(strcmp(view->mediatorMap[2].mediator.name, "mediator4") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[2].context)->name, "mediator4") == 0);
+    assert(view->mediatorMap[3].key[0] == '\0'); // last mediator deleted
+    assert(view->observerMap[0].key[0] != '\0'); // Key persists while observers exist
+
+    // Remove the first mediator and verify that subsequent mediators 3, 4 shift left
+    view->removeMediator(view, "mediator1");
+    assert(strcmp(view->mediatorMap[0].mediator.name, "mediator3") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[0].context)->name, "mediator3") == 0);
+    assert(strcmp(view->mediatorMap[1].mediator.name, "mediator4") == 0);
+    assert(strcmp(((struct Mediator *)view->observerMap[0].observers[1].context)->name, "mediator4") == 0);
+
+    // Remove all remaining mediators and confirm that the dictionary key is cleared
+    view->removeMediator(view, "mediator3");
+    view->removeMediator(view, "mediator4");
+    assert(view->observerMap[0].key[0] == '\0'); // Dictionary key cleared observers are empty
+
+    puremvc_view_removeView("ViewTestKey14");
+    view = NULL;
 }

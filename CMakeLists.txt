@@ -21,8 +21,14 @@ add_library(puremvc::puremvc ALIAS puremvc)
 # 4️⃣ Target include paths
 target_include_directories(puremvc
         PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>)
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>)
+
+# Warnings (cross-platform)
+target_compile_options(puremvc
+        PRIVATE
+            $<$<C_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Werror>
+            $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
 
 # 9️⃣ Tests
 option(BUILD_TESTS "Build Tests" ON)

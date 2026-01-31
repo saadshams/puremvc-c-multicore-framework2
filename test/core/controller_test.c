@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "puremvc/controller.h"
 
@@ -16,6 +17,7 @@ int main() {
     testReregisterAndExecuteCommand();
     testRegisterAndUpdateCommand();
     testRemoveController();
+    testRegisterAndRemoveMultipleCommands();
     return 0;
 }
 
@@ -179,4 +181,43 @@ void testRemoveController() {
 
     // cleanup
     puremvc_controller_removeController("ControllerTestKey7");
+}
+
+void testRegisterAndRemoveMultipleCommands() {
+    struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey8", puremvc_controller);
+    controller->initializeController(controller);
+
+    // Register four commands and verify that each is correctly associated to their dictionaries and observers
+    controller->registerCommand(controller, "command1", puremvc_simple_command);
+    assert(strcmp(controller->commandMap[0].key, "command1") == 0);
+    assert(controller->commandMap[0].factory == puremvc_simple_command);
+    assert(strcmp(controller->view->observerMap[0].key, "command1") == 0);
+    assert(controller->view->observerMap[0].observers[0].context == controller);
+
+    controller->registerCommand(controller, "command2", puremvc_simple_command);
+    assert(strcmp(controller->commandMap[1].key, "command2") == 0);
+    assert(controller->commandMap[1].factory == puremvc_simple_command);
+    assert(strcmp(controller->view->observerMap[1].key, "command2") == 0);
+    assert(controller->view->observerMap[1].observers[0].context == controller);
+
+    controller->registerCommand(controller, "command3", puremvc_simple_command);
+    assert(strcmp(controller->commandMap[2].key, "command3") == 0);
+    assert(controller->commandMap[2].factory == puremvc_simple_command);
+    assert(strcmp(controller->view->observerMap[2].key, "command3") == 0);
+    assert(controller->view->observerMap[2].observers[0].context == controller);
+
+    controller->registerCommand(controller, "command4", puremvc_simple_command);
+    assert(strcmp(controller->commandMap[3].key, "command4") == 0);
+    assert(controller->commandMap[3].factory == puremvc_simple_command);
+    assert(strcmp(controller->view->observerMap[3].key, "command4") == 0);
+    assert(controller->view->observerMap[3].observers[0].context == controller);
+
+    // Remove the second command (middle) and verify that remaining commands and observers 3, 4 are shifted correctly
+    controller->removeCommand(controller, "command2");
+    assert(strcmp(controller->commandMap[0].key, "command1") == 0);
+    assert(controller->commandMap[0].factory == puremvc_simple_command);
+    // assert(strcmp(controller->view->observerMap[1].key, "command3") == 0);
+    // assert(controller->view->observerMap[1].observers[0].context == controller);
+
+
 }

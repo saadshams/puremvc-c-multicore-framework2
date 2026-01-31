@@ -75,10 +75,16 @@ static void removeCommand(struct Controller *self, const char *notificationName)
     for (size_t i = 0; i < COMMAND_MAP_SIZE && i < self->commandMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->commandMap[i].key, notificationName) == 0) {
             self->view->removeObserver(self->view, notificationName, self);
-            memset(&self->commandMap, 0, sizeof(struct CommandMap));
+            memset(&self->commandMap[index], 0, sizeof(struct CommandMap));
         } else {
             if (index != i) { // shift left
-                memmove(&self->commandMap[index], &self->commandMap[i], sizeof(struct SimpleCommand));
+                self->view->removeObserver(self->view, notificationName, self); // remove before the shift
+
+                memmove(&self->commandMap[index], &self->commandMap[i], sizeof(struct CommandMap));
+
+                const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification)) executeCommand, self);
+                self->view->registerObserver(self->view, notificationName, observer); // register after the shift
+
                 memset(&self->commandMap[i], 0, sizeof(struct CommandMap));
             }
             index++;

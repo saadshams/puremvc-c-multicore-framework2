@@ -14,6 +14,7 @@ int main() {
     testRemoveModel();
     testMultipleModels();
     testRegisterAndReplaceProxy();
+    testRegisterAndRemoveMultipleProxies();
     return 0;
 }
 
@@ -196,5 +197,66 @@ void testRegisterAndReplaceProxy() {
 
     assert(model->retrieveProxy(model, "sizes") == NULL);
     puremvc_model_removeModel("ModelTestKey8");
+    model = NULL;
+}
+
+void testRegisterAndRemoveMultipleProxies() {
+    struct Model *model = puremvc_model_getInstance("ModelTestKey9", puremvc_model);
+    model->initializeModel(model);
+
+    // Register five proxies and verify that each is correctly associated to their dictionaries
+    model->registerProxy(model, puremvc_proxy("proxy1", NULL));
+    assert(strcmp(model->proxyMap[0].key, "proxy1") == 0);
+    assert(strcmp(model->proxyMap[0].proxy.name, "proxy1") == 0);
+
+    model->registerProxy(model, puremvc_proxy("proxy2", NULL));
+    assert(strcmp(model->proxyMap[1].key, "proxy2") == 0);
+    assert(strcmp(model->proxyMap[1].proxy.name, "proxy2") == 0);
+
+    model->registerProxy(model, puremvc_proxy("proxy3", NULL));
+    assert(strcmp(model->proxyMap[2].key, "proxy3") == 0);
+    assert(strcmp(model->proxyMap[2].proxy.name, "proxy3") == 0);
+
+    model->registerProxy(model, puremvc_proxy("proxy4", NULL));
+    assert(strcmp(model->proxyMap[3].key, "proxy4") == 0);
+    assert(strcmp(model->proxyMap[3].proxy.name, "proxy4") == 0);
+
+    model->registerProxy(model, puremvc_proxy("proxy5", NULL));
+    assert(strcmp(model->proxyMap[4].key, "proxy5") == 0);
+    assert(strcmp(model->proxyMap[4].proxy.name, "proxy5") == 0);
+
+    // Remove the second proxy (middle) and verify that remaining mediators 3, 4, 5 are shifted correctly
+    model->removeProxy(model, "proxy2");
+    assert(strcmp(model->proxyMap[0].key, "proxy1") == 0);
+    assert(strcmp(model->proxyMap[0].proxy.name, "proxy1") == 0);
+    assert(strcmp(model->proxyMap[1].key, "proxy3") == 0);
+    assert(strcmp(model->proxyMap[1].proxy.name, "proxy3") == 0);
+    assert(strcmp(model->proxyMap[2].key, "proxy4") == 0);
+    assert(strcmp(model->proxyMap[2].proxy.name, "proxy4") == 0);
+    assert(strcmp(model->proxyMap[3].key, "proxy5") == 0);
+    assert(strcmp(model->proxyMap[3].proxy.name, "proxy5") == 0);
+
+    // Remove the last proxy and verify the remaining ones stay in place
+    model->removeProxy(model, "proxy5");
+    assert(strcmp(model->proxyMap[0].key, "proxy1") == 0);
+    assert(strcmp(model->proxyMap[0].proxy.name, "proxy1") == 0);
+    assert(strcmp(model->proxyMap[1].key, "proxy3") == 0);
+    assert(strcmp(model->proxyMap[1].proxy.name, "proxy3") == 0);
+    assert(strcmp(model->proxyMap[2].key, "proxy4") == 0);
+    assert(strcmp(model->proxyMap[2].proxy.name, "proxy4") == 0);
+
+    // Remove the first mediator and verify that subsequent mediators 3, 4 shift left
+    model->removeProxy(model, "proxy1");
+    assert(strcmp(model->proxyMap[0].key, "proxy3") == 0);
+    assert(strcmp(model->proxyMap[0].proxy.name, "proxy3") == 0);
+    assert(strcmp(model->proxyMap[1].key, "proxy4") == 0);
+    assert(strcmp(model->proxyMap[1].proxy.name, "proxy4") == 0);
+
+    // Remove all remaining mediators and confirm that the dictionary is NULL
+    model->removeProxy(model, "proxy3");
+    model->removeProxy(model, "proxy4");
+    assert(model->proxyMap->key[0] == '\0'); // proxyMap is empty
+
+    puremvc_model_removeModel("ModelTestKey9");
     model = NULL;
 }

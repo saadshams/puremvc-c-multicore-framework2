@@ -8,6 +8,7 @@
 #define NOTE4 "Notification4"
 #define NOTE5 "Notification5"
 #define NOTE6 "Notification6"
+#define NOTE7 "Notification7"
 
 void testGetInstance();
 void testRegisterAndNotifyObserver();
@@ -21,7 +22,8 @@ void testRemoveOneOfTwoMediatorsAndSubsequentNotify();
 void testMediatorReregistration();
 void testModifyObserverListDuringNotification();
 void testRemoveView();
-void testAddAndRemoveMultipleMediators();
+void testRegisterAndRemoveMultipleMediators();
+void testRegisterAndRemoveMultipleObservers();
 
 struct ViewTest {
     const char *lastNotification;
