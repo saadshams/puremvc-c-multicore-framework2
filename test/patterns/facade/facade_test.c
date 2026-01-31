@@ -10,17 +10,17 @@
 #include "facade_test_vo.h"
 
 int main() {
-    // testGetInstance();
-    // testRegisterCommandAndSendNotification();
-    // testRegisterAndRemoveCommandAndSendNotification();
-    // testRegisterAndRetrieveProxy();
-    // testRegisterAndRemoveProxy();
-    // testRegisterRetrieveAndRemoveMediator();
-    // testHasProxy();
-    // testHasMediator();
-    // testHasCommand();
+    testGetInstance();
+    testRegisterCommandAndSendNotification();
+    testRegisterAndRemoveCommandAndSendNotification();
+    testRegisterAndRetrieveProxy();
+    testRegisterAndRemoveProxy();
+    testRegisterRetrieveAndRemoveMediator();
+    testHasProxy();
+    testHasMediator();
+    testHasCommand();
     testHasCoreAndRemoveCore();
-    // testAddAndRemoveMultipleCores();
+    testAddAndRemoveMultipleCores();
     return 0;
 }
 

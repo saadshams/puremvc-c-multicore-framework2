@@ -76,7 +76,7 @@ static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
             proxy.onRemove(&proxy);
         } else {
             if (index != i) { // shift left
-                memmove(&self->proxyMap[index], &self->proxyMap[i], sizeof(struct Proxy));
+                memmove(&self->proxyMap[index], &self->proxyMap[i], sizeof(struct ProxyMap));
                 memset(&self->proxyMap[i], 0, sizeof(struct ProxyMap));
             }
             index++;

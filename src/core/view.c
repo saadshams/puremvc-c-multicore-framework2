@@ -44,7 +44,7 @@ static void registerObserver(struct View *self, const char *notificationName, co
 
 static void notifyObservers(struct View *self, const struct Notification notification) {
     mutex_lock_shared(&self->observerMapMutex);
-    struct Observer observers[OBSERVER_ARRAY_SIZE];
+    struct Observer observers[OBSERVER_ARRAY_SIZE] = {0};
     size_t count = 0;
     for (size_t i = 0; i < OBSERVER_MAP_SIZE && self->observerMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->observerMap[i].key, notification.name) == 0) {
@@ -72,7 +72,8 @@ void removeObserver(struct View *self, const char *notificationName, const void 
                     memset(&self->observerMap[i].observers[j], 0, sizeof(struct Observer));
                 } else {
                     if (index != j) { // shift left
-                        memmove(&self->observerMap[i].observers[j], &self->observerMap[i].observers[j+1], sizeof(struct Observer));
+                        memmove(&self->observerMap[i].observers[index], &self->observerMap[i].observers[j], sizeof(struct Observer));
+                        memset(&self->observerMap[i].observers[j], 0, sizeof(struct Observer));
                     }
                     index++;
                 }
@@ -149,17 +150,37 @@ static struct Mediator removeMediator(struct View *self, const char *mediatorNam
                 self->removeObserver(self, *cursor, &self->mediatorMap[i].mediator);
             }
             self->mediatorMap[i].mediator.onRemove(&self->mediatorMap[i].mediator);
+            memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap));
         } else {
             if (index != i) { // shift left
-                memmove(&self->mediatorMap[index], &self->mediatorMap[i], sizeof(struct Mediator));
+                // as mediator swaps, the observer context is still pointing to the old memory address
+                // how to make observer point to the new address
+                // remove observer but cache notify before removing
+                // give new address of mediator and pass notify again
+                // first get the notify before move
+                // then set the notify and new address after move
+                // basically updating observers
+                // observer provides accessor methods
+                // how do i know which observer corresponds to this mediator
+                // i need retrieveObserver
+                // write inline
+                // or removeObserver for all the notification before the swap and registerObserver for all the notifications after swap
+
+                const char **interests = self->mediatorMap[i].mediator.listNotificationInterests(&self->mediatorMap[i].mediator);
+                for (const char **cursor = interests; *cursor; cursor++) {
+                    self->removeObserver(self, *cursor, &self->mediatorMap[i].mediator);
+                }
+                memmove(&self->mediatorMap[index], &self->mediatorMap[i], sizeof(struct MediatorMap));
+                for (const char **cursor = interests; *cursor; cursor++) {
+                    const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification)) self->mediatorMap[index].mediator.handleNotification, &self->mediatorMap[index].mediator);
+                    self->registerObserver(self, *cursor, observer);
+                }
+
                 memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap));
             }
             index++;
         }
     }
-
-    if (mediator.name[0] != '\0')
-        memset(&self->mediatorMap[index], 0, sizeof(struct MediatorMap));
 
     return mutex_unlock(&self->mediatorMapMutex), mediator;
 }

@@ -6,6 +6,9 @@
 #include "puremvc/observer.h"
 
 #include "view_test.h"
+
+#include <stdio.h>
+
 #include "view_test_mediator.h"
 #include "view_test_mediator2.h"
 #include "view_test_mediator3.h"
@@ -24,8 +27,9 @@ int main() {
     testRemoveMediatorAndSubsequentNotify();
     testRemoveOneOfTwoMediatorsAndSubsequentNotify();
     testMediatorReregistration();
-    // testModifyObserverListDuringNotification();
+    testModifyObserverListDuringNotification();
     testRemoveView();
+    testAddAndRemoveMultipleMediators();
     return 0;
 }
 
@@ -335,39 +339,53 @@ void testMediatorReregistration() {
     view = NULL;
 }
 
+/**
+ * Verifies that the observer list is not modified while a notification
+ * dispatch is in progress.
+ *
+ * In this test, each mediator removes itself in response to the notification.
+ * Removing a mediator also removes one of its observers, which would otherwise
+ * compact the observer list (e.g., via memmove) while it is being iterated.
+ *
+ * Modifying the observer list during dispatch would invalidate observer
+ * addresses and lead to undefined behavior. The expected behavior is that
+ * removals are deferred until after notification dispatch completes.
+ */
+/**
+ * Observers and Mediators must not be structurally modified during notification dispatch.
+ * Mediators in this test remove themselves when notified, which would otherwise
+ * invalidate the observer list during iteration.
+ */
 void testModifyObserverListDuringNotification() {
     // Get the Singleton View instance
     struct View *view = puremvc_view_getInstance("ViewTestKey11", puremvc_view);
     view->initializeView(view);
 
-    struct ViewTest viewTest = {"", "", "", 0};
+    struct ViewTest viewTest = {"", "", "", 0, .deferred = {0}};
 
     // Create and register several mediator instances that respond to notification 6
     // by removing themselves, which will cause the observer list for that notification
     // to change.
 
-    struct Mediator mediator1 = view_test_mediator6("view_test_mediator6/1", &viewTest);
-    view->registerMediator(view, mediator1);
-    struct Mediator mediator2 = view_test_mediator6("view_test_mediator6/2", &viewTest);
-    view->registerMediator(view, mediator2);
-    struct Mediator mediator3 = view_test_mediator6("view_test_mediator6/3", &viewTest);
-    view->registerMediator(view, mediator3);
-    struct Mediator mediator4 = view_test_mediator6("view_test_mediator6/4", &viewTest);
-    view->registerMediator(view, mediator4);
-    struct Mediator mediator5 = view_test_mediator6("view_test_mediator6/5", &viewTest);
-    view->registerMediator(view, mediator5);
-    struct Mediator mediator6 = view_test_mediator6("view_test_mediator6/6", &viewTest);
-    view->registerMediator(view, mediator6);
-    struct Mediator mediator7 = view_test_mediator6("view_test_mediator6/7", &viewTest);
-    view->registerMediator(view, mediator7);
-    struct Mediator mediator8 = view_test_mediator6("view_test_mediator6/8", &viewTest);
-    view->registerMediator(view, mediator8);
+    view->registerMediator(view, view_test_mediator6("view_test_mediator6/1", &viewTest));
+    view->registerMediator(view, view_test_mediator6("view_test_mediator6/2", &viewTest));
+    view->registerMediator(view, view_test_mediator6("view_test_mediator6/3", &viewTest));
+    view->registerMediator(view, view_test_mediator6("view_test_mediator6/4", &viewTest));
+    view->registerMediator(view, view_test_mediator6("view_test_mediator6/5", &viewTest));
+    view->registerMediator(view, view_test_mediator6("view_test_mediator6/6", &viewTest));
+    view->registerMediator(view, view_test_mediator6("view_test_mediator6/7", &viewTest));
+    view->registerMediator(view, view_test_mediator6("view_test_mediator6/8", &viewTest));
 
     // send the notification. each of the above mediators will respond by removing
     // themselves and incrementing the counter by 1. This should leave us with a
     // count of 8, since 8 mediators will respond.
-    struct Notification notification = puremvc_notification(NOTE6, NULL, NULL);
+    const struct Notification notification = puremvc_notification(NOTE6, NULL, NULL);
     view->notifyObservers(view, notification);
+
+    // iterate through deferred names and call
+    for (size_t i = 0; i < MEDIATOR_MAP_SIZE && viewTest.deferred[i][0] != '\0'; i++) {
+        view->removeMediator(view, viewTest.deferred[i]);
+    }
 
     // verify the count is correct
     assert(viewTest.counter == 8);
@@ -396,4 +414,29 @@ void testRemoveView() {
 
     // cleanup
     puremvc_view_removeView("ViewTestKey12");
+}
+
+void testAddAndRemoveMultipleMediators() {
+    struct View *view = puremvc_view_getInstance("ViewTestKey13", puremvc_view);
+    view->initializeView(view);
+
+    view->registerMediator(view, puremvc_mediator("view_test_mediator1", NULL));
+    view->registerMediator(view, puremvc_mediator("view_test_mediator2", NULL));
+    view->registerMediator(view, puremvc_mediator("view_test_mediator3", NULL));
+    view->registerMediator(view, puremvc_mediator("view_test_mediator4", NULL));
+    view->registerMediator(view, puremvc_mediator("view_test_mediator5", NULL));
+    view->registerMediator(view, puremvc_mediator("view_test_mediator6", NULL));
+
+    view->removeMediator(view, "view_test_mediator1");
+    assert(view->hasMediator(view, "view_test_mediator1") == false);
+    view->removeMediator(view, "view_test_mediator2");
+    assert(view->hasMediator(view, "view_test_mediator2") == false);
+    view->removeMediator(view, "view_test_mediator3");
+    assert(view->hasMediator(view, "view_test_mediator3") == false);
+    view->removeMediator(view, "view_test_mediator5");
+    assert(view->hasMediator(view, "view_test_mediator5") == false);
+    view->removeMediator(view, "view_test_mediator6");
+    assert(view->hasMediator(view, "view_test_mediator6") == false);
+    view->removeMediator(view, "view_test_mediator4");
+    assert(view->hasMediator(view, "view_test_mediator4") == false);
 }

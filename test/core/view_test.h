@@ -21,12 +21,14 @@ void testRemoveOneOfTwoMediatorsAndSubsequentNotify();
 void testMediatorReregistration();
 void testModifyObserverListDuringNotification();
 void testRemoveView();
+void testAddAndRemoveMultipleMediators();
 
 struct ViewTest {
     const char *lastNotification;
     bool onRegisterCalled;
     bool onRemoveCalled;
     int counter;
+    char deferred[MEDIATOR_MAP_SIZE][NAME_SIZE];
 };
 
 struct ViewTestVar {

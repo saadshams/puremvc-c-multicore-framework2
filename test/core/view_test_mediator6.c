@@ -9,8 +9,16 @@ static const char **listNotificationInterests(const struct Mediator *self) {
 }
 
 static void handleNotification(const struct Mediator *self, struct Notification notification) {
-    const struct Facade *facade = self->notifier.getFacade(&self->notifier);
-    facade->removeMediator(facade, self->getName(self));
+    struct ViewTest *component = self->getComponent(self);
+    const char *name = self->getName(self);
+
+    for (size_t i = 0; i < MEDIATOR_MAP_SIZE; i++) {
+        // Find the first empty slot (assumes first char is '\0')
+        if (component->deferred[i][0] == '\0') {
+            snprintf(component->deferred[i], NAME_SIZE, "%s", name);
+            break;
+        }
+    }
 }
 
 static void onRemove(struct Mediator *self) {
