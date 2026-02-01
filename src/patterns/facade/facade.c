@@ -123,7 +123,10 @@ struct Facade puremvc_facade(const char *key) {
         .sendNotification = sendNotification
     };
 
-    snprintf(facade.multitonKey, KEY_SIZE, "%s", key);
+    int len = snprintf(facade.multitonKey, KEY_SIZE, "%s", key);
+    if (len >= KEY_SIZE)
+        printf("[PureMVC::Facade] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+
     return facade;
 }
 

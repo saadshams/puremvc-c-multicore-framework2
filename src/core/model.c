@@ -45,7 +45,10 @@ static void registerProxy(struct Model *self, struct Proxy proxy) {
 
     proxy.notifier.initializeNotifier(&proxy.notifier, self->multitonKey);
 
-    snprintf(self->proxyMap[i].key, KEY_SIZE, "%s", proxy.name);
+    int len = snprintf(self->proxyMap[i].key, KEY_SIZE, "%s", proxy.name);
+    if (len >= KEY_SIZE)
+        printf("[PureMVC::Model::registerProxy] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", proxy.name, len, KEY_SIZE);
+
     self->proxyMap[i].proxy = proxy;
     self->proxyMap[i].proxy.onRegister(&self->proxyMap[i].proxy);
     mutex_unlock(&self->proxyMapMutex);
@@ -107,7 +110,10 @@ struct Model puremvc_model(const char *key) {
         .removeProxy = removeProxy
     };
 
-    snprintf(model.multitonKey, KEY_SIZE, "%s", key);
+    int len = snprintf(model.multitonKey, KEY_SIZE, "%s", key);
+    if (len >= KEY_SIZE)
+        printf("[PureMVC::Model] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+
     return model;
 }
 
@@ -134,7 +140,10 @@ struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(
         return NULL;
     }
 
-    snprintf(modelMap[i].key, KEY_SIZE, "%s", key);
+    int len = snprintf(modelMap[i].key, KEY_SIZE, "%s", key);
+    if (len >= KEY_SIZE)
+        printf("[PureMVC::Model::getInstance] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+
     modelMap[i].model = factory(key);
     mutex_init(&modelMap[i].model.proxyMapMutex);
 

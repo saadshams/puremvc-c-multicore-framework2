@@ -49,7 +49,10 @@ static void registerObserver(struct View *self, const char *notificationName, co
         return;
     }
 
-    snprintf(self->observerMap[i].key, NAME_SIZE, "%s", notificationName);
+    int len = snprintf(self->observerMap[i].key, KEY_SIZE, "%s", notificationName);
+    if (len >= KEY_SIZE)
+        printf("[PureMVC::View::registerObserver] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", notificationName, len, KEY_SIZE);
+
     self->observerMap[i].observers[0] = observer;
     mutex_unlock(&self->observerMapMutex);
 }
@@ -123,7 +126,10 @@ static void registerMediator(struct View *self, struct Mediator mediator) {
 
     mediator.notifier.initializeNotifier(&mediator.notifier, self->multitonKey);
 
-    snprintf(self->mediatorMap[i].key, NAME_SIZE, "%s", mediator.name);
+    int len = snprintf(self->mediatorMap[i].key, KEY_SIZE, "%s", mediator.name);
+    if (len >= KEY_SIZE)
+        printf("[PureMVC::View::registerMediator] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", mediator.name, len, KEY_SIZE);
+
     self->mediatorMap[i].mediator = mediator;
     mutex_unlock(&self->mediatorMapMutex);
 
@@ -215,7 +221,10 @@ struct View puremvc_view(const char *key) {
         .removeMediator = removeMediator
     };
 
-    snprintf(view.multitonKey, KEY_SIZE, "%s", key);
+    int len = snprintf(view.multitonKey, KEY_SIZE, "%s", key);
+    if (len >= KEY_SIZE)
+        printf("[PureMVC::View] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+
     return view;
 }
 
@@ -242,7 +251,10 @@ struct View *puremvc_view_getInstance(const char *key, struct View(*factory)(con
         return NULL;
     }
 
-    snprintf(viewMap[i].key, KEY_SIZE, "%s", key);
+    int len = snprintf(viewMap[i].key, KEY_SIZE, "%s", key);
+    if (len >= KEY_SIZE)
+        printf("[PureMVC::View::getInstance] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+
     viewMap[i].view = factory(key);
     mutex_init(&viewMap[i].view.observerMapMutex);
     mutex_init(&viewMap[i].view.mediatorMapMutex);

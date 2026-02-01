@@ -23,7 +23,9 @@ const char *getMultitonKey(const struct Notifier *self) {
 }
 
 static void initializeNotifier(struct Notifier *self, const char *key) {
-    snprintf(self->key, KEY_SIZE, "%s", key);
+    int len = snprintf(self->key, KEY_SIZE, "%s", key);
+    if (len >= KEY_SIZE)
+        printf("[PureMVC::Notifier::initializeNotifier] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
 }
 
 static void sendNotification(const struct Notifier *self, const char *notificationName, void *body, const char *type) {
