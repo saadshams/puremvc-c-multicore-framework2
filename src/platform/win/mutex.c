@@ -3,24 +3,24 @@
 
 #include "puremvc/mutex.h"
 
-void mutex_init(Mutex *m) {
-    InitializeCriticalSection(&m->cs);
+void mutex_init(Mutex *mutex) {
+    InitializeCriticalSection(&mutex->cs);
 }
 
-void mutex_lock(Mutex *m) {
-    EnterCriticalSection(&m->cs);
+void mutex_lock(Mutex *mutex) {
+    EnterCriticalSection(&mutex->cs);
 }
 
-void mutex_lock_shared(Mutex *m) {
-    EnterCriticalSection(&m->cs);
+void mutex_lock_shared(Mutex *mutex) {
+    EnterCriticalSection(&mutex->cs);
 }
 
-void mutex_unlock(Mutex *m) {
-    LeaveCriticalSection(&m->cs);
+void mutex_unlock(Mutex *mutex) {
+    LeaveCriticalSection(&mutex->cs);
 }
 
-void mutex_destroy(Mutex *m) {
-    DeleteCriticalSection(&m->cs);
+void mutex_destroy(Mutex *mutex) {
+    DeleteCriticalSection(&mutex->cs);
 }
 
 static BOOL CALLBACK _mutex_win_once_wrapper(PINIT_ONCE InitOnce, PVOID Parameter, PVOID* Context) {
@@ -30,6 +30,6 @@ static BOOL CALLBACK _mutex_win_once_wrapper(PINIT_ONCE InitOnce, PVOID Paramete
     return TRUE;
 }
 
-void mutex_once(MutexOnce *once, void (*fn)(void)) {
-    InitOnceExecuteOnce(once, _mutex_win_once_wrapper, (PVOID)fn, NULL);
+void mutex_once(MutexOnce *once, void (*callback)(void)) {
+    InitOnceExecuteOnce(once, _mutex_win_once_wrapper, (PVOID)callback, NULL);
 }

@@ -55,4 +55,3 @@ add_test(NAME PureMVC.ObserverTest COMMAND ObserverTest)
 add_executable(ProxyTest patterns/proxy/proxy_test.c)
 target_link_libraries(ProxyTest PRIVATE puremvc)
 add_test(NAME PureMVC.ProxyTest COMMAND ProxyTest)
-
