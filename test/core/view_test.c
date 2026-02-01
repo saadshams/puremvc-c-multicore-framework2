@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "puremvc/view.h"
@@ -31,6 +32,7 @@ int main() {
     testRemoveView();
     testRegisterAndRemoveMultipleObservers();
     testRegisterAndRemoveMultipleMediators();
+    testCapacityWarning();
     return 0;
 }
 
@@ -561,4 +563,20 @@ void testGetAndRemoveMultipleInstances() {
     puremvc_view_removeView("view4"); // remove last
     puremvc_view_removeView("view1"); // remove first
     puremvc_view_removeView("view3"); // remove remaining
+}
+
+void testCapacityWarning() {
+    for (int i = 0; i < INSTANCE_MAP_SIZE + 1; i++) {
+        char key[32] = {0};
+        snprintf(key, sizeof(key), "view%d", i);
+        puremvc_view_getInstance(key, puremvc_view);
+    }
+
+    struct View *view = puremvc_view_getInstance("view1", puremvc_view);
+    for (int i = 0; i < COMMAND_MAP_SIZE + 1; i++) {
+        char key[32] = {0};
+        snprintf(key, sizeof(key), "mediator%d", i);
+        view->registerMediator(view, puremvc_mediator(key, NULL));
+        view->registerObserver(view, key, puremvc_observer(NULL, NULL));
+    }
 }

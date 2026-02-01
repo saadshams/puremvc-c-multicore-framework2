@@ -1,8 +1,12 @@
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "model_test.h"
 #include "puremvc/model.h"
+
+#include <stdio.h>
+
 #include "model_test_proxy.h"
 
 int main() {
@@ -16,6 +20,7 @@ int main() {
     testRegisterAndReplaceProxy();
     testRegisterAndRemoveMultipleProxies();
     testGetAndRemoveMultipleInstances();
+    testCapacityWarning();
     return 0;
 }
 
@@ -123,7 +128,7 @@ void testOnRegisterAndOnRemove() {
 
 void testRemoveModel() {
     // Get a Multiton Model instance
-    struct Model *model = puremvc_model_getInstance("ModelTestKey6", puremvc_model);
+    puremvc_model_getInstance("ModelTestKey6", puremvc_model);
 
     // remove the model
     puremvc_model_removeModel("ModelTestKey6");
@@ -164,7 +169,7 @@ void testMultipleModels() {
 }
 
 void testRegisterAndReplaceProxy() {
-    struct Model *model = puremvc_model_getInstance("ModelTestKey8", puremvc_model);
+    struct Model *model = puremvc_model_getInstance("ModelTestKey9", puremvc_model);
 
     int *sizes = (int []) {1, 0};
     struct Proxy p1 = puremvc_proxy("sizes", sizes);
@@ -188,12 +193,12 @@ void testRegisterAndReplaceProxy() {
     assert(strcmp(removedProxy.getName(&removedProxy), "sizes") == 0);
 
     assert(model->retrieveProxy(model, "sizes") == NULL);
-    puremvc_model_removeModel("ModelTestKey8");
+    puremvc_model_removeModel("ModelTestKey9");
     model = NULL;
 }
 
 void testRegisterAndRemoveMultipleProxies() {
-    struct Model *model = puremvc_model_getInstance("ModelTestKey9", puremvc_model);
+    struct Model *model = puremvc_model_getInstance("ModelTestKey10", puremvc_model);
 
     // Register five proxies and verify that each is correctly associated to their dictionaries
     model->registerProxy(model, puremvc_proxy("proxy1", NULL));
@@ -248,7 +253,7 @@ void testRegisterAndRemoveMultipleProxies() {
     model->removeProxy(model, "proxy4");
     assert(model->proxyMap->key[0] == '\0'); // proxyMap is empty
 
-    puremvc_model_removeModel("ModelTestKey9");
+    puremvc_model_removeModel("ModelTestKey10");
     model = NULL;
 }
 
@@ -262,4 +267,25 @@ void testGetAndRemoveMultipleInstances() {
     puremvc_model_removeModel("model4"); // remove last
     puremvc_model_removeModel("model1"); // remove first
     puremvc_model_removeModel("model3"); // remove remaining
+}
+
+void testCapacityWarning() {
+    for (int i = 0; i < INSTANCE_MAP_SIZE + 1; i++) {
+        char key[32] = {0};
+        snprintf(key, sizeof(key), "model%d", i);
+        puremvc_model_getInstance(key, puremvc_model);
+    }
+
+    struct Model *model = puremvc_model_getInstance("model1", puremvc_model);
+    for (int i = 0; i < PROXY_MAP_SIZE + 1; i++) {
+        char key[32] = {0};
+        snprintf(key, sizeof(key), "proxy%d", i);
+        model->registerProxy(model, puremvc_proxy(key, NULL));
+    }
+
+    for (int i = 0; i < INSTANCE_MAP_SIZE + 1; i++) {
+        char key[32] = {0};
+        snprintf(key, sizeof(key), "model%d", i);
+        puremvc_model_removeModel(key);
+    }
 }

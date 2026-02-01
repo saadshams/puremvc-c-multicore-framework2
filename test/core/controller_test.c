@@ -19,6 +19,7 @@ int main() {
     testRemoveController();
     testRegisterAndRemoveMultipleCommands();
     testGetAndRemoveMultipleInstances();
+    testCapacityWarning();
     return 0;
 }
 
@@ -30,6 +31,7 @@ void testGetInstance() {
     assert(controller != NULL);
     assert(controller == puremvc_controller_getInstance("ControllerTestKey1", puremvc_controller));
     puremvc_controller_removeController("ControllerTestKey1");
+    puremvc_view_removeView("ControllerTestKey1");
     controller = NULL;
 }
 
@@ -52,6 +54,7 @@ void testRegisterAndExecuteCommand() {
 
     controller->removeCommand(controller, "ControllerTest1");
     puremvc_controller_removeController("ControllerTestKey2");
+    puremvc_view_removeView("ControllerTestKey2");
     controller = NULL;
 }
 
@@ -86,6 +89,7 @@ void testRegisterAndRemoveCommand() {
     // test assertions
     assert(vo.result == 0);
     puremvc_controller_removeController("ControllerTestKey3");
+    puremvc_view_removeView("ControllerTestKey3");
     controller = NULL;
 }
 
@@ -104,6 +108,7 @@ void testHasCommand() {
     assert(controller->hasCommand(controller, "hasCommandTest") == false);
 
     puremvc_controller_removeController("ControllerTestKey4");
+    puremvc_view_removeView("ControllerTestKey4");
     controller = NULL;
 }
 
@@ -160,12 +165,13 @@ void testRegisterAndUpdateCommand() {
 
     controller->removeCommand(controller, "ControllerTest2");
     puremvc_controller_removeController("ControllerTestKey6");
+    puremvc_view_removeView("ControllerTestKey6");
     controller = NULL;
 }
 
 void testRemoveController() {
     // Get a Multiton Controller instance
-    struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey7", puremvc_controller);
+    puremvc_controller_getInstance("ControllerTestKey7", puremvc_controller);
 
     // remove the controller
     puremvc_controller_removeController("ControllerTestKey7");
@@ -175,6 +181,7 @@ void testRemoveController() {
 
     // cleanup
     puremvc_controller_removeController("ControllerTestKey7");
+    puremvc_view_removeView("ControllerTestKey7");
 }
 
 void testRegisterAndRemoveMultipleCommands() {
@@ -242,7 +249,8 @@ void testRegisterAndRemoveMultipleCommands() {
     controller->removeCommand(controller, "command3");
     assert(controller->commandMap[0].key[0] == '\0');
 
-    puremvc_controller_removeController("ViewTestKey8");
+    puremvc_controller_removeController("ControllerTestKey8");
+    puremvc_view_removeView("ControllerTestKey8");
     controller = NULL;
 }
 
@@ -256,4 +264,24 @@ void testGetAndRemoveMultipleInstances() {
     puremvc_controller_removeController("controller4"); // remove last
     puremvc_controller_removeController("controller1"); // remove first
     puremvc_controller_removeController("controller3"); // remove remaining
+
+    puremvc_view_removeView("controller2"); // remove middle
+    puremvc_view_removeView("controller4"); // remove last
+    puremvc_view_removeView("controller1"); // remove first
+    puremvc_view_removeView("controller3"); // remove remaining
+}
+
+void testCapacityWarning() {
+    for (int i = 0; i < INSTANCE_MAP_SIZE + 1; i++) {
+        char key[32] = {0};
+        snprintf(key, sizeof(key), "controller%d", i);
+        puremvc_controller_getInstance(key, puremvc_controller);
+    }
+
+    struct Controller *controller = puremvc_controller_getInstance("controller1", puremvc_controller);
+    for (int i = 0; i < COMMAND_MAP_SIZE + 1; i++) {
+        char key[32] = {0};
+        snprintf(key, sizeof(key), "command%d", i);
+        controller->registerCommand(controller, key, puremvc_simple_command);
+    }
 }

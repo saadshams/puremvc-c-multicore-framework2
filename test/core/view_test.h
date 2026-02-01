@@ -25,6 +25,7 @@ void testRemoveView();
 void testRegisterAndRemoveMultipleObservers();
 void testRegisterAndRemoveMediators();
 void testRegisterAndRemoveMultipleMediators();
+void testCapacityWarning();
 
 struct ViewTest {
     const char *lastNotification;

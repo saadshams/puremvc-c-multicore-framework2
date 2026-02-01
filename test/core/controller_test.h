@@ -9,3 +9,4 @@ void testRegisterAndUpdateCommand();
 void testRemoveController();
 void testRegisterAndRemoveMultipleCommands();
 void testGetAndRemoveMultipleInstances();
+void testCapacityWarning();

@@ -15,10 +15,13 @@
 #include "puremvc/model.h"
 #include "puremvc/view.h"
 
-// The Multiton Facade instanceMap.
-static struct Facade instanceMap[INSTANCE_MAP_SIZE];
+// The Multiton facadeMap.
+static struct FacadeMap {
+    char key[KEY_SIZE];
+    struct Facade facade;
+} facadeMap[INSTANCE_MAP_SIZE];
 
-// mutex for instanceMap
+// mutex for facadeMap
 static Mutex mutex;
 static MutexOnce token = MUTEX_ONCE_INIT;
 
@@ -134,33 +137,34 @@ struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factor
     mutex_lock(&mutex);
 
     size_t i = 0;
-    for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
+    for (; facadeMap[i].key[0] != '\0'; i++) {
+        if (strncmp(facadeMap[i].key, key, KEY_SIZE) == 0) {
             mutex_unlock(&mutex);
-            return &instanceMap[i];
+            return &facadeMap[i].facade;
         }
     }
 
     if (i >= INSTANCE_MAP_SIZE) {
-        fprintf(stderr, "[PureMVC::Facade::getInstance] Warning: InstanceMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
+        fprintf(stderr, "[PureMVC::Facade::getInstance] Warning: facadeMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
         mutex_unlock(&mutex);
         return NULL;
     }
 
-    instanceMap[i] = factory(key);
+    strncpy(facadeMap[i].key, key, KEY_SIZE);
+    facadeMap[i].facade = factory(key);
 
-    instanceMap[i].initializeFacade(&instanceMap[i]);
+    facadeMap[i].facade.initializeFacade(&facadeMap[i].facade);
 
     mutex_unlock(&mutex);
-    return &instanceMap[i];
+    return &facadeMap[i].facade;
 }
 
 bool puremvc_facade_hasCore(const char *key) {
     if (key == NULL) return false;
     mutex_lock_shared(&mutex);
     bool exists = false;
-    for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strcmp(instanceMap[i].multitonKey, key) == 0) {
+    for (size_t i = 0; i < INSTANCE_MAP_SIZE && facadeMap[i].key[0] != '\0'; i++) {
+        if (strcmp(facadeMap[i].key, key) == 0) {
             exists = true;
             break;
         }
@@ -179,13 +183,13 @@ void puremvc_facade_removeFacade(const char *key) {
     puremvc_controller_removeController(key);
 
     size_t index = 0;
-    for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strcmp(instanceMap[i].multitonKey, key) == 0) {
-            memset(&instanceMap[i], 0, sizeof(struct Facade));
+    for (size_t i = 0; i < INSTANCE_MAP_SIZE && facadeMap[i].key[0] != '\0'; i++) {
+        if (strcmp(facadeMap[i].key, key) == 0) {
+            memset(&facadeMap[i], 0, sizeof(struct FacadeMap));
         } else {
             if (index != i) {
-                memmove(&instanceMap[index], &instanceMap[i], sizeof(struct Facade));
-                memset(&instanceMap[i], 0, sizeof(struct Facade));
+                memmove(&facadeMap[index], &facadeMap[i], sizeof(struct FacadeMap));
+                memset(&facadeMap[i], 0, sizeof(struct FacadeMap));
             }
             index++;
         }

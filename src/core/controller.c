@@ -12,10 +12,13 @@
 #include "puremvc/controller.h"
 #include "puremvc/mutex.h"
 
-// The Multiton Controller instanceMap.
-static struct Controller instanceMap[INSTANCE_MAP_SIZE];
+// The Multiton controllerMap.
+static struct ControllerMap {
+    char key[KEY_SIZE];
+    struct Controller controller;
+} controllerMap[INSTANCE_MAP_SIZE];
 
-// mutex for controller instanceMap
+// mutex for controllerMap
 static MutexOnce token = MUTEX_ONCE_INIT;
 static Mutex mutex;
 
@@ -123,10 +126,10 @@ struct Controller *puremvc_controller_getInstance(const char *key, struct Contro
     mutex_lock(&mutex);
 
     size_t i = 0;
-    for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
+    for (; i < INSTANCE_MAP_SIZE && controllerMap[i].key[0] != '\0'; i++) {
+        if (strncmp(controllerMap[i].key, key, KEY_SIZE) == 0) {
             mutex_unlock(&mutex);
-            return &instanceMap[i];
+            return &controllerMap[i].controller;
         }
     }
 
@@ -136,13 +139,14 @@ struct Controller *puremvc_controller_getInstance(const char *key, struct Contro
         return NULL;
     }
 
-    instanceMap[i] = factory(key);
-    mutex_init(&instanceMap[i].commandMapMutex);
+    strncpy(controllerMap[i].key, key, KEY_SIZE);
+    controllerMap[i].controller = factory(key);
+    mutex_init(&controllerMap[i].controller.commandMapMutex);
 
-    instanceMap[i].initializeController(&instanceMap[i]);
+    controllerMap[i].controller.initializeController(&controllerMap[i].controller);
 
     mutex_unlock(&mutex);
-    return &instanceMap[i];
+    return &controllerMap[i].controller;
 }
 
 void puremvc_controller_removeController(const char *key) {
@@ -151,13 +155,13 @@ void puremvc_controller_removeController(const char *key) {
     mutex_lock(&mutex);
 
     size_t index = 0;
-    for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strcmp(instanceMap[i].multitonKey, key) == 0) {
-            memset(&instanceMap[i], 0, sizeof(struct Controller));
+    for (size_t i = 0; i < INSTANCE_MAP_SIZE && controllerMap[i].key[0] != '\0'; i++) {
+        if (strcmp(controllerMap[i].key, key) == 0) {
+            memset(&controllerMap[i], 0, sizeof(struct ControllerMap));
         } else {
             if (index != i) {
-                memmove(&instanceMap[index], &instanceMap[i], sizeof(struct Controller));
-                memset(&instanceMap[i], 0, sizeof(struct Controller));
+                memmove(&controllerMap[index], &controllerMap[i], sizeof(struct ControllerMap));
+                memset(&controllerMap[i], 0, sizeof(struct ControllerMap));
             }
             index++;
         }

@@ -11,10 +11,13 @@
 
 #include "puremvc/view.h"
 
-// The Multiton View instanceMap.
-static struct View instanceMap[INSTANCE_MAP_SIZE];
+// The Multiton viewMap.
+static struct ViewMap {
+    char key[KEY_SIZE];
+    struct View view;
+} viewMap[INSTANCE_MAP_SIZE];
 
-// mutex for instanceMap
+// mutex for viewMap
 static MutexOnce token = MUTEX_ONCE_INIT;
 static Mutex mutex;
 
@@ -226,10 +229,10 @@ struct View *puremvc_view_getInstance(const char *key, struct View(*factory)(con
     mutex_lock(&mutex);
 
     size_t i = 0;
-    for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
+    for (; i < INSTANCE_MAP_SIZE && viewMap[i].key[0] != '\0'; i++) {
+        if (strncmp(viewMap[i].key, key, KEY_SIZE) == 0) {
             mutex_unlock(&mutex);
-            return &instanceMap[i];
+            return &viewMap[i].view;
         }
     }
 
@@ -239,14 +242,15 @@ struct View *puremvc_view_getInstance(const char *key, struct View(*factory)(con
         return NULL;
     }
 
-    instanceMap[i] = factory(key);
-    mutex_init(&instanceMap[i].observerMapMutex);
-    mutex_init(&instanceMap[i].mediatorMapMutex);
+    strncpy(viewMap[i].key, key, KEY_SIZE);
+    viewMap[i].view = factory(key);
+    mutex_init(&viewMap[i].view.observerMapMutex);
+    mutex_init(&viewMap[i].view.mediatorMapMutex);
 
-    instanceMap[i].initializeView(&instanceMap[i]);
+    viewMap[i].view.initializeView(&viewMap[i].view);
 
     mutex_unlock(&mutex);
-    return &instanceMap[i];
+    return &viewMap[i].view;
 }
 
 void puremvc_view_removeView(const char *key) {
@@ -255,13 +259,13 @@ void puremvc_view_removeView(const char *key) {
     mutex_lock(&mutex);
 
     size_t index = 0;
-    for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strcmp(instanceMap[i].multitonKey, key) == 0) {
-            memset(&instanceMap[i], 0, sizeof(struct View));
+    for (size_t i = 0; i < INSTANCE_MAP_SIZE && viewMap[i].key[0] != '\0'; i++) {
+        if (strcmp(viewMap[i].key, key) == 0) {
+            memset(&viewMap[i], 0, sizeof(struct ViewMap));
         } else {
             if (index != i) {
-                memmove(&instanceMap[index], &instanceMap[i], sizeof(struct View));
-                memset(&instanceMap[i], 0, sizeof(struct View));
+                memmove(&viewMap[index], &viewMap[i], sizeof(struct ViewMap));
+                memset(&viewMap[i], 0, sizeof(struct ViewMap));
             }
             index++;
         }

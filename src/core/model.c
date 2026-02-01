@@ -12,8 +12,11 @@
 #include "puremvc/model.h"
 #include "puremvc/mutex.h"
 
-// The Multiton Model instanceMap.
-static struct Model instanceMap[INSTANCE_MAP_SIZE];
+// The Multiton modelMap.
+static struct ModelMap {
+    char key[KEY_SIZE];
+    struct Model model;
+} modelMap[INSTANCE_MAP_SIZE];
 
 // mutex for instanceMap
 static Mutex mutex;
@@ -118,10 +121,10 @@ struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(
     mutex_lock(&mutex);
 
     size_t i = 0;
-    for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
+    for (; i < INSTANCE_MAP_SIZE && modelMap[i].key[0] != '\0'; i++) {
+        if (strncmp(modelMap[i].key, key, KEY_SIZE) == 0) {
             mutex_unlock(&mutex);
-            return &instanceMap[i];
+            return &modelMap[i].model;
         }
     }
 
@@ -131,13 +134,14 @@ struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(
         return NULL;
     }
 
-    instanceMap[i] = factory(key);
-    mutex_init(&instanceMap[i].proxyMapMutex);
+    strncpy(modelMap[i].key, key, KEY_SIZE);
+    modelMap[i].model = factory(key);
+    mutex_init(&modelMap[i].model.proxyMapMutex);
 
-    instanceMap[i].initializeModel(&instanceMap[i]);
+    modelMap[i].model.initializeModel(&modelMap[i].model);
 
     mutex_unlock(&mutex);
-    return &instanceMap[i];
+    return &modelMap[i].model;
 }
 
 void puremvc_model_removeModel(const char *key) {
@@ -146,13 +150,13 @@ void puremvc_model_removeModel(const char *key) {
     mutex_lock(&mutex);
 
     size_t index = 0;
-    for (size_t i = 0; i < INSTANCE_MAP_SIZE && instanceMap[i].multitonKey[0] != '\0'; i++) {
-        if (strcmp(instanceMap[i].multitonKey, key) == 0) {
-            memset(&instanceMap[i], 0, sizeof(struct Model));
+    for (size_t i = 0; i < INSTANCE_MAP_SIZE && modelMap[i].key[0] != '\0'; i++) {
+        if (strcmp(modelMap[i].key, key) == 0) {
+            memset(&modelMap[i], 0, sizeof(struct ModelMap));
         } else {
             if (index != i) {
-                memmove(&instanceMap[index], &instanceMap[i], sizeof(struct Model));
-                memset(&instanceMap[i], 0, sizeof(struct Model));
+                memmove(&modelMap[index], &modelMap[i], sizeof(struct ModelMap));
+                memset(&modelMap[i], 0, sizeof(struct ModelMap));
             }
             index++;
         }
