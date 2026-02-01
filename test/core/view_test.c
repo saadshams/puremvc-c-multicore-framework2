@@ -16,6 +16,7 @@
 #include "view_test_mediator7.h"
 
 int main() {
+    testRegisterAndRemoveMediators();
     testGetInstance();
     testRegisterAndNotifyObserver();
     testRegisterAndRetrieveMediator();
@@ -458,6 +459,29 @@ void testRegisterAndRemoveMultipleObservers() {
 
     puremvc_view_removeView("ViewTestKey13");
     view = NULL;
+}
+
+void testRegisterAndRemoveMediators() {
+    struct View *view = puremvc_view_getInstance("ViewTestKey0", puremvc_view);
+
+    view->registerMediator(view, view_test_mediator7("mediator1", NULL));
+    view->registerMediator(view, view_test_mediator7("mediator2", NULL));
+    view->registerMediator(view, view_test_mediator7("mediator3", NULL));
+
+    view->removeMediator(view, "mediator2"); // remove from middle, leaving mediator1 & mediator3
+    struct Mediator *mediator1 = view->retrieveMediator(view, "mediator1");
+    assert(view->observerMap[0].observers[0].context == mediator1);
+    struct Mediator *mediator3 = view->retrieveMediator(view, "mediator3");
+    assert(view->observerMap[0].observers[1].context == mediator3);
+
+    view->removeMediator(view, "mediator1"); // remove first, leaving mediator3
+    mediator3 = view->retrieveMediator(view, "mediator3");
+    assert(view->observerMap[0].observers[0].context == mediator3);
+
+    view->removeMediator(view, "mediator3"); // remove remaining one
+    assert(view->observerMap[0].key[0] == '\0');
+
+    puremvc_view_removeView("ViewTestKey0");
 }
 
 void testRegisterAndRemoveMultipleMediators() {

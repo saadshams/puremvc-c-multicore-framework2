@@ -13,8 +13,8 @@ int main() {
     testGetInstance();
     testRegisterCommandAndSendNotification();
     testRegisterAndRemoveCommandAndSendNotification();
-    testRegisterAndRetrieveProxy(); //
-    testRegisterAndRemoveProxy(); //
+    testRegisterAndRetrieveProxy();
+    testRegisterAndRemoveProxy();
     testRegisterRetrieveAndRemoveMediator();
     testHasProxy();
     testHasMediator();

@@ -173,17 +173,23 @@ static struct Mediator removeMediator(struct View *self, const char *mediatorNam
             memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap));
         } else {
             if (index != i) { // shift left
-                const char **interests = self->mediatorMap[i].mediator.listNotificationInterests(&self->mediatorMap[i].mediator);
-                for (const char **cursor = interests; *cursor; cursor++) { // Remove observers to fix context before shifting mediators
-                    self->removeObserver(self, *cursor, &self->mediatorMap[i].mediator);
-                }
-                memmove(&self->mediatorMap[index], &self->mediatorMap[i], sizeof(struct MediatorMap)); // shift mediator
+                const struct Mediator *previous = &self->mediatorMap[i].mediator;
+                memmove(&self->mediatorMap[index], &self->mediatorMap[i], sizeof(struct MediatorMap)); // move to new position
+                memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap)); // clear the now-vacant slot
 
-                for (const char **cursor = interests; *cursor; cursor++) { // Re-register observers to new mediator's address
-                    const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification)) self->mediatorMap[index].mediator.handleNotification, &self->mediatorMap[index].mediator);
-                    self->registerObserver(self, *cursor, observer);
+                const char **interests = self->mediatorMap[index].mediator.listNotificationInterests(&self->mediatorMap[index].mediator);
+                for (const char **cursor = interests; *cursor; cursor++) { // update observer context
+                    for (size_t j = 0; j < OBSERVER_MAP_SIZE && self->observerMap[j].key[0] != '\0'; j++) {
+                        if (strcmp(self->observerMap[j].key, *cursor) == 0) {
+                            for (size_t k = 0; k < OBSERVER_ARRAY_SIZE && self->observerMap[j].observers[k].context != NULL; k++) {
+                                if (self->observerMap[j].observers[k].context == previous) {
+                                    self->observerMap[j].observers[k].context = &self->mediatorMap[index].mediator; // point context to mediator's new address
+                                }
+                            }
+                            break;
+                        }
+                    }
                 }
-                memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap));
             }
             index++;
         }

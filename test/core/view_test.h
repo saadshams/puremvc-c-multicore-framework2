@@ -23,6 +23,7 @@ void testMediatorReregistration();
 void testModifyObserverListDuringNotification();
 void testRemoveView();
 void testRegisterAndRemoveMultipleObservers();
+void testRegisterAndRemoveMediators();
 void testRegisterAndRemoveMultipleMediators();
 
 struct ViewTest {
