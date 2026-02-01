@@ -124,7 +124,7 @@ struct Facade puremvc_facade(const char *key) {
     return facade;
 }
 
-static void dispatchOnce() {
+static void dispatchOnce(void) {
     mutex_init(&mutex);
 }
 

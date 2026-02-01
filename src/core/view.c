@@ -209,7 +209,7 @@ struct View puremvc_view(const char *key) {
     return view;
 }
 
-static void dispatchOnce() {
+static void dispatchOnce(void) {
      mutex_init(&mutex);
 }
 

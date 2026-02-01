@@ -108,7 +108,7 @@ struct Model puremvc_model(const char *key) {
     return model;
 }
 
-static void dispatchOnce() {
+static void dispatchOnce(void) {
     mutex_init(&mutex);
 }
 

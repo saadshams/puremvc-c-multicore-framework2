@@ -113,7 +113,7 @@ struct Controller puremvc_controller(const char *key) {
     return controller;
 }
 
-static void dispatchOnce() {
+static void dispatchOnce(void) {
     mutex_init(&mutex);
 }
 
