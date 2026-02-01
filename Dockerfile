@@ -10,7 +10,7 @@ RUN git clone https://github.com/microsoft/vcpkg.git /opt/vcpkg && /opt/vcpkg/bo
 WORKDIR /app
 COPY . .
 
-# Configure + build
+# Build Debug
 RUN mkdir -p build-debug && \
     cmake -S . -B build-debug \
       -DBUILD_TESTS=ON \
@@ -18,5 +18,13 @@ RUN mkdir -p build-debug && \
       -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake && \
     cmake --build build-debug --parallel
 
-# Run tests
-CMD ["ctest", "--test-dir", "build-debug", "-C", "Debug", "--output-on-failure"]
+# Build Release
+RUN mkdir -p build-release && \
+    cmake -S . -B build-release \
+      -DBUILD_TESTS=ON \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake && \
+    cmake --build build-release --parallel
+
+# Run tests for both
+CMD ["bash", "-c", "ctest --test-dir build-debug -C Debug --output-on-failure && ctest --test-dir build-release -C Release --output-on-failure"]
