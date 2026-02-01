@@ -22,8 +22,8 @@ static struct FacadeMap {
 } facadeMap[INSTANCE_MAP_SIZE];
 
 // mutex for facadeMap
-static Mutex mutex;
-static MutexOnce token = MUTEX_ONCE_INIT;
+static Mutex facadeMapMutex;
+static MutexOnce facadeMutexOnce = MUTEX_ONCE_INIT;
 
 static void initializeFacade(struct Facade *self) {
     self->initializeModel(self);
@@ -128,25 +128,25 @@ struct Facade puremvc_facade(const char *key) {
 }
 
 static void dispatchOnce(void) {
-    mutex_init(&mutex);
+    mutex_init(&facadeMapMutex);
 }
 
 struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factory)(const char *)) {
     if (key == NULL || factory == NULL) return NULL;
-    mutex_once(&token, dispatchOnce);
-    mutex_lock(&mutex);
+    mutex_once(&facadeMutexOnce, dispatchOnce);
+    mutex_lock(&facadeMapMutex);
 
     size_t i = 0;
     for (; facadeMap[i].key[0] != '\0'; i++) {
         if (strncmp(facadeMap[i].key, key, KEY_SIZE) == 0) {
-            mutex_unlock(&mutex);
+            mutex_unlock(&facadeMapMutex);
             return &facadeMap[i].facade;
         }
     }
 
     if (i >= INSTANCE_MAP_SIZE) {
         fprintf(stderr, "[PureMVC::Facade::getInstance] Warning: facadeMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
-        mutex_unlock(&mutex);
+        mutex_unlock(&facadeMapMutex);
         return NULL;
     }
 
@@ -155,13 +155,13 @@ struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factor
 
     facadeMap[i].facade.initializeFacade(&facadeMap[i].facade);
 
-    mutex_unlock(&mutex);
+    mutex_unlock(&facadeMapMutex);
     return &facadeMap[i].facade;
 }
 
 bool puremvc_facade_hasCore(const char *key) {
     if (key == NULL) return false;
-    mutex_lock_shared(&mutex);
+    mutex_lock_shared(&facadeMapMutex);
     bool exists = false;
     for (size_t i = 0; i < INSTANCE_MAP_SIZE && facadeMap[i].key[0] != '\0'; i++) {
         if (strcmp(facadeMap[i].key, key) == 0) {
@@ -169,14 +169,14 @@ bool puremvc_facade_hasCore(const char *key) {
             break;
         }
     }
-    mutex_unlock(&mutex);
+    mutex_unlock(&facadeMapMutex);
     return exists;
 }
 
 void puremvc_facade_removeFacade(const char *key) {
     if (key == NULL) return;
-    mutex_once(&token, dispatchOnce);
-    mutex_lock(&mutex);
+    mutex_once(&facadeMutexOnce, dispatchOnce);
+    mutex_lock(&facadeMapMutex);
 
     puremvc_model_removeModel(key);
     puremvc_view_removeView(key);
@@ -194,5 +194,5 @@ void puremvc_facade_removeFacade(const char *key) {
             index++;
         }
     }
-    mutex_unlock(&mutex);
+    mutex_unlock(&facadeMapMutex);
 }

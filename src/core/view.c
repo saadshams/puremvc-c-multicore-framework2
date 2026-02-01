@@ -18,8 +18,8 @@ static struct ViewMap {
 } viewMap[INSTANCE_MAP_SIZE];
 
 // mutex for viewMap
-static MutexOnce token = MUTEX_ONCE_INIT;
-static Mutex mutex;
+static Mutex viewMapMutex;
+static MutexOnce viewMutexOnce = MUTEX_ONCE_INIT;
 
 static void initializeView(struct View *self) {
     (void)self;
@@ -220,25 +220,25 @@ struct View puremvc_view(const char *key) {
 }
 
 static void dispatchOnce(void) {
-     mutex_init(&mutex);
+     mutex_init(&viewMapMutex);
 }
 
 struct View *puremvc_view_getInstance(const char *key, struct View(*factory)(const char *key)) {
     if (key == NULL || factory == NULL) return NULL;
-    mutex_once(&token, dispatchOnce);
-    mutex_lock(&mutex);
+    mutex_once(&viewMutexOnce, dispatchOnce);
+    mutex_lock(&viewMapMutex);
 
     size_t i = 0;
     for (; i < INSTANCE_MAP_SIZE && viewMap[i].key[0] != '\0'; i++) {
         if (strncmp(viewMap[i].key, key, KEY_SIZE) == 0) {
-            mutex_unlock(&mutex);
+            mutex_unlock(&viewMapMutex);
             return &viewMap[i].view;
         }
     }
 
     if (i >= INSTANCE_MAP_SIZE) {
         fprintf(stderr, "[PureMVC::View::getInstance] Warning: InstanceMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
-        mutex_unlock(&mutex);
+        mutex_unlock(&viewMapMutex);
         return NULL;
     }
 
@@ -249,14 +249,14 @@ struct View *puremvc_view_getInstance(const char *key, struct View(*factory)(con
 
     viewMap[i].view.initializeView(&viewMap[i].view);
 
-    mutex_unlock(&mutex);
+    mutex_unlock(&viewMapMutex);
     return &viewMap[i].view;
 }
 
 void puremvc_view_removeView(const char *key) {
     if (key == NULL) return;
-    mutex_once(&token, dispatchOnce);
-    mutex_lock(&mutex);
+    mutex_once(&viewMutexOnce, dispatchOnce);
+    mutex_lock(&viewMapMutex);
 
     size_t index = 0;
     for (size_t i = 0; i < INSTANCE_MAP_SIZE && viewMap[i].key[0] != '\0'; i++) {
@@ -270,5 +270,5 @@ void puremvc_view_removeView(const char *key) {
             index++;
         }
     }
-    mutex_unlock(&mutex);
+    mutex_unlock(&viewMapMutex);
 }

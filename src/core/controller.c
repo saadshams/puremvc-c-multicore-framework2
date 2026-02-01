@@ -19,8 +19,8 @@ static struct ControllerMap {
 } controllerMap[INSTANCE_MAP_SIZE];
 
 // mutex for controllerMap
-static MutexOnce token = MUTEX_ONCE_INIT;
-static Mutex mutex;
+static Mutex controllerMapMutex;
+static MutexOnce controllerMutexOnce = MUTEX_ONCE_INIT;
 
 static void initializeController(struct Controller *self) {
     if (self->view != NULL) return;
@@ -117,25 +117,25 @@ struct Controller puremvc_controller(const char *key) {
 }
 
 static void dispatchOnce(void) {
-    mutex_init(&mutex);
+    mutex_init(&controllerMapMutex);
 }
 
 struct Controller *puremvc_controller_getInstance(const char *key, struct Controller(*factory)(const char *key)) {
     if (key == NULL || factory == NULL) return NULL;
-    mutex_once(&token, dispatchOnce);
-    mutex_lock(&mutex);
+    mutex_once(&controllerMutexOnce, dispatchOnce);
+    mutex_lock(&controllerMapMutex);
 
     size_t i = 0;
     for (; i < INSTANCE_MAP_SIZE && controllerMap[i].key[0] != '\0'; i++) {
         if (strncmp(controllerMap[i].key, key, KEY_SIZE) == 0) {
-            mutex_unlock(&mutex);
+            mutex_unlock(&controllerMapMutex);
             return &controllerMap[i].controller;
         }
     }
 
     if (i >= INSTANCE_MAP_SIZE) {
         fprintf(stderr, "[PureMVC::Controller::getInstance] Warning: InstanceMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
-        mutex_unlock(&mutex);
+        mutex_unlock(&controllerMapMutex);
         return NULL;
     }
 
@@ -145,14 +145,14 @@ struct Controller *puremvc_controller_getInstance(const char *key, struct Contro
 
     controllerMap[i].controller.initializeController(&controllerMap[i].controller);
 
-    mutex_unlock(&mutex);
+    mutex_unlock(&controllerMapMutex);
     return &controllerMap[i].controller;
 }
 
 void puremvc_controller_removeController(const char *key) {
     if (key == NULL) return;
-    mutex_once(&token, dispatchOnce);
-    mutex_lock(&mutex);
+    mutex_once(&controllerMutexOnce, dispatchOnce);
+    mutex_lock(&controllerMapMutex);
 
     size_t index = 0;
     for (size_t i = 0; i < INSTANCE_MAP_SIZE && controllerMap[i].key[0] != '\0'; i++) {
@@ -166,5 +166,5 @@ void puremvc_controller_removeController(const char *key) {
             index++;
         }
     }
-    mutex_unlock(&mutex);
+    mutex_unlock(&controllerMapMutex);
 }

@@ -18,8 +18,8 @@ static struct ModelMap {
     struct Model model;
 } modelMap[INSTANCE_MAP_SIZE];
 
-// mutex for instanceMap
-static Mutex mutex;
+// mutex for modelMap
+static Mutex modelMapMutex;
 static MutexOnce token = MUTEX_ONCE_INIT;
 
 static void initializeModel(struct Model *self) {
@@ -112,25 +112,25 @@ struct Model puremvc_model(const char *key) {
 }
 
 static void dispatchOnce(void) {
-    mutex_init(&mutex);
+    mutex_init(&modelMapMutex);
 }
 
 struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(const char *key)) {
     if (key == NULL || factory == NULL) return NULL;
     mutex_once(&token, dispatchOnce);
-    mutex_lock(&mutex);
+    mutex_lock(&modelMapMutex);
 
     size_t i = 0;
     for (; i < INSTANCE_MAP_SIZE && modelMap[i].key[0] != '\0'; i++) {
         if (strncmp(modelMap[i].key, key, KEY_SIZE) == 0) {
-            mutex_unlock(&mutex);
+            mutex_unlock(&modelMapMutex);
             return &modelMap[i].model;
         }
     }
 
     if (i >= INSTANCE_MAP_SIZE) {
         fprintf(stderr, "[PureMVC::Model::getInstance] Warning: InstanceMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
-        mutex_unlock(&mutex);
+        mutex_unlock(&modelMapMutex);
         return NULL;
     }
 
@@ -140,14 +140,14 @@ struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(
 
     modelMap[i].model.initializeModel(&modelMap[i].model);
 
-    mutex_unlock(&mutex);
+    mutex_unlock(&modelMapMutex);
     return &modelMap[i].model;
 }
 
 void puremvc_model_removeModel(const char *key) {
     if (key == NULL) return;
     mutex_once(&token, dispatchOnce);
-    mutex_lock(&mutex);
+    mutex_lock(&modelMapMutex);
 
     size_t index = 0;
     for (size_t i = 0; i < INSTANCE_MAP_SIZE && modelMap[i].key[0] != '\0'; i++) {
@@ -161,5 +161,5 @@ void puremvc_model_removeModel(const char *key) {
             index++;
         }
     }
-    mutex_unlock(&mutex);
+    mutex_unlock(&modelMapMutex);
 }
