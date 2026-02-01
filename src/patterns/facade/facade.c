@@ -153,7 +153,10 @@ struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factor
         return NULL;
     }
 
-    snprintf(facadeMap[i].key, KEY_SIZE, "%s", key);
+    int len = snprintf(facadeMap[i].key, KEY_SIZE, "%s", key);
+    if (len >= KEY_SIZE)
+        printf("[PureMVC::Facade::getInstance] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+
     facadeMap[i].facade = factory(key);
 
     facadeMap[i].facade.initializeFacade(&facadeMap[i].facade);

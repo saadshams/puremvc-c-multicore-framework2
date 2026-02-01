@@ -28,12 +28,14 @@ static const char *getType(const struct Notification *self) {
 
 static void setType(struct Notification *self, const char *type) {
     int len = snprintf(self->type, NAME_SIZE, "%s", type);
-    if (len >= NAME_SIZE) printf("[PureMVC::Notification::setType] Warning: Type Truncated: '%s' (Original length: %d, Buffer size: %d)\n", type, len, NAME_SIZE);
+    if (len >= NAME_SIZE)
+        printf("[PureMVC::Notification::setType] Warning: Type Truncated: '%s' (Original length: %d, Buffer size: %d)\n", type, len, NAME_SIZE);
 }
 
 void toString(const struct Notification *self, char *buffer, size_t buffer_size) {
     int len = snprintf(buffer, buffer_size, "%s : %s [body=%p]", self->name, self->type, self->body);
-    if (len >= NAME_SIZE) printf("[PureMVC::Notification::toString] Warning: String Truncated: '%lu' (Original length: %d, Buffer size: %d)\n", buffer_size, len, NAME_SIZE);
+    if (len >= buffer_size)
+        printf("[PureMVC::Notification::toString] Warning: Buffer Truncated: '%lu' (Original length: %d, Buffer size: %d)\n", buffer_size, len, NAME_SIZE);
 }
 
 struct Notification puremvc_notification(const char *name, void *body, const char *type) {
