@@ -29,13 +29,22 @@ static void registerObserver(struct View *self, const char *notificationName, co
         if (strcmp(self->observerMap[i].key, notificationName) == 0) {
             size_t count = 0;
             while (count < OBSERVER_ARRAY_SIZE && self->observerMap[i].observers[count].context != NULL) count++;
-            if (count >= OBSERVER_ARRAY_SIZE) return mutex_unlock(&self->observerMapMutex), (void)0; // observer array is full
+            if (count >= OBSERVER_ARRAY_SIZE) {
+                fprintf(stderr, "[PureMVC::View::registerObserver] Warning: Observers are at capacity for notification '%s' (max %d observers); skipping registration.\n", notificationName, OBSERVER_ARRAY_SIZE);
+                mutex_unlock(&self->observerMapMutex);
+                return;
+            }
             self->observerMap[i].observers[count] = observer;
-            return mutex_unlock(&self->observerMapMutex), (void)0;
+            mutex_unlock(&self->observerMapMutex);
+            return;
         }
     }
 
-    if (i >= OBSERVER_MAP_SIZE) return mutex_unlock(&self->observerMapMutex), (void)0; // observerMap is full
+    if (i >= OBSERVER_MAP_SIZE) {
+        fprintf(stderr, "[PureMVC::View::registerObserver] Warning: ObserverMap is at capacity for notification '%s' (max %d observers); skipping registration.\n", notificationName, OBSERVER_MAP_SIZE);
+        mutex_unlock(&self->observerMapMutex);
+        return;
+    }
 
     snprintf(self->observerMap[i].key, NAME_SIZE, "%s", notificationName);
     self->observerMap[i].observers[0] = observer;
@@ -62,7 +71,6 @@ static void notifyObservers(struct View *self, const struct Notification notific
 void removeObserver(struct View *self, const char *notificationName, const void *notifyContext) {
     mutex_lock(&self->observerMapMutex);
 
-    // One-pass removal (Filter pattern)
     for (size_t i = 0; i < OBSERVER_MAP_SIZE && self->observerMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->observerMap[i].key, notificationName) == 0) {
             size_t index = 0;
@@ -86,7 +94,8 @@ void removeObserver(struct View *self, const char *notificationName, const void 
                     memset(&self->observerMap[k + 1], 0, sizeof(struct ObserverMap));
                 }
             }
-            return mutex_unlock(&self->observerMapMutex), (void)0;
+            mutex_unlock(&self->observerMapMutex);
+            return;
         }
     }
     mutex_unlock(&self->observerMapMutex);
@@ -96,11 +105,18 @@ static void registerMediator(struct View *self, struct Mediator mediator) {
     mutex_lock(&self->mediatorMapMutex);
     size_t i = 0;
     for (; i < MEDIATOR_MAP_SIZE && self->mediatorMap[i].key[0] != '\0'; i++) {
-        if (strcmp(self->mediatorMap[i].key, mediator.getName(&mediator)) == 0)
-            return mutex_unlock(&self->mediatorMapMutex), (void)0;
+        if (strcmp(self->mediatorMap[i].key, mediator.getName(&mediator)) == 0) {
+            fprintf(stderr, "[PureMVC::View::registerMediator] Warning: Mediator '%s' exists; skipping registration.\n", mediator.getName(&mediator));
+            mutex_unlock(&self->mediatorMapMutex);
+            return;
+        }
     }
 
-    if (i >= MEDIATOR_MAP_SIZE) return mutex_unlock(&self->mediatorMapMutex), (void)0; // mediatorMap is full
+    if (i >= MEDIATOR_MAP_SIZE) {
+        fprintf(stderr, "[PureMVC::View::registerMediator] Warning: MediatorMap is at capacity for mediator '%s' (max %d mediators); skipping registration.\n", mediator.name, OBSERVER_MAP_SIZE);
+        mutex_unlock(&self->mediatorMapMutex);
+        return;
+    }
 
     mediator.notifier.initializeNotifier(&mediator.notifier, self->multitonKey);
 
@@ -120,10 +136,12 @@ static struct Mediator *retrieveMediator(struct View *self, const char *mediator
     mutex_lock_shared(&self->mediatorMapMutex);
     for (size_t i = 0; i < MEDIATOR_MAP_SIZE && self->mediatorMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->mediatorMap[i].key, mediatorName) == 0) {
-            return mutex_unlock(&self->mediatorMapMutex), &self->mediatorMap[i].mediator;
+            mutex_unlock(&self->mediatorMapMutex);
+            return &self->mediatorMap[i].mediator;
         }
     }
-    return mutex_unlock(&self->mediatorMapMutex), NULL;
+    mutex_unlock(&self->mediatorMapMutex);
+    return NULL;
 }
 
 static bool hasMediator(struct View *self, const char *mediatorName) {
@@ -135,16 +153,16 @@ static bool hasMediator(struct View *self, const char *mediatorName) {
             break;
         }
     }
-    return mutex_unlock(&self->mediatorMapMutex), exists;
+    mutex_unlock(&self->mediatorMapMutex);
+    return exists;
 }
 
 static struct Mediator removeMediator(struct View *self, const char *mediatorName) {
     mutex_lock(&self->mediatorMapMutex);
     struct Mediator mediator = {0};
 
-    size_t index = 0; // One-pass removal (Filter pattern)
-    size_t i = 0;
-    for (; i < MEDIATOR_MAP_SIZE && self->mediatorMap[i].key[0] != '\0'; i++) {
+    size_t index = 0;
+    for (size_t i = 0; i < MEDIATOR_MAP_SIZE && self->mediatorMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->mediatorMap[i].key, mediatorName) == 0) {
             mediator = self->mediatorMap[i].mediator;
             const char **interests = self->mediatorMap[i].mediator.listNotificationInterests(&self->mediatorMap[i].mediator);
@@ -156,22 +174,23 @@ static struct Mediator removeMediator(struct View *self, const char *mediatorNam
         } else {
             if (index != i) { // shift left
                 const char **interests = self->mediatorMap[i].mediator.listNotificationInterests(&self->mediatorMap[i].mediator);
-                for (const char **cursor = interests; *cursor; cursor++) { // Remove observers to fix context before moving mediator
+                for (const char **cursor = interests; *cursor; cursor++) { // Remove observers to fix context before shifting mediators
                     self->removeObserver(self, *cursor, &self->mediatorMap[i].mediator);
                 }
                 memmove(&self->mediatorMap[index], &self->mediatorMap[i], sizeof(struct MediatorMap)); // shift mediator
 
-                for (const char **cursor = interests; *cursor; cursor++) { // Re-register observers to new mediator address
+                for (const char **cursor = interests; *cursor; cursor++) { // Re-register observers to new mediator's address
                     const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification)) self->mediatorMap[index].mediator.handleNotification, &self->mediatorMap[index].mediator);
                     self->registerObserver(self, *cursor, observer);
                 }
-                memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap)); // clear slot
+                memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap));
             }
             index++;
         }
     }
 
-    return mutex_unlock(&self->mediatorMapMutex), mediator;
+    mutex_unlock(&self->mediatorMapMutex);
+    return mediator;
 }
 
 struct View puremvc_view(const char *key) {
@@ -202,15 +221,21 @@ struct View *puremvc_view_getInstance(const char *key, struct View(*factory)(con
     size_t i = 0;
     for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
         if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
-            return mutex_unlock(&mutex), &instanceMap[i];
+            mutex_unlock(&mutex);
+            return &instanceMap[i];
         }
     }
 
-    if (i >= INSTANCE_MAP_SIZE) return mutex_unlock(&mutex), NULL;
+    if (i >= INSTANCE_MAP_SIZE) {
+        fprintf(stderr, "[PureMVC::View::getInstance] Warning: InstanceMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
+        mutex_unlock(&mutex);
+        return NULL;
+    }
 
     instanceMap[i] = factory(key);
 
-    return mutex_unlock(&mutex), &instanceMap[i];
+    mutex_unlock(&mutex);
+    return &instanceMap[i];
 }
 
 void puremvc_view_removeView(const char *key) {

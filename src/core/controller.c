@@ -43,11 +43,16 @@ static void registerCommand(struct Controller *self, const char *notificationNam
     for (; i < COMMAND_MAP_SIZE && self->commandMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->commandMap[i].key, notificationName) == 0) {
             self->commandMap[i].factory = factory;
-            return mutex_unlock(&self->commandMapMutex), (void)0;
+            mutex_unlock(&self->commandMapMutex);
+            return;
         }
     }
 
-    if (i >= COMMAND_MAP_SIZE) return mutex_unlock(&self->commandMapMutex), (void)0; // commandMap is full
+    if (i >= COMMAND_MAP_SIZE) {
+        fprintf(stderr, "[PureMVC::Controller::registerCommand] Warning: CommandMap is at capacity for notification '%s' (max %d commands); skipping registration.\n", notificationName, COMMAND_MAP_SIZE);
+        mutex_unlock(&self->commandMapMutex);
+        return;
+    }
 
     const struct Observer observer = puremvc_observer((void (*)(const void *, struct Notification)) executeCommand, self);
     self->view->registerObserver(self->view, notificationName, observer);
@@ -66,7 +71,8 @@ static bool hasCommand(struct Controller *self, const char *notificationName) {
             break;
         }
     }
-    return mutex_unlock(&self->commandMapMutex), exists;
+    mutex_unlock(&self->commandMapMutex);
+    return exists;
 }
 
 static void removeCommand(struct Controller *self, const char *notificationName) {
@@ -118,15 +124,21 @@ struct Controller *puremvc_controller_getInstance(const char *key, struct Contro
     size_t i = 0;
     for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
         if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
-            return mutex_unlock(&mutex), &instanceMap[i];
+            mutex_unlock(&mutex);
+            return &instanceMap[i];
         }
     }
 
-    if (i >= INSTANCE_MAP_SIZE) return mutex_unlock(&mutex), NULL;
+    if (i >= INSTANCE_MAP_SIZE) {
+        fprintf(stderr, "[PureMVC::Controller::getInstance] Warning: InstanceMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
+        mutex_unlock(&mutex);
+        return NULL;
+    }
 
     instanceMap[i] = factory(key);
 
-    return mutex_unlock(&mutex), &instanceMap[i];
+    mutex_unlock(&mutex);
+    return &instanceMap[i];
 }
 
 void puremvc_controller_removeController(const char *key) {

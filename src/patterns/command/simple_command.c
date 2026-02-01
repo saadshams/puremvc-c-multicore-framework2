@@ -9,7 +9,8 @@
 #include "puremvc/simple_command.h"
 
 static void execute(const struct SimpleCommand *self, struct Notification notification) {
-    (void)self; (void)notification;
+    (void)self;
+    (void)notification;
 }
 
 struct SimpleCommand puremvc_simple_command() {

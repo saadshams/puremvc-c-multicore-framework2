@@ -136,15 +136,21 @@ struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factor
     size_t i = 0;
     for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
         if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
-            return mutex_unlock(&mutex), &instanceMap[i];
+            mutex_unlock(&mutex);
+            return &instanceMap[i];
         }
     }
 
-    if (i >= INSTANCE_MAP_SIZE) return mutex_unlock(&mutex), NULL;
+    if (i >= INSTANCE_MAP_SIZE) {
+        fprintf(stderr, "[PureMVC::Facade::getInstance] Warning: InstanceMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
+        mutex_unlock(&mutex);
+        return NULL;
+    }
 
     instanceMap[i] = factory(key);
 
-    return mutex_unlock(&mutex), &instanceMap[i];
+    mutex_unlock(&mutex);
+    return &instanceMap[i];
 }
 
 bool puremvc_facade_hasCore(const char *key) {
@@ -157,7 +163,8 @@ bool puremvc_facade_hasCore(const char *key) {
             break;
         }
     }
-    return mutex_unlock(&mutex), exists;
+    mutex_unlock(&mutex);
+    return exists;
 }
 
 void puremvc_facade_removeFacade(const char *key) {

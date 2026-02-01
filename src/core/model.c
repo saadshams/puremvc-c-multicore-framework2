@@ -34,7 +34,11 @@ static void registerProxy(struct Model *self, struct Proxy proxy) {
         }
     }
 
-    if (i >= PROXY_MAP_SIZE) return mutex_unlock(&self->proxyMapMutex), (void)0; // proxyMap is full
+    if (i >= PROXY_MAP_SIZE) {
+        fprintf(stderr, "[PureMVC::Model::registerProxy] Warning: ProxyMap is at capacity for proxy '%s' (max %d proxies); skipping registration.\n", proxy.name, PROXY_MAP_SIZE);
+        mutex_unlock(&self->proxyMapMutex);
+        return;
+    }
 
     proxy.notifier.initializeNotifier(&proxy.notifier, self->multitonKey);
 
@@ -48,10 +52,12 @@ static struct Proxy *retrieveProxy(struct Model *self, const char *proxyName) {
     mutex_lock_shared(&self->proxyMapMutex);
     for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
-            return mutex_unlock(&self->proxyMapMutex), &self->proxyMap[i].proxy;
+            mutex_unlock(&self->proxyMapMutex);
+            return &self->proxyMap[i].proxy;
         }
     }
-    return mutex_unlock(&self->proxyMapMutex), NULL;
+    mutex_unlock(&self->proxyMapMutex);
+    return NULL;
 }
 
 static bool hasProxy(struct Model *self, const char *proxyName) {
@@ -63,7 +69,8 @@ static bool hasProxy(struct Model *self, const char *proxyName) {
             break;
         }
     }
-    return mutex_unlock(&self->proxyMapMutex), exists;
+    mutex_unlock(&self->proxyMapMutex);
+    return exists;
 }
 
 static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
@@ -84,7 +91,8 @@ static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
         }
     }
 
-    return mutex_unlock(&self->proxyMapMutex), proxy;
+    mutex_unlock(&self->proxyMapMutex);
+    return proxy;
 }
 
 struct Model puremvc_model(const char *key) {
@@ -112,15 +120,21 @@ struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(
     size_t i = 0;
     for (; instanceMap[i].multitonKey[0] != '\0'; i++) {
         if (strncmp(instanceMap[i].multitonKey, key, KEY_SIZE) == 0) {
-            return mutex_unlock(&mutex), &instanceMap[i];
+            mutex_unlock(&mutex);
+            return &instanceMap[i];
         }
     }
 
-    if (i >= INSTANCE_MAP_SIZE) return mutex_unlock(&mutex), NULL;
+    if (i >= INSTANCE_MAP_SIZE) {
+        fprintf(stderr, "[PureMVC::Model::getInstance] Warning: InstanceMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
+        mutex_unlock(&mutex);
+        return NULL;
+    }
 
     instanceMap[i] = factory(key);
 
-    return mutex_unlock(&mutex), &instanceMap[i];
+    mutex_unlock(&mutex);
+    return &instanceMap[i];
 }
 
 void puremvc_model_removeModel(const char *key) {
