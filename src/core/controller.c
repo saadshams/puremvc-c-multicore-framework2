@@ -63,7 +63,7 @@ static void registerCommand(struct Controller *self, const char *notificationNam
 
     int len = snprintf(self->commandMap[i].key, KEY_SIZE, "%s", notificationName);
     if (len >= KEY_SIZE)
-        printf("[PureMVC::Controller::registerCommand] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", notificationName, len, KEY_SIZE);
+        fprintf(stderr, "[PureMVC::Controller::registerCommand] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", notificationName, len, KEY_SIZE);
 
     self->commandMap[i].factory = factory;
     mutex_unlock(&self->commandMapMutex);
@@ -117,7 +117,7 @@ struct Controller puremvc_controller(const char *key) {
 
     int len = snprintf(controller.multitonKey, KEY_SIZE, "%s", key);
     if (len >= KEY_SIZE)
-        printf("[PureMVC::Controller] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+        fprintf(stderr, "[PureMVC::Controller] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
 
     return controller;
 }
@@ -147,7 +147,7 @@ struct Controller *puremvc_controller_getInstance(const char *key, struct Contro
 
     int len = snprintf(controllerMap[i].key, KEY_SIZE, "%s", key);
     if (len >= KEY_SIZE)
-        printf("[PureMVC::Controller::getInstance] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+        fprintf(stderr, "[PureMVC::Controller::getInstance] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
 
     controllerMap[i].controller = factory(key);
     mutex_init(&controllerMap[i].controller.commandMapMutex);

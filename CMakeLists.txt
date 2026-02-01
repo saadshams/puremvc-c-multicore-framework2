@@ -30,11 +30,44 @@ target_include_directories(puremvc
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>)
 
-# Warnings (cross-platform)
+# Compiler warnings (cross-platform, strict)
 target_compile_options(puremvc
         PRIVATE
             $<$<C_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Werror>
             $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
+
+## 5️⃣ Install rules
+include(GNUInstallDirs)
+
+install(TARGETS puremvc
+        EXPORT puremvc-targets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT PureMVCDevelopment)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+## 6️⃣ Export targets for find_package()
+install(EXPORT puremvc-targets
+        FILE puremvc-targets.cmake
+        NAMESPACE puremvc::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/puremvc)
+
+## 7️⃣ Package configuration files
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/puremvc-config.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/puremvc-config.cmake
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/puremvc)
+
+## 8️⃣ Package version file
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/puremvc-config-version.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion)
+
+install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/puremvc-config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/puremvc-config-version.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/puremvc)
 
 # 9️⃣ Tests
 option(BUILD_TESTS "Build Tests" ON)

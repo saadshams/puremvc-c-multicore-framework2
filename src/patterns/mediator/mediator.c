@@ -55,7 +55,7 @@ struct Mediator puremvc_mediator(const char *name, void *component) {
 
     int len = snprintf(mediator.name, NAME_SIZE, "%s", name ? name : MEDIATOR_NAME);
     if (len >= NAME_SIZE)
-        printf("[PureMVC::Mediator] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : MEDIATOR_NAME, len, NAME_SIZE);
+        fprintf(stderr, "[PureMVC::Mediator] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : MEDIATOR_NAME, len, NAME_SIZE);
 
     return mediator;
 }

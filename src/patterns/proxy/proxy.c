@@ -43,7 +43,7 @@ struct Proxy puremvc_proxy(const char *name, void *data) {
 
     int len = snprintf(proxy.name, NAME_SIZE, "%s", name ? name : PROXY_NAME);
     if (len >= NAME_SIZE)
-        printf("[PureMVC::Proxy] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : PROXY_NAME, len, NAME_SIZE);
+        fprintf(stderr, "[PureMVC::Proxy] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : PROXY_NAME, len, NAME_SIZE);
 
     return proxy;
 }

@@ -125,7 +125,7 @@ struct Facade puremvc_facade(const char *key) {
 
     int len = snprintf(facade.multitonKey, KEY_SIZE, "%s", key);
     if (len >= KEY_SIZE)
-        printf("[PureMVC::Facade] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+        fprintf(stderr, "[PureMVC::Facade] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
 
     return facade;
 }
@@ -155,7 +155,7 @@ struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factor
 
     int len = snprintf(facadeMap[i].key, KEY_SIZE, "%s", key);
     if (len >= KEY_SIZE)
-        printf("[PureMVC::Facade::getInstance] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+        fprintf(stderr, "[PureMVC::Facade::getInstance] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
 
     facadeMap[i].facade = factory(key);
 
