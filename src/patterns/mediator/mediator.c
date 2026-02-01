@@ -28,15 +28,15 @@ static const char **listNotificationInterests(const struct Mediator *self) {
 }
 
 static void handleNotification(const struct Mediator *self, struct Notification notification) {
-
+    (void)self; (void)notification;
 }
 
 static void onRegister(struct Mediator *self) {
-
+    (void)self;
 }
 
 static void onRemove(struct Mediator *self) {
-
+    (void)self;
 }
 
 struct Mediator puremvc_mediator(const char *name, void *component) {
