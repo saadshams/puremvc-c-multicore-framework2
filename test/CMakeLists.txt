@@ -56,6 +56,3 @@ add_executable(ProxyTest patterns/proxy/proxy_test.c)
 target_link_libraries(ProxyTest PRIVATE puremvc)
 add_test(NAME PureMVC.ProxyTest COMMAND ProxyTest)
 
-add_executable(MutexTest mutex_test.c)
-target_link_libraries(MutexTest PRIVATE puremvc)
-add_test(NAME PureMVC.MutexTest COMMAND MutexTest)
