@@ -150,7 +150,7 @@ struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factor
         return NULL;
     }
 
-    strncpy(facadeMap[i].key, key, KEY_SIZE);
+    snprintf(facadeMap[i].key, KEY_SIZE, "%s", key);
     facadeMap[i].facade = factory(key);
 
     facadeMap[i].facade.initializeFacade(&facadeMap[i].facade);

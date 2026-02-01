@@ -139,7 +139,7 @@ struct Controller *puremvc_controller_getInstance(const char *key, struct Contro
         return NULL;
     }
 
-    strncpy(controllerMap[i].key, key, KEY_SIZE);
+    snprintf(controllerMap[i].key, KEY_SIZE, "%s", key);
     controllerMap[i].controller = factory(key);
     mutex_init(&controllerMap[i].controller.commandMapMutex);
 

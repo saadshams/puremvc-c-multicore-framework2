@@ -242,7 +242,7 @@ struct View *puremvc_view_getInstance(const char *key, struct View(*factory)(con
         return NULL;
     }
 
-    strncpy(viewMap[i].key, key, KEY_SIZE);
+    snprintf(viewMap[i].key, KEY_SIZE, "%s", key);
     viewMap[i].view = factory(key);
     mutex_init(&viewMap[i].view.observerMapMutex);
     mutex_init(&viewMap[i].view.mediatorMapMutex);

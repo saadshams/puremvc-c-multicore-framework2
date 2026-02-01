@@ -134,7 +134,7 @@ struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(
         return NULL;
     }
 
-    strncpy(modelMap[i].key, key, KEY_SIZE);
+    snprintf(modelMap[i].key, KEY_SIZE, "%s", key);
     modelMap[i].model = factory(key);
     mutex_init(&modelMap[i].model.proxyMapMutex);
 
