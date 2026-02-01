@@ -22,10 +22,10 @@ typedef pthread_once_t MutexOnce;
 
 #endif
 
-void mutex_init(Mutex *m);
-void mutex_lock(Mutex *m);
-void mutex_lock_shared(Mutex *m);
-void mutex_unlock(Mutex *m);
-void mutex_destroy(Mutex *m);
+void mutex_init(Mutex *mutex);
+void mutex_lock(Mutex *mutex);
+void mutex_lock_shared(Mutex *mutex);
+void mutex_unlock(Mutex *mutex);
+void mutex_destroy(Mutex *mutex);
 
-void mutex_once(MutexOnce *once, void (*fn)(void));
+void mutex_once(MutexOnce *once, void (*callback)(void));
