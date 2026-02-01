@@ -10,8 +10,6 @@
 
 #include "puremvc/notification.h"
 
-static int unused_variable;
-
 static const char *getName(const struct Notification *self) {
     return self->name;
 }
