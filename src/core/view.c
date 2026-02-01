@@ -206,6 +206,8 @@ struct View puremvc_view(const char *key) {
     };
 
     snprintf(view.multitonKey, KEY_SIZE, "%s", key);
+    mutex_init(&view.observerMapMutex);
+    mutex_init(&view.mediatorMapMutex);
     return view;
 }
 

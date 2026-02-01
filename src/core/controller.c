@@ -109,6 +109,7 @@ struct Controller puremvc_controller(const char *key) {
     };
 
     snprintf(controller.multitonKey, KEY_SIZE, "%s", key);
+    mutex_init(&controller.commandMapMutex);
     return controller;
 }
 

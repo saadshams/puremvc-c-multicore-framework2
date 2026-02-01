@@ -105,6 +105,7 @@ struct Model puremvc_model(const char *key) {
     };
 
     snprintf(model.multitonKey, KEY_SIZE, "%s", key);
+    mutex_init(&model.proxyMapMutex);
     return model;
 }
 

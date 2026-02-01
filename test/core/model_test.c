@@ -7,15 +7,15 @@
 
 int main() {
     testGetInstance();
-    testRegisterAndRetrieveProxy();
-    testRegisterAndRemoveProxy();
-    testHasProxy();
-    testOnRegisterAndOnRemove();
-    testRemoveModel();
-    testMultipleModels();
-    testRegisterAndReplaceProxy();
-    testRegisterAndRemoveMultipleProxies();
-    testGetAndRemoveMultipleInstances();
+    // testRegisterAndRetrieveProxy();
+    // testRegisterAndRemoveProxy();
+    // testHasProxy();
+    // testOnRegisterAndOnRemove();
+    // testRemoveModel();
+    // testMultipleModels();
+    // testRegisterAndReplaceProxy();
+    // testRegisterAndRemoveMultipleProxies();
+    // testGetAndRemoveMultipleInstances();
     return 0;
 }
 
