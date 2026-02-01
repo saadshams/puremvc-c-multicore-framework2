@@ -1,0 +1,6 @@
+{
+  "name": "puremvc",
+  "version": "1.0.0",
+  "maintainers": ["Saad Shams <saad.shams@puremvc.org>"],
+  "description": "PureMVC MultiCore Framework for C"
+}

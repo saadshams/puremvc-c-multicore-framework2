@@ -19,7 +19,7 @@ static MutexOnce token = MUTEX_ONCE_INIT;
 static Mutex mutex;
 
 static void initializeView(struct View *self) {
-
+    (void)self;
 }
 
 static void registerObserver(struct View *self, const char *notificationName, const struct Observer observer) {
