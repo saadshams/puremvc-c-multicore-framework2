@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "model_test.h"
 #include "puremvc/model.h"
