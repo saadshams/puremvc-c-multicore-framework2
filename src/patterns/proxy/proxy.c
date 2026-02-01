@@ -23,11 +23,11 @@ static void setData(struct Proxy *self, void *data) {
 }
 
 static void onRegister(struct Proxy *self) {
-
+    (void)self;
 }
 
 static void onRemove(struct Proxy *self) {
-
+    (void)self;
 }
 
 struct Proxy puremvc_proxy(const char *name, void *data) {
