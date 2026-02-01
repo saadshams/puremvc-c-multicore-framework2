@@ -23,6 +23,7 @@ static void *getComponent(const struct Mediator *self) {
 }
 
 static const char **listNotificationInterests(const struct Mediator *self) {
+    (void)self;
     static const char *interests[] = { NULL };
     return interests;
 }

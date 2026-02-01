@@ -20,7 +20,7 @@ static MutexOnce token = MUTEX_ONCE_INIT;
 static Mutex mutex;
 
 static void initializeModel(struct Model *self) {
-    (void) self;
+    (void)self;
 }
 
 static void registerProxy(struct Model *self, struct Proxy proxy) {
