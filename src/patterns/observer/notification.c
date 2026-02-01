@@ -34,7 +34,7 @@ static void setType(struct Notification *self, const char *type) {
 
 void toString(const struct Notification *self, char *buffer, size_t buffer_size) {
     int len = snprintf(buffer, buffer_size, "%s : %s [body=%p]", self->name, self->type, self->body);
-    if (len >= buffer_size)
+    if ((size_t) len >= buffer_size)
         fprintf(stderr, "[PureMVC::Notification::toString] Warning: Buffer Truncated: '%lu' (Original length: %d, Buffer size: %d)\n", buffer_size, len, NAME_SIZE);
 }
 
