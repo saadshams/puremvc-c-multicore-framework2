@@ -174,6 +174,7 @@ static struct Mediator removeMediator(struct View *self, const char *mediatorNam
         } else {
             if (index != i) { // shift left
                 const struct Mediator *previous = &self->mediatorMap[i].mediator;
+
                 memmove(&self->mediatorMap[index], &self->mediatorMap[i], sizeof(struct MediatorMap)); // move to new position
                 memset(&self->mediatorMap[i], 0, sizeof(struct MediatorMap)); // clear the now-vacant slot
 
