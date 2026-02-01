@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "puremvc/controller.h"
+#include "puremvc/mutex.h"
 
 // The Multiton Controller instanceMap.
 static struct Controller instanceMap[INSTANCE_MAP_SIZE];
@@ -109,7 +110,6 @@ struct Controller puremvc_controller(const char *key) {
     };
 
     snprintf(controller.multitonKey, KEY_SIZE, "%s", key);
-    mutex_init(&controller.commandMapMutex);
     return controller;
 }
 
@@ -137,6 +137,9 @@ struct Controller *puremvc_controller_getInstance(const char *key, struct Contro
     }
 
     instanceMap[i] = factory(key);
+    mutex_init(&instanceMap[i].commandMapMutex);
+
+    instanceMap[i].initializeController(&instanceMap[i]);
 
     mutex_unlock(&mutex);
     return &instanceMap[i];

@@ -206,8 +206,6 @@ struct View puremvc_view(const char *key) {
     };
 
     snprintf(view.multitonKey, KEY_SIZE, "%s", key);
-    mutex_init(&view.observerMapMutex);
-    mutex_init(&view.mediatorMapMutex);
     return view;
 }
 
@@ -235,6 +233,10 @@ struct View *puremvc_view_getInstance(const char *key, struct View(*factory)(con
     }
 
     instanceMap[i] = factory(key);
+    mutex_init(&instanceMap[i].observerMapMutex);
+    mutex_init(&instanceMap[i].mediatorMapMutex);
+
+    instanceMap[i].initializeView(&instanceMap[i]);
 
     mutex_unlock(&mutex);
     return &instanceMap[i];

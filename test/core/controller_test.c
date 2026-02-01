@@ -25,7 +25,6 @@ int main() {
 void testGetInstance() {
     // Test Factory Method
     struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey1", puremvc_controller);
-    controller->initializeController(controller);
 
     // test assertions
     assert(controller != NULL);
@@ -37,7 +36,6 @@ void testGetInstance() {
 void testRegisterAndExecuteCommand() {
     // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
     struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey2", puremvc_controller);
-    controller->initializeController(controller);
     controller->registerCommand(controller, "ControllerTest1", test_controller_command_new);
 
     // Create a 'ControllerTest' note
@@ -60,7 +58,6 @@ void testRegisterAndExecuteCommand() {
 void testRegisterAndRemoveCommand() {
     // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
     struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey3", puremvc_controller);
-    controller->initializeController(controller);
     controller->registerCommand(controller, "ControllerRemoveTest", test_controller_command_new);
 
     // Create a 'ControllerTest' note
@@ -95,7 +92,6 @@ void testRegisterAndRemoveCommand() {
 void testHasCommand() {
     // register the ControllerTestCommand to handle 'hasCommandTest' notes
     struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey4", puremvc_controller);
-    controller->initializeController(controller);
 
     // test that hasCommand returns true for hasCommandTest notifications
     controller->registerCommand(controller, "hasCommandTest", test_controller_command_new);
@@ -114,7 +110,6 @@ void testHasCommand() {
 void testReregisterAndExecuteCommand() {
     // Fetch the controller, register the ControllerTestCommand2 to handle 'ControllerTest2' notes
     struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey5", puremvc_controller);
-    controller->initializeController(controller);
     controller->registerCommand(controller, "ControllerTest2", test_controller_command2_new);
 
     // Remove the Command from the Controller
@@ -149,7 +144,6 @@ void testReregisterAndExecuteCommand() {
 
 void testRegisterAndUpdateCommand() {
     struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey6", puremvc_controller);
-    controller->initializeController(controller);
 
     // first registration
     controller->registerCommand(controller, "ControllerTest2", test_controller_command_new);
@@ -172,7 +166,6 @@ void testRegisterAndUpdateCommand() {
 void testRemoveController() {
     // Get a Multiton Controller instance
     struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey7", puremvc_controller);
-    controller->initializeController(controller);
 
     // remove the controller
     puremvc_controller_removeController("ControllerTestKey7");
@@ -186,7 +179,6 @@ void testRemoveController() {
 
 void testRegisterAndRemoveMultipleCommands() {
     struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey8", puremvc_controller);
-    controller->initializeController(controller);
 
     controller->executeCommand(controller, puremvc_notification("command0", NULL, NULL)); // crash test
     controller->executeCommand(controller, puremvc_notification("command0", NULL, NULL));

@@ -149,6 +149,8 @@ struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factor
 
     instanceMap[i] = factory(key);
 
+    instanceMap[i].initializeFacade(&instanceMap[i]);
+
     mutex_unlock(&mutex);
     return &instanceMap[i];
 }

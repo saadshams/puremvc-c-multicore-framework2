@@ -16,8 +16,8 @@
 static struct Model instanceMap[INSTANCE_MAP_SIZE];
 
 // mutex for instanceMap
-static MutexOnce token = MUTEX_ONCE_INIT;
 static Mutex mutex;
+static MutexOnce token = MUTEX_ONCE_INIT;
 
 static void initializeModel(struct Model *self) {
     (void)self;
@@ -105,7 +105,6 @@ struct Model puremvc_model(const char *key) {
     };
 
     snprintf(model.multitonKey, KEY_SIZE, "%s", key);
-    mutex_init(&model.proxyMapMutex);
     return model;
 }
 
@@ -133,6 +132,9 @@ struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(
     }
 
     instanceMap[i] = factory(key);
+    mutex_init(&instanceMap[i].proxyMapMutex);
+
+    instanceMap[i].initializeModel(&instanceMap[i]);
 
     mutex_unlock(&mutex);
     return &instanceMap[i];

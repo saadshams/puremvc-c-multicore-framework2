@@ -16,6 +16,12 @@ add_library(puremvc STATIC
         src/patterns/observer/observer.c
         src/patterns/proxy/proxy.c)
 
+if(WIN32)
+    target_sources(puremvc PRIVATE src/platform/win/mutex.c)
+else()
+    target_sources(puremvc PRIVATE src/platform/posix/mutex.c)
+endif()
+
 add_library(puremvc::puremvc ALIAS puremvc)
 
 # 4️⃣ Target include paths

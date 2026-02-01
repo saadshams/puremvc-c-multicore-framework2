@@ -7,15 +7,15 @@
 
 int main() {
     testGetInstance();
-    // testRegisterAndRetrieveProxy();
-    // testRegisterAndRemoveProxy();
-    // testHasProxy();
-    // testOnRegisterAndOnRemove();
-    // testRemoveModel();
-    // testMultipleModels();
-    // testRegisterAndReplaceProxy();
-    // testRegisterAndRemoveMultipleProxies();
-    // testGetAndRemoveMultipleInstances();
+    testRegisterAndRetrieveProxy();
+    testRegisterAndRemoveProxy();
+    testHasProxy();
+    testOnRegisterAndOnRemove();
+    testRemoveModel();
+    testMultipleModels();
+    testRegisterAndReplaceProxy();
+    testRegisterAndRemoveMultipleProxies();
+    testGetAndRemoveMultipleInstances();
     return 0;
 }
 
@@ -23,7 +23,6 @@ void testGetInstance() {
     // Test Factory Method
     struct Model *model = puremvc_model_getInstance("ModelTestKey1", puremvc_model);
     assert(model != NULL);
-    model->initializeModel(model);
 
     // test assertions
     assert(model == puremvc_model_getInstance("ModelTestKey1", puremvc_model));
@@ -34,7 +33,6 @@ void testGetInstance() {
 void testRegisterAndRetrieveProxy() {
     // register a new and retrieve it.
     struct Model *model = puremvc_model_getInstance("ModelTestKey2", puremvc_model);
-    model->initializeModel(model);
 
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
     model->registerProxy(model, puremvc_proxy("colors", colors));
@@ -59,7 +57,6 @@ void testRegisterAndRetrieveProxy() {
 void testRegisterAndRemoveProxy() {
     // register a new, remove it, then try to retrieve it
     struct Model *model = puremvc_model_getInstance("ModelTestKey4", puremvc_model);
-    model->initializeModel(model);
 
     int *sizes = (int []) {1, 2, 3, 0};
     struct Proxy p = puremvc_proxy("sizes", sizes);
@@ -81,7 +78,6 @@ void testRegisterAndRemoveProxy() {
 void testHasProxy() {
     // register a new
     struct Model *model = puremvc_model_getInstance("ModelTestKey5", puremvc_model);
-    model->initializeModel(model);
 
     const char **aces = (const char *[]) {"clubs", "spades", "hearts", "diamonds", NULL};
     struct Proxy p = puremvc_proxy("aces", aces);
@@ -106,7 +102,6 @@ void testHasProxy() {
 void testOnRegisterAndOnRemove() {
     // Get a Multiton Model instance
     struct Model *model = puremvc_model_getInstance("ModelTestKey6", puremvc_model);
-    model->initializeModel(model);
 
     // Create and register the test proxy
     model->registerProxy(model, model_test_proxy("ModelTestProxy", NULL));
@@ -129,7 +124,6 @@ void testOnRegisterAndOnRemove() {
 void testRemoveModel() {
     // Get a Multiton Model instance
     struct Model *model = puremvc_model_getInstance("ModelTestKey6", puremvc_model);
-    model->initializeModel(model);
 
     // remove the model
     puremvc_model_removeModel("ModelTestKey6");
@@ -144,9 +138,7 @@ void testRemoveModel() {
 void testMultipleModels() {
     // Get a Multiton Model instance
     struct Model *model1 = puremvc_model_getInstance("ModelTestKey7", puremvc_model);
-    model1->initializeModel(model1);
     struct Model *model2 = puremvc_model_getInstance("ModelTestKey8", puremvc_model);
-    model2->initializeModel(model2);
 
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
     const char **aces = (const char *[]) { "clubs", "spades", "hearts", "diamonds", NULL};
@@ -173,7 +165,6 @@ void testMultipleModels() {
 
 void testRegisterAndReplaceProxy() {
     struct Model *model = puremvc_model_getInstance("ModelTestKey8", puremvc_model);
-    model->initializeModel(model);
 
     int *sizes = (int []) {1, 0};
     struct Proxy p1 = puremvc_proxy("sizes", sizes);
@@ -203,7 +194,6 @@ void testRegisterAndReplaceProxy() {
 
 void testRegisterAndRemoveMultipleProxies() {
     struct Model *model = puremvc_model_getInstance("ModelTestKey9", puremvc_model);
-    model->initializeModel(model);
 
     // Register five proxies and verify that each is correctly associated to their dictionaries
     model->registerProxy(model, puremvc_proxy("proxy1", NULL));

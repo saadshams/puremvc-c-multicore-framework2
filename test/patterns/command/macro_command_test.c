@@ -31,7 +31,6 @@ void testMacroCommandExecute() {
 
 void testRegisterAndExecuteCommand() {
     struct Controller *controller = puremvc_controller_getInstance("ControllerTestKey1", puremvc_controller);
-    controller->initializeController(controller);
 
     controller->registerCommand(controller, "MacroCommandTest", macro_command_test_command);
 
