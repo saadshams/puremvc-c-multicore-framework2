@@ -8,9 +8,8 @@
  */
 #pragma once
 
-#include "i_mediator.h"
-#include "mediator.h"
 #include "i_notification.h"
+#include "mediator.h"
 #include "observer.h"
 
 #include <stdbool.h>
@@ -23,7 +22,6 @@
  * for delivering notifications to interested parties.
  */
 struct IView {
-
     void (*initializeView)(struct IView *self);
 
     void (*registerObserver)(const struct IView *self, const char *notificationName, struct Observer observer);

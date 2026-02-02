@@ -8,10 +8,9 @@
  */
 #pragma once
 
-#include <stdbool.h>
-
-#include "i_proxy.h"
 #include "proxy.h"
+
+#include <stdbool.h>
 
 /**
  * @struct IModel

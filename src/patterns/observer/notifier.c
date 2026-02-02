@@ -6,11 +6,11 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include <stdio.h>
-#include <string.h>
-
 #include "puremvc/notifier.h"
 #include "puremvc/facade.h"
+
+#include <stdio.h>
+#include <string.h>
 
 static struct IFacade *getFacade(const struct INotifier *self) {
     struct IFacade *facade = puremvc_facade_getInstance(self->getMultitonKey(self), puremvc_facade);

@@ -6,8 +6,6 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include <stdio.h>
-
 #include "puremvc/observer.h"
 
 static void *getContext(const struct IObserver *self) {

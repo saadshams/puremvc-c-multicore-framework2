@@ -6,10 +6,10 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include <stddef.h>
-
-#include "puremvc/macro_command.h"
 #include "puremvc/constants.h"
+#include "puremvc/macro_command.h"
+
+#include <stddef.h>
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
     const struct SimpleCommand *this = (struct SimpleCommand *) self;
@@ -20,7 +20,6 @@ static void execute(const struct ICommand *self, struct INotification *notificat
         struct SimpleCommand (*factory)() = subCommands[i];
         struct SimpleCommand command = factory();
         command.notifier.base.initializeNotifier(&command.notifier.base, this->notifier.base.getMultitonKey(&this->notifier.base));
-        // command.notifier.initializeNotifier(&command.notifier, self->notifier.getMultitonKey(&self->notifier));
         command.base.execute(&command.base, notification);
     }
 }

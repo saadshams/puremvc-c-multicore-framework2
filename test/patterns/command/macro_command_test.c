@@ -3,6 +3,7 @@
 #include "puremvc/macro_command.h"
 #include "puremvc/controller.h"
 #include "puremvc/notification.h"
+#include "puremvc/view.h"
 
 #include "macro_command_test.h"
 #include "macro_command_test_command.h"

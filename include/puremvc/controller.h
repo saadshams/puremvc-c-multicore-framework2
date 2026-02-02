@@ -12,7 +12,7 @@
 #include "constants.h"
 #include "i_controller.h"
 #include "simple_command.h"
-#include "view.h"
+#include "i_view.h"
 
 struct Controller {
     struct IController base;

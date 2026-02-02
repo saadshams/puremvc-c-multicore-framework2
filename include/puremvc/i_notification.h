@@ -15,7 +15,6 @@
  * @brief Represents a notification in the PureMVC framework.
  */
 struct INotification {
-
     const char *(*getName)(const struct INotification *self);
 
     const void *(*getBody)(const struct INotification *self);

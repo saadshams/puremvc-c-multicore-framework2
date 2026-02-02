@@ -11,9 +11,7 @@
 #include <stdbool.h>
 
 #include "simple_command.h"
-#include "i_mediator.h"
 #include "mediator.h"
-#include "i_proxy.h"
 #include "proxy.h"
 #include "i_notification.h"
 
@@ -26,7 +24,6 @@
  * and notification dispatching for a given multiton key.
  */
 struct IFacade {
-
     void (*initializeFacade)(struct IFacade *self);
     
     void (*initializeController)(struct IFacade *self);

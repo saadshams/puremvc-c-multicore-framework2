@@ -1,5 +1,5 @@
 /**
- * @file IController.h
+ * @file i_controller.h
  * @ingroup PureMVC
  *
  * @author Saad Shams <saad.shams@puremvc.org>
@@ -9,8 +9,8 @@
 
 #include <stdbool.h>
 
-#include "i_command.h"
 #include "simple_command.h"
+#include "i_notification.h"
 
 /**
  * @struct IController
@@ -21,7 +21,6 @@
  * is responsible for executing commands in response to notifications.
  */
 struct IController {
-
     void (*initializeController)(const struct IController *self);
 
     void (*registerCommand)(struct IController *self, const char *notificationName, struct SimpleCommand(*factory)());

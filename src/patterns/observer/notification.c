@@ -6,9 +6,9 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include <stdio.h>
-
 #include "puremvc/notification.h"
+
+#include <stdio.h>
 
 static const char *getName(const struct INotification *self) {
     const struct Notification *this = (struct Notification *) self;

@@ -1,5 +1,5 @@
 /**
- * @file IObserver.h
+ * @file i_observer.h
  * @ingroup PureMVC
  * @brief IObserver Interface
  *
@@ -8,9 +8,9 @@
  */
 #pragma once
 
-#include <stdbool.h>
-
 #include "i_notification.h"
+
+#include <stdbool.h>
 
 struct IObserver {
 

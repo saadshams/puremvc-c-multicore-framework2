@@ -6,11 +6,11 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
+#include "puremvc/mutex.h"
+#include "puremvc/model.h"
+
 #include <stdio.h>
 #include <string.h>
-
-#include "puremvc/model.h"
-#include "puremvc/mutex.h"
 
 // The Multiton modelMap.
 static struct ModelMap {

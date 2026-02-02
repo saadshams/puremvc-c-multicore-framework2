@@ -6,11 +6,12 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
+#include "puremvc/mutex.h"
+#include "puremvc/controller.h"
+#include "puremvc/view.h"
+
 #include <stdio.h>
 #include <string.h>
-
-#include "puremvc/controller.h"
-#include "puremvc/mutex.h"
 
 // The Multiton controllerMap.
 static struct IControllerMap {

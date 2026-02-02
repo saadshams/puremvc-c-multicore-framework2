@@ -6,10 +6,10 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
+#include "puremvc/view.h"
+
 #include <stdio.h>
 #include <string.h>
-
-#include "puremvc/view.h"
 
 // The Multiton viewMap.
 static struct ViewMap {
