@@ -8,10 +8,10 @@
  */
 #pragma once
 
-// struct IFacade; // Forward-declare IFacade to avoid including it and break reference cycle
+struct IFacade; // Forward-declare IFacade to avoid including it and break reference cycle
 
 struct INotifier {
-    // struct IFacade *(*getFacade)(const struct INotifier *self);
+    struct IFacade *(*getFacade)(const struct INotifier *self);
 
     const char *(*getMultitonKey)(const struct INotifier *self);
 

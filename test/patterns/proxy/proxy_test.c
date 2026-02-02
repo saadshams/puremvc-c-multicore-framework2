@@ -18,8 +18,8 @@ int main(void) {
  */
 void testConstructor() {
     // struct Proxy myProxy = {0};
-    struct Proxy p = puremvc_proxy(NULL, NULL);
-    struct IProxy *proxy = &p.base;
+    const struct Proxy p = puremvc_proxy(NULL, NULL);
+    const struct IProxy *proxy = &p.base;
 
     // test assertions
     assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
@@ -61,8 +61,8 @@ void testDataAccessors() {
 void testDataReassign() {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
 
-    const struct Proxy proxy = puremvc_proxy("colors", colors);
-    const struct IProxy *p = &proxy.base;
+    struct Proxy proxy = puremvc_proxy("colors", colors);
+    struct IProxy *p = &proxy.base;
 
     // Re-assign the same data to ensure the proxy does not free it
     p->setData(p, colors);

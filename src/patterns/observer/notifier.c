@@ -10,13 +10,13 @@
 #include <string.h>
 
 #include "puremvc/notifier.h"
-// #include "puremvc/facade.h"
+#include "puremvc/facade.h"
 
-// static struct Facade *getFacade(const struct Notifier *self) {
-//     struct Facade *facade = puremvc_facade_getInstance(self->key, puremvc_facade);
-//     facade->initializeFacade(facade);
-//     return facade;
-// }
+static struct IFacade *getFacade(const struct INotifier *self) {
+    struct IFacade *facade = puremvc_facade_getInstance(self->getMultitonKey(self), puremvc_facade);
+    facade->initializeFacade(facade);
+    return facade;
+}
 
 const char *getMultitonKey(const struct INotifier *self) {
     const struct Notifier *this = (struct Notifier *) self;
@@ -31,16 +31,14 @@ static void initializeNotifier(struct INotifier *self, const char *key) {
 }
 
 static void sendNotification(const struct INotifier *self, const char *notificationName, void *body, const char *type) {
-    (void)self; (void)notificationName; (void)body; (void)type;
-    // struct Notifier *this = (struct Notifier *) self;
-    // const struct Facade *facade = self->getFacade(self);
-    // facade->sendNotification(facade, notificationName, body, type);
+    const struct IFacade *facade = self->getFacade(self);
+    facade->sendNotification(facade, notificationName, body, type);
 }
 
 struct Notifier puremvc_notifier() {
     return (struct Notifier) {
         .base = (struct INotifier) {
-            // .getFacade = getFacade,
+            .getFacade = getFacade,
             .getMultitonKey = getMultitonKey,
             .initializeNotifier = initializeNotifier,
             .sendNotification = sendNotification
