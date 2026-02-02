@@ -1,8 +1,36 @@
 services:
-  puremvc:
-    image: puremvc
-    build: .
-#    volumes: # sync locally
-#      - ./:/app
-    stdin_open: true
-    tty: true
+  ubuntu-debug-gcc:
+    build:
+      context: .
+      args:
+        CMAKE_BUILD_TYPE: Debug
+        CC: gcc
+        CXX: g++
+    image: puremvc:ubuntu-debug-gcc
+
+  ubuntu-release-gcc:
+    build:
+      context: .
+      args:
+        CMAKE_BUILD_TYPE: Release
+        CC: gcc
+        CXX: g++
+    image: puremvc:ubuntu-release-gcc
+
+  ubuntu-debug-clang:
+    build:
+      context: .
+      args:
+        CMAKE_BUILD_TYPE: Debug
+        CC: clang
+        CXX: clang++
+    image: puremvc:ubuntu-debug-clang
+
+  ubuntu-release-clang:
+    build:
+      context: .
+      args:
+        CMAKE_BUILD_TYPE: Release
+        CC: clang
+        CXX: clang++
+    image: puremvc:ubuntu-release-clang
