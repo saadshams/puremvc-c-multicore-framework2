@@ -6,9 +6,9 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include <stdio.h>
-
 #include "puremvc/proxy.h"
+
+#include <stdio.h>
 
 static const char *getName(const struct IProxy *self) {
     const struct Proxy *this = (struct Proxy *) self;
@@ -33,30 +33,31 @@ static void onRemove(struct IProxy *self) {
     (void)self;
 }
 
-struct IProxy *puremvc_proxy(struct Proxy *proxy, const char *name, void *data) {
-    proxy->base = (struct IProxy) {
-        .getName = getName,
-        .getData = getData,
-        .setData = setData,
-        .onRegister = onRegister,
-        .onRemove = onRemove,
+struct Proxy puremvc_proxy(const char *name, void *data) {
+    struct Proxy proxy = {
+        .base = (struct IProxy) {
+            .getName = getName,
+            .getData = getData,
+            .setData = setData,
+            .onRegister = onRegister,
+            .onRemove = onRemove,
+        },
+        .data = data,
+        .notifier = puremvc_notifier(),
     };
-    proxy->data = data;
-
-    // struct Proxy proxy = {
-    //     // .notifier = puremvc_notifier(),
-    // };
-
-    int len = snprintf(proxy->name, NAME_SIZE, "%s", name ? name : PROXY_NAME);
+    
+    int len = snprintf(proxy.name, NAME_SIZE, "%s", name ? name : PROXY_NAME);
     if (len >= NAME_SIZE)
         fprintf(stderr, "[PureMVC::Proxy] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : PROXY_NAME, len, NAME_SIZE);
 
-    return &proxy->base;
+    return proxy;
 }
 
 // void puremvc_proxy_teardown(struct Proxy *self) {
 //     if (!self) return;
 //
+//      Call notifier specific cleanup if necessary
+//      puremvc_notifier_teardown(&proxy->notifier);
 //     // 1. Trigger the lifecycle hook via the interface
 //     if (self->base.onRemove) {
 //         self->base.onRemove(&self->base);

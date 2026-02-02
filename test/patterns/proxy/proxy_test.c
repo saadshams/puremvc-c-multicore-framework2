@@ -6,10 +6,10 @@
 #include "puremvc/proxy.h"
 
 int main(void) {
-    // testConstructor();
-    // testNameAccessors();
-    // testDataAccessors();
-    // testDataReassign();
+    testConstructor();
+    testNameAccessors();
+    testDataAccessors();
+    testDataReassign();
     return 0;
 }
 
@@ -18,25 +18,28 @@ int main(void) {
  */
 void testConstructor() {
     // struct Proxy myProxy = {0};
-    const struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, NULL, NULL);
+    const struct Proxy proxy = puremvc_proxy(NULL, NULL);
+    const struct IProxy *p = &proxy.base;
 
     // test assertions
-    assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
+    assert(strcmp(p->getName(p), PROXY_NAME) == 0);
 
-    assert(proxy->getData(proxy) == NULL);
+    assert(p->getData(p) == NULL);
 }
 
 /**
  * Tests getting the name using Proxy class accessor method. Setting can only be done in constructor.
  */
 void testNameAccessors() {
-    const struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, "TestProxy", NULL);
+    const struct Proxy proxy = puremvc_proxy("TestProxy", NULL);
+    const struct IProxy *p = &proxy.base;
 
     // test assertions
-    assert(strcmp(proxy->getName(proxy), "TestProxy") == 0);
+    assert(strcmp(p->getName(p), "TestProxy") == 0);
 
-    struct IProxy *proxy2 = puremvc_proxy(&(struct Proxy){0}, NULL, NULL);
-    assert(strcmp(proxy2->getName(proxy2), PROXY_NAME) == 0);
+    struct Proxy proxy2 = puremvc_proxy(NULL, NULL);
+    const struct IProxy *p2 = &proxy2.base;
+    assert(strcmp(p2->getName(p2), PROXY_NAME) == 0);
 }
 
 /**
@@ -44,9 +47,10 @@ void testNameAccessors() {
  */
 void testDataAccessors() {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
-    const struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, "colors", colors);
+    const struct Proxy proxy = puremvc_proxy("colors", colors);
+    const struct IProxy *p = &proxy.base;
 
-    const char **data = proxy->getData(proxy);
+    const char **data = p->getData(p);
 
     // test assertions
     assert(strcmp(*data, "red") == 0);
@@ -58,12 +62,13 @@ void testDataAccessors() {
 void testDataReassign() {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
 
-    struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, "colors", colors);
+    struct Proxy proxy = puremvc_proxy("colors", colors);
+    const struct IProxy *p = &proxy.base;
 
     // Re-assign the same data to ensure the proxy does not free it
-    proxy->setData(proxy, colors);
+    p->setData(p, colors);
 
-    const char **data = proxy->getData(proxy);
+    const char **data = p->getData(p);
 
     assert(strcmp(*data, "red") == 0);
     assert(strcmp(*(data + 1), "green") == 0);

@@ -9,17 +9,17 @@
 #include "model_test_proxy.h"
 
 int main() {
-    // testGetInstance();
-    // testRegisterAndRetrieveProxy();
-    // testRegisterAndRemoveProxy();
-    // testHasProxy();
-    // testOnRegisterAndOnRemove();
-    // testRemoveModel();
-    // testMultipleModels();
-    // testRegisterAndReplaceProxy();
-    // testRegisterAndRemoveMultipleProxies();
-    // testGetAndRemoveMultipleInstances();
-    // testCapacityWarning();
+    testGetInstance();
+    testRegisterAndRetrieveProxy();
+    testRegisterAndRemoveProxy();
+    testHasProxy();
+    testOnRegisterAndOnRemove();
+    testRemoveModel();
+    testMultipleModels();
+    testRegisterAndReplaceProxy();
+    testRegisterAndRemoveMultipleProxies();
+    testGetAndRemoveMultipleInstances();
+    testCapacityWarning();
     return 0;
 }
 
@@ -41,7 +41,7 @@ void testRegisterAndRetrieveProxy() {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
     model->registerProxy(model, puremvc_proxy("colors", colors));
 
-    const struct Proxy *proxy = model->retrieveProxy(model, "colors");
+    const struct IProxy *proxy = model->retrieveProxy(model, "colors");
     assert(proxy != NULL);
     const char **data = proxy->getData(proxy);
 
@@ -51,7 +51,7 @@ void testRegisterAndRetrieveProxy() {
     assert(strcmp(*(data + 2), "blue") == 0);
 
     const struct Proxy removedProxy = model->removeProxy(model, "colors");
-    assert(strcmp(removedProxy.getName(&removedProxy), "colors") == 0);
+    assert(strcmp(removedProxy.base.getName(&removedProxy.base), "colors") == 0);
 
     assert(model->retrieveProxy(model, "colors") == NULL);
     puremvc_model_removeModel("ModelTestKey2");
@@ -60,28 +60,28 @@ void testRegisterAndRetrieveProxy() {
 
 void testRegisterAndRemoveProxy() {
     // register a new, remove it, then try to retrieve it
-    struct Model *model = puremvc_model_getInstance("ModelTestKey4", puremvc_model);
+    struct Model *model = puremvc_model_getInstance("ModelTestKey3", puremvc_model);
 
     int *sizes = (int []) {1, 2, 3, 0};
     struct Proxy p = puremvc_proxy("sizes", sizes);
     model->registerProxy(model, p);
 
     // remove the new
-    struct Proxy removedProxy = model->removeProxy(model, "sizes");
+    const struct Proxy removedProxy = model->removeProxy(model, "sizes");
 
     // assert that we removed the appropriate new
-    assert(strcmp(removedProxy.getName(&removedProxy), "sizes") == 0);
+    assert(strcmp(removedProxy.name, "sizes") == 0);
 
     // ensure that the new is no longer retrievable from the model
     assert(model->retrieveProxy(model, "sizes") == NULL);
 
-    puremvc_model_removeModel("ModelTestKey4");
+    puremvc_model_removeModel("ModelTestKey3");
     model = NULL;
 }
 
 void testHasProxy() {
     // register a new
-    struct Model *model = puremvc_model_getInstance("ModelTestKey5", puremvc_model);
+    struct Model *model = puremvc_model_getInstance("ModelTestKey4", puremvc_model);
 
     const char **aces = (const char *[]) {"clubs", "spades", "hearts", "diamonds", NULL};
     struct Proxy p = puremvc_proxy("aces", aces);
@@ -93,35 +93,35 @@ void testHasProxy() {
 
     // remove the new
     const struct Proxy proxy = model->removeProxy(model, "aces");
-    assert(strcmp(proxy.getName(&proxy), "aces") == 0);
+    assert(strcmp(proxy.name, "aces") == 0);
 
     // assert that the model.hasProxy method returns false
     // for that new name
     assert(model->hasProxy(model, "aces") == false);
 
-    puremvc_model_removeModel("ModelTestKey5");
+    puremvc_model_removeModel("ModelTestKey4");
     model = NULL;
 }
 
 void testOnRegisterAndOnRemove() {
     // Get a Multiton Model instance
-    struct Model *model = puremvc_model_getInstance("ModelTestKey6", puremvc_model);
+    struct Model *model = puremvc_model_getInstance("ModelTestKey5", puremvc_model);
 
     // Create and register the test proxy
     model->registerProxy(model, model_test_proxy("ModelTestProxy", NULL));
 
     // assert that onRegister was called, and the new responded by setting its data accordingly
-    const struct Proxy *proxy = model->retrieveProxy(model, "ModelTestProxy");
+    const struct IProxy *proxy = model->retrieveProxy(model, "ModelTestProxy");
     assert(strcmp(proxy->getData(proxy), ON_REGISTER_CALLED) == 0);
 
     // Remove the proxy
     const struct Proxy removedProxy = model->removeProxy(model, "ModelTestProxy");
-    assert(strcmp(removedProxy.getName(&removedProxy), "ModelTestProxy") == 0);
+    assert(strcmp(removedProxy.name, "ModelTestProxy") == 0);
 
     // assert that onRemove was called, and the new responded by setting its data accordingly
-    assert(strcmp(removedProxy.getData(&removedProxy), ON_REMOVE_CALLED) == 0);
+    assert(strcmp(removedProxy.data, ON_REMOVE_CALLED) == 0);
 
-    puremvc_model_removeModel("ModelTestKey6");
+    puremvc_model_removeModel("ModelTestKey5");
     model = NULL;
 }
 
@@ -159,9 +159,9 @@ void testMultipleModels() {
     assert(model2->hasProxy(model2, "aces"));
 
     struct Proxy proxy = model1->removeProxy(model1, "colors");
-    assert(strcmp(proxy.getName(&proxy), "colors") == 0);
+    assert(strcmp(proxy.name, "colors") == 0);
     struct Proxy removedProxy = model2->removeProxy(model2, "aces");
-    assert(strcmp(removedProxy.getName(&removedProxy), "aces") == 0);
+    assert(strcmp(removedProxy.name, "aces") == 0);
 
     puremvc_model_removeModel("ModelTestKey7");
     puremvc_model_removeModel("ModelTestKey8");
@@ -178,7 +178,7 @@ void testRegisterAndReplaceProxy() {
     struct Proxy p2 = puremvc_proxy("sizes", colors);
     model->registerProxy(model, p2);
 
-    const struct Proxy *proxy = model->retrieveProxy(model, "sizes");
+    const struct IProxy *proxy = model->retrieveProxy(model, "sizes");
 
     assert(proxy != NULL);
     const char **data = proxy->getData(proxy);
@@ -189,7 +189,7 @@ void testRegisterAndReplaceProxy() {
     assert(strcmp(*(data + 2), "blue") == 0);
 
     const struct Proxy removedProxy = model->removeProxy(model, "sizes");
-    assert(strcmp(removedProxy.getName(&removedProxy), "sizes") == 0);
+    assert(strcmp(removedProxy.name, "sizes") == 0);
 
     assert(model->retrieveProxy(model, "sizes") == NULL);
     puremvc_model_removeModel("ModelTestKey9");

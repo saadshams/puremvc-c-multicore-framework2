@@ -4,9 +4,9 @@
 #target_link_libraries(ControllerTest PRIVATE puremvc)
 #add_test(NAME PureMVC.ControllerTest COMMAND ControllerTest)
 #
-#add_executable(ModelTest core/model_test.c core/model_test_proxy.c)
-#target_link_libraries(ModelTest PRIVATE puremvc)
-#add_test(NAME PureMVC.ModelTest COMMAND ModelTest)
+add_executable(ModelTest core/model_test.c core/model_test_proxy.c)
+target_link_libraries(ModelTest PRIVATE puremvc)
+add_test(NAME PureMVC.ModelTest COMMAND ModelTest)
 #
 #add_executable(ViewTest core/view_test.c
 #        core/view_test_mediator.c core/view_test_mediator2.c
@@ -44,9 +44,9 @@
 #target_link_libraries(NotificationTest PRIVATE puremvc)
 #add_test(NAME PureMVC.NotificationTest COMMAND NotificationTest)
 #
-#add_executable(NotifierTest patterns/observer/notifier_test.c)
-#target_link_libraries(NotifierTest PRIVATE puremvc)
-#add_test(NAME PureMVC.NotifierTest COMMAND NotifierTest)
+add_executable(NotifierTest patterns/observer/notifier_test.c)
+target_link_libraries(NotifierTest PRIVATE puremvc)
+add_test(NAME PureMVC.NotifierTest COMMAND NotifierTest)
 #
 #add_executable(ObserverTest patterns/observer/observer_test.c)
 #target_link_libraries(ObserverTest PRIVATE puremvc)

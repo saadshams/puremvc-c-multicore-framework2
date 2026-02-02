@@ -8,19 +8,22 @@
 #pragma once
 
 #include "constants.h"
+#include "i_notifier.h"
 
-struct Facade; // forward declaration
+// struct Facade; // forward declaration
 
 struct Notifier {
+    struct INotifier base;
+
     char key[NAME_SIZE];
     
-    struct Facade *(*getFacade)(const struct Notifier *self);
-    
-    const char *(*getMultitonKey)(const struct Notifier *self);
-    
-    void (*initializeNotifier)(struct Notifier *self, const char *key);
-    
-    void (*sendNotification)(const struct Notifier *self, const char *notificationName, void *body, const char *type);
+    // struct Facade *(*getFacade)(const struct Notifier *self);
+    //
+    // const char *(*getMultitonKey)(const struct Notifier *self);
+    //
+    // void (*initializeNotifier)(struct Notifier *self, const char *key);
+    //
+    // void (*sendNotification)(const struct Notifier *self, const char *notificationName, void *body, const char *type);
 };
 
 struct Notifier puremvc_notifier();

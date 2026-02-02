@@ -10,34 +10,39 @@
 #include <string.h>
 
 #include "puremvc/notifier.h"
-#include "puremvc/facade.h"
+// #include "puremvc/facade.h"
 
-static struct Facade *getFacade(const struct Notifier *self) {
-    struct Facade *facade = puremvc_facade_getInstance(self->key, puremvc_facade);
-    facade->initializeFacade(facade);
-    return facade;
+// static struct Facade *getFacade(const struct Notifier *self) {
+//     struct Facade *facade = puremvc_facade_getInstance(self->key, puremvc_facade);
+//     facade->initializeFacade(facade);
+//     return facade;
+// }
+
+const char *getMultitonKey(const struct INotifier *self) {
+    const struct Notifier *this = (struct Notifier *) self;
+    return this->key;
 }
 
-const char *getMultitonKey(const struct Notifier *self) {
-    return self->key;
-}
-
-static void initializeNotifier(struct Notifier *self, const char *key) {
-    int len = snprintf(self->key, KEY_SIZE, "%s", key);
+static void initializeNotifier(struct INotifier *self, const char *key) {
+    struct Notifier *this = (struct Notifier *) self;
+    int len = snprintf(this->key, KEY_SIZE, "%s", key);
     if (len >= KEY_SIZE)
         fprintf(stderr, "[PureMVC::Notifier::initializeNotifier] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
 }
 
-static void sendNotification(const struct Notifier *self, const char *notificationName, void *body, const char *type) {
-    const struct Facade *facade = self->getFacade(self);
-    facade->sendNotification(facade, notificationName, body, type);
+static void sendNotification(const struct INotifier *self, const char *notificationName, void *body, const char *type) {
+    // struct Notifier *this = (struct Notifier *) self;
+    // const struct Facade *facade = self->getFacade(self);
+    // facade->sendNotification(facade, notificationName, body, type);
 }
 
 struct Notifier puremvc_notifier() {
     return (struct Notifier) {
-        .getFacade = getFacade,
-        .getMultitonKey = getMultitonKey,
-        .initializeNotifier = initializeNotifier,
-        .sendNotification = sendNotification
+        .base = (struct INotifier) {
+            // .getFacade = getFacade,
+            .getMultitonKey = getMultitonKey,
+            .initializeNotifier = initializeNotifier,
+            .sendNotification = sendNotification
+        }
     };
 }

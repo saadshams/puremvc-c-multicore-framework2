@@ -26,7 +26,7 @@ struct Model {
 
     void (*registerProxy)(struct Model *self, struct Proxy proxy);
 
-    struct Proxy *(*retrieveProxy)(struct Model *self, const char *proxyName);
+    struct IProxy *(*retrieveProxy)(struct Model *self, const char *proxyName);
     
     bool (*hasProxy)(struct Model *self, const char *proxyName);
     

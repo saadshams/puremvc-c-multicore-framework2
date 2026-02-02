@@ -30,8 +30,8 @@ static void registerProxy(struct Model *self, struct Proxy proxy) {
     mutex_lock(&self->proxyMapMutex);
     size_t i = 0;
     for (; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
-        if (strcmp(self->proxyMap[i].key, proxy.getName(&proxy)) == 0) {
-            self->proxyMap[i].proxy.onRemove(&self->proxyMap[i].proxy);
+        if (strcmp(self->proxyMap[i].key, proxy.base.getName(&proxy.base)) == 0) {
+            self->proxyMap[i].proxy.base.onRemove(&self->proxyMap[i].proxy.base);
             memset(&self->proxyMap[i].proxy, 0, sizeof(struct Proxy));
             break;
         }
@@ -50,16 +50,16 @@ static void registerProxy(struct Model *self, struct Proxy proxy) {
         fprintf(stderr, "[PureMVC::Model::registerProxy] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", proxy.name, len, KEY_SIZE);
 
     self->proxyMap[i].proxy = proxy;
-    self->proxyMap[i].proxy.onRegister(&self->proxyMap[i].proxy);
+    self->proxyMap[i].proxy.base.onRegister(&self->proxyMap[i].proxy.base);
     mutex_unlock(&self->proxyMapMutex);
 }
 
-static struct Proxy *retrieveProxy(struct Model *self, const char *proxyName) {
+static struct IProxy *retrieveProxy(struct Model *self, const char *proxyName) {
     mutex_lock_shared(&self->proxyMapMutex);
     for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
             mutex_unlock(&self->proxyMapMutex);
-            return &self->proxyMap[i].proxy;
+            return &self->proxyMap[i].proxy.base;
         }
     }
     mutex_unlock(&self->proxyMapMutex);
@@ -86,7 +86,7 @@ static struct Proxy removeProxy(struct Model *self, const char *proxyName) {
     for (size_t i = 0; i < PROXY_MAP_SIZE && self->proxyMap[i].key[0] != '\0'; i++) {
         if (strcmp(self->proxyMap[i].key, proxyName) == 0) {
             proxy = self->proxyMap[i].proxy;
-            proxy.onRemove(&proxy);
+            proxy.base.onRemove(&proxy.base);
             memset(&self->proxyMap[index], 0, sizeof(struct ProxyMap));
         } else {
             if (index != i) { // shift left
