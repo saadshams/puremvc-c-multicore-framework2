@@ -31,6 +31,7 @@ static void initializeNotifier(struct INotifier *self, const char *key) {
 }
 
 static void sendNotification(const struct INotifier *self, const char *notificationName, void *body, const char *type) {
+    (void)self; (void)notificationName; (void)body; (void)type;
     // struct Notifier *this = (struct Notifier *) self;
     // const struct Facade *facade = self->getFacade(self);
     // facade->sendNotification(facade, notificationName, body, type);
