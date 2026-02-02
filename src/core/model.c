@@ -162,6 +162,12 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
 
 void puremvc_model_removeModel(struct ModelMap **modelMap, const char *key) {
     if (key == NULL || modelMap == NULL) return;
+
+    if (strlen(key) >= KEY_SIZE) { // Key Truncation Collision
+        fprintf(stderr, "[PureMVC::Model::removeModel] Error: Key '%s' too long (max %d) — skipping registration.\n", key, KEY_SIZE);
+        return;
+    }
+
     mutex_once(&token, dispatchOnce);
     mutex_lock(&modelMapMutex);
 
