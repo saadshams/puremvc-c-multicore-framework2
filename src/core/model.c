@@ -138,24 +138,22 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
     mutex_lock(&modelMapMutex);
 
     size_t i = 0;
-    for (; modelMap[i] != NULL && modelMap[i]->key[0] != '\0'; i++) {
+    for (; modelMap[i] != NULL && modelMap[i]->key[0] != '\0'; i++) { // find model
         if (strcmp(modelMap[i]->key, key) == 0) {
             mutex_unlock(&modelMapMutex);
             return &modelMap[i]->model.base;
         }
     }
 
-    if (modelMap[i] == NULL) {
+    if (modelMap[i] == NULL) { // storage overflow
         fprintf(stderr, "[PureMVC::Model::getInstance] Warning: Model storage overflow for key '%s' at index %zu; increase array size - skipping registration.\n", key, i);
         mutex_unlock(&modelMapMutex);
         return NULL;
     }
 
-    strcpy(modelMap[i]->key, key);
-
+    snprintf(modelMap[i]->key, KEY_SIZE, "%s", key); // initialize
     init(&modelMap[i]->model, key);
     mutex_init(&modelMap[i]->model.proxyMapMutex);
-
     modelMap[i]->model.base.initializeModel(&modelMap[i]->model.base);
 
     mutex_unlock(&modelMapMutex);
@@ -181,7 +179,7 @@ void puremvc_model_removeModel(struct ModelMap **modelMap, const char *key) {
             }
         } else {
             if (index != i) { // shift left
-                strcpy(modelMap[index]->key, modelMap[i]->key); // copy model (destination)
+                snprintf(modelMap[index]->key, KEY_SIZE, "%s", modelMap[i]->key); // copy model (destination)
                 modelMap[index]->model = modelMap[i]->model;
 
                 memset(modelMap[i]->key, 0, KEY_SIZE); // clear model (source)
