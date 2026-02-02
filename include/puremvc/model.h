@@ -12,20 +12,23 @@
 #include "i_model.h"
 #include "proxy.h"
 
-struct Model {
-    struct IModel base;
+struct ModelMap {
 
-    char multitonKey[KEY_SIZE];
+    char key[KEY_SIZE];
 
-    Mutex proxyMapMutex;
-    struct ProxyMap {
-        char key[KEY_SIZE];
-        struct Proxy proxy;
-    } proxyMap[PROXY_MAP_SIZE];
+    struct Model {
+        struct IModel base;
+
+        char multitonKey[KEY_SIZE];
+
+        Mutex proxyMapMutex;
+        struct ProxyMap {
+            char key[KEY_SIZE];
+            struct Proxy proxy;
+        } **proxyMap;
+    } model;
 };
 
-struct Model puremvc_model(const char *key);
+struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key);
 
-struct IModel *puremvc_model_getInstance(const char *key, struct Model(*factory)(const char *key));
-
-void puremvc_model_removeModel(const char *key);
+void puremvc_model_removeModel(struct ModelMap **modelMap, const char *key);

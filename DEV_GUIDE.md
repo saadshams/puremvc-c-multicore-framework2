@@ -1,4 +1,4 @@
-D) User-provided storage (very clean API design)
+* User-provided storage (very clean API design)
 
 This is the most honest pattern:
 
@@ -23,3 +23,6 @@ Library never mallocs.
 Caller owns the constraint.
 
 This is how serious C APIs avoid the question entirely.
+
+* Key Truncation Collision
+* library is thread-safe because it uses internal mutexes,
