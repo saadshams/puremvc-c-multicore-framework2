@@ -43,7 +43,7 @@ static void registerProxy(struct Model *self, struct Proxy proxy) {
         return;
     }
 
-    proxy.notifier.initializeNotifier(&proxy.notifier, self->multitonKey);
+    // proxy.notifier.initializeNotifier(&proxy.notifier, self->multitonKey); // todo
 
     int len = snprintf(self->proxyMap[i].key, KEY_SIZE, "%s", proxy.name);
     if (len >= KEY_SIZE)

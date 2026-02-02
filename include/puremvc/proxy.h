@@ -9,22 +9,17 @@
 #pragma once
 
 #include "constants.h"
-#include "notifier.h"
+#include "i_proxy.h"
+// #include "notifier.h"
 
 #define PROXY_NAME "Proxy"
 
 struct Proxy {
+    struct IProxy base;
     char name[NAME_SIZE];
-    void* data;
+    void *data;
 
-    struct Notifier notifier;
-
-    const char* (*getName)(const struct Proxy *self);
-    void* (*getData)(const struct Proxy *self);
-    void (*setData)(struct Proxy* self, void *data);
-
-    void (*onRegister)(struct Proxy *self);
-    void (*onRemove)(struct Proxy *self);
+    // struct Notifier notifier;
 };
 
-struct Proxy puremvc_proxy(const char *name, void *data);
+struct IProxy *puremvc_proxy(struct Proxy *proxy, const char *name, void *data);
