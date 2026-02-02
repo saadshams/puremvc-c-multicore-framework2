@@ -25,7 +25,6 @@
  * concurrent environments.
  */
 struct IModel {
-
     void (*initializeModel)(struct IModel *self);
 
     void (*registerProxy)(struct IModel *self, struct Proxy proxy);

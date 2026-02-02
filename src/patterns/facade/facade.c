@@ -14,6 +14,7 @@
 #include "puremvc/controller.h"
 #include "puremvc/model.h"
 #include "puremvc/view.h"
+#include "puremvc/notification.h"
 
 // The Multiton facadeMap.
 static struct FacadeMap {
@@ -25,102 +26,119 @@ static struct FacadeMap {
 static Mutex facadeMapMutex;
 static MutexOnce facadeMutexOnce = MUTEX_ONCE_INIT;
 
-static void initializeFacade(struct Facade *self) {
+static void initializeFacade(struct IFacade *self) {
     self->initializeModel(self);
     self->initializeController(self);
     self->initializeView(self);
 }
 
-static void initializeController(struct Facade *self) {
-    if (self->controller != NULL) return;
-    self->controller = puremvc_controller_getInstance(self->multitonKey, puremvc_controller);
-    self->controller->initializeController(self->controller);
+static void initializeController(struct IFacade *self) {
+    struct Facade *this = (struct Facade *) self;
+    if (this->controller != NULL) return;
+    this->controller = puremvc_controller_getInstance(this->multitonKey, puremvc_controller);
+    this->controller->initializeController(this->controller);
 }
 
-static void initializeModel(struct Facade *self) {
-    if (self->model != NULL) return;
-    self->model = puremvc_model_getInstance(self->multitonKey, puremvc_model);
-    self->model->initializeModel(self->model);
+static void initializeModel(struct IFacade *self) {
+    struct Facade *this = (struct Facade *) self;
+    if (this->model != NULL) return;
+    this->model = puremvc_model_getInstance(this->multitonKey, puremvc_model);
+    this->model->initializeModel(this->model);
 }
 
-static void initializeView(struct Facade *self) {
-    if (self->view != NULL) return;
-    self->view = puremvc_view_getInstance(self->multitonKey, puremvc_view);
-    self->view->initializeView(self->view);
+static void initializeView(struct IFacade *self) {
+    struct Facade *this = (struct Facade *) self;
+    if (this->view != NULL) return;
+    this->view = puremvc_view_getInstance(this->multitonKey, puremvc_view);
+    this->view->initializeView(this->view);
 }
 
-static void registerCommand(const struct Facade *self, const char *notificationName, struct SimpleCommand(*factory)()) {
-    self->controller->registerCommand(self->controller, notificationName, factory);
+static void registerCommand(const struct IFacade *self, const char *notificationName, struct SimpleCommand(*factory)()) {
+    const struct Facade *this = (struct Facade *) self;
+    this->controller->registerCommand(this->controller, notificationName, factory);
 }
 
-static bool hasCommand(const struct Facade *self, const char *notificationName) {
-    return self->controller->hasCommand(self->controller, notificationName);
+static bool hasCommand(const struct IFacade *self, const char *notificationName) {
+    const struct Facade *this = (struct Facade *) self;
+    return this->controller->hasCommand(this->controller, notificationName);
 }
 
-static void removeCommand(const struct Facade *self, const char *notificationName) {
-    self->controller->removeCommand(self->controller, notificationName);
+static void removeCommand(const struct IFacade *self, const char *notificationName) {
+    const struct Facade *this = (struct Facade *) self;
+    this->controller->removeCommand(this->controller, notificationName);
 }
 
-static void registerProxy(const struct Facade *self, struct Proxy proxy) {
-    self->model->registerProxy(self->model, proxy);
+static void registerProxy(const struct IFacade *self, struct Proxy proxy) {
+    const struct Facade *this = (struct Facade *) self;
+    this->model->registerProxy(this->model, proxy);
 }
 
-static struct Proxy *retrieveProxy(const struct Facade *self, const char *proxyName) {
-    return self->model->retrieveProxy(self->model, proxyName);
+static struct IProxy *retrieveProxy(const struct IFacade *self, const char *proxyName) {
+    const struct Facade *this = (struct Facade *) self;
+    return this->model->retrieveProxy(this->model, proxyName);
 }
 
-static bool hasProxy(const struct Facade *self, const char *proxyName) {
-    return self->model->hasProxy(self->model, proxyName);
+static bool hasProxy(const struct IFacade *self, const char *proxyName) {
+    const struct Facade *this = (struct Facade *) self;
+    return this->model->hasProxy(this->model, proxyName);
 }
 
-static struct Proxy removeProxy(const struct Facade *self, const char *proxyName) {
-    return self->model->removeProxy(self->model, proxyName);
+static struct Proxy removeProxy(const struct IFacade *self, const char *proxyName) {
+    const struct Facade *this = (struct Facade *) self;
+    return this->model->removeProxy(this->model, proxyName);
 }
 
-static void registerMediator(const struct Facade *self, const struct Mediator mediator) {
-    self->view->registerMediator(self->view, mediator);
+static void registerMediator(const struct IFacade *self, const struct Mediator mediator) {
+    const struct Facade *this = (struct Facade *) self;
+    this->view->registerMediator(this->view, mediator);
 }
 
-static struct Mediator *retrieveMediator(const struct Facade *self, const char *mediatorName) {
-    return self->view->retrieveMediator(self->view, mediatorName);
+static struct IMediator *retrieveMediator(const struct IFacade *self, const char *mediatorName) {
+    const struct Facade *this = (struct Facade *) self;
+    return this->view->retrieveMediator(this->view, mediatorName);
 }
 
-static bool hasMediator(const struct Facade *self, const char *mediatorName) {
-    return self->view->hasMediator(self->view, mediatorName);
+static bool hasMediator(const struct IFacade *self, const char *mediatorName) {
+    const struct Facade *this = (struct Facade *) self;
+    return this->view->hasMediator(this->view, mediatorName);
 }
 
-static struct Mediator removeMediator(const struct Facade *self, const char *mediatorName) {
-    return self->view->removeMediator(self->view, mediatorName);
+static struct Mediator removeMediator(const struct IFacade *self, const char *mediatorName) {
+    const struct Facade *this = (struct Facade *) self;
+    return this->view->removeMediator(this->view, mediatorName);
 }
 
-static void notifyObservers(const struct Facade *self, const struct Notification notification) {
-    self->view->notifyObservers(self->view, notification);
+static void notifyObservers(const struct IFacade *self, struct INotification *notification) {
+    const struct Facade *this = (struct Facade *) self;
+    this->view->notifyObservers(this->view, notification);
 }
 
-static void sendNotification(const struct Facade *self, const char *notificationName, void *body, const char *type) {
-    const struct Notification notification = puremvc_notification(notificationName, body, type);
-    self->notifyObservers(self, notification);
+static void sendNotification(const struct IFacade *self, const char *notificationName, void *body, const char *type) {
+    struct Notification notification = puremvc_notification(notificationName, body, type);
+    self->notifyObservers(self, &notification.base);
 }
 
 struct Facade puremvc_facade(const char *key) {
     struct Facade facade = {
-        .initializeFacade = initializeFacade,
-        .initializeController = initializeController,
-        .initializeModel = initializeModel,
-        .initializeView = initializeView,
-        .registerCommand = registerCommand,
-        .hasCommand = hasCommand,
-        .removeCommand = removeCommand,
-        .registerProxy = registerProxy,
-        .retrieveProxy = retrieveProxy,
-        .hasProxy = hasProxy,
-        .removeProxy = removeProxy,
-        .registerMediator = registerMediator,
-        .retrieveMediator = retrieveMediator,
-        .hasMediator = hasMediator,
-        .removeMediator = removeMediator,
-        .notifyObservers = notifyObservers,
-        .sendNotification = sendNotification
+        .base = {
+            .initializeFacade = initializeFacade,
+            .initializeController = initializeController,
+            .initializeModel = initializeModel,
+            .initializeView = initializeView,
+            .registerCommand = registerCommand,
+            .hasCommand = hasCommand,
+            .removeCommand = removeCommand,
+            .registerProxy = registerProxy,
+            .retrieveProxy = retrieveProxy,
+            .hasProxy = hasProxy,
+            .removeProxy = removeProxy,
+            .registerMediator = registerMediator,
+            .retrieveMediator = retrieveMediator,
+            .hasMediator = hasMediator,
+            .removeMediator = removeMediator,
+            .notifyObservers = notifyObservers,
+            .sendNotification = sendNotification
+        },
     };
 
     int len = snprintf(facade.multitonKey, KEY_SIZE, "%s", key);
@@ -134,7 +152,7 @@ static void dispatchOnce(void) {
     mutex_init(&facadeMapMutex);
 }
 
-struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factory)(const char *)) {
+struct IFacade *puremvc_facade_getInstance(const char *key, struct Facade(*factory)(const char *)) {
     if (key == NULL || factory == NULL) return NULL;
     mutex_once(&facadeMutexOnce, dispatchOnce);
     mutex_lock(&facadeMapMutex);
@@ -143,7 +161,7 @@ struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factor
     for (; facadeMap[i].key[0] != '\0'; i++) {
         if (strncmp(facadeMap[i].key, key, KEY_SIZE) == 0) {
             mutex_unlock(&facadeMapMutex);
-            return &facadeMap[i].facade;
+            return &facadeMap[i].facade.base;
         }
     }
 
@@ -159,10 +177,10 @@ struct Facade *puremvc_facade_getInstance(const char *key, struct Facade(*factor
 
     facadeMap[i].facade = factory(key);
 
-    facadeMap[i].facade.initializeFacade(&facadeMap[i].facade);
+    facadeMap[i].facade.base.initializeFacade(&facadeMap[i].facade.base);
 
     mutex_unlock(&facadeMapMutex);
-    return &facadeMap[i].facade;
+    return &facadeMap[i].facade.base;
 }
 
 bool puremvc_facade_hasCore(const char *key) {
