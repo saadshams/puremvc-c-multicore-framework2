@@ -93,7 +93,7 @@ static struct Proxy removeProxy(struct IModel *self, const char *proxyName) {
 
             memset(&this->proxyMap[i]->key, 0, KEY_SIZE);
             this->proxyMap[i]->proxy.base = (struct IProxy){0};
-            mutex_destroy(&this->proxyMapMutex);
+            // mutex_destroy(&this->proxyMapMutex);
         } else {
             if (index != i) { // shift left
                 snprintf(this->proxyMap[index]->key, KEY_SIZE, "%s", this->proxyMap[i]->key);
