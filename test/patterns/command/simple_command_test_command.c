@@ -8,8 +8,8 @@
  * @param self
  * @param notification the <code>INotification</code> carrying the <code>SimpleCommandTestVO</code>
  */
-static void execute(const struct SimpleCommand *self, struct Notification notification) {
-    struct SimpleCommandTestVO *vo = (struct SimpleCommandTestVO *) notification.getBody(&notification);
+static void execute(const struct ICommand *self, struct INotification *notification) {
+    struct SimpleCommandTestVO *vo = (struct SimpleCommandTestVO *) notification->getBody(notification);
 
     // Fabricate a result
     vo->result = 2 * vo->input;
@@ -17,6 +17,6 @@ static void execute(const struct SimpleCommand *self, struct Notification notifi
 
 struct SimpleCommand test_simple_command() {
     struct SimpleCommand command = puremvc_simple_command();
-    command.execute = execute;
+    command.base.execute = execute;
     return command;
 }

@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #include "view_test_mediator6.h"
-#include "puremvc/facade.h"
 
 static const char **listNotificationInterests(const struct IMediator *self) {
     static const char *interests[] = { NOTE6, NULL };

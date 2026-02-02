@@ -8,13 +8,15 @@
 */
 #include "puremvc/simple_command.h"
 
-static void execute(const struct SimpleCommand *self, struct Notification notification) {
+static void execute(const struct ICommand *self, struct INotification *notification) {
     (void)self; (void)notification;
 }
 
 struct SimpleCommand puremvc_simple_command() {
     return (struct SimpleCommand) {
+        .base = {
+            .execute = execute
+        },
         .notifier = puremvc_notifier(),
-        .execute = execute
     };
 }

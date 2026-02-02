@@ -1,6 +1,7 @@
 #include <assert.h>
 
 #include "simple_command_test.h"
+#include "puremvc/notification.h"
 #include "simple_command_test_command.h"
 #include "simple_command_test_vo.h"
 
@@ -26,13 +27,13 @@ void testSimpleCommandExecute() {
     struct SimpleCommandTestVO vo = {.input = 5};
 
     // Create the Notification (note)
-    struct Notification note = puremvc_notification("SimpleCommandTestNote", &vo, NULL);
+    struct Notification notification = puremvc_notification("SimpleCommandTestNote", &vo, NULL);
 
     // Create the SimpleCommand
     const struct SimpleCommand command = test_simple_command();
 
     // Execute the SimpleCommand
-    command.execute(&command, note);
+    command.base.execute(&command.base, &notification.base);
 
     // test assertions
     assert(vo.result == 10);

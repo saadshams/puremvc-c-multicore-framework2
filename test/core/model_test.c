@@ -25,7 +25,7 @@ int main() {
 
 void testGetInstance() {
     // Test Factory Method
-    struct IModel *model = puremvc_model_getInstance("ModelTestKey1", puremvc_model);
+    const struct IModel *model = puremvc_model_getInstance("ModelTestKey1", puremvc_model);
     assert(model != NULL);
 
     // test assertions

@@ -1,9 +1,9 @@
-#add_executable(ControllerTest core/controller_test.c
-#        core/controller_test_command.c
-#        core/controller_test_command2.c)
-#target_link_libraries(ControllerTest PRIVATE puremvc)
-#add_test(NAME PureMVC.ControllerTest COMMAND ControllerTest)
-#
+add_executable(ControllerTest core/controller_test.c
+        core/controller_test_command.c
+        core/controller_test_command2.c)
+target_link_libraries(ControllerTest PRIVATE puremvc)
+add_test(NAME PureMVC.ControllerTest COMMAND ControllerTest)
+
 add_executable(ModelTest core/model_test.c core/model_test_proxy.c)
 target_link_libraries(ModelTest PRIVATE puremvc)
 add_test(NAME PureMVC.ModelTest COMMAND ModelTest)
@@ -16,20 +16,20 @@ add_executable(ViewTest core/view_test.c
 target_link_libraries(ViewTest PRIVATE puremvc)
 add_test(NAME PureMVC.ViewTest COMMAND ViewTest)
 
-#add_executable(SimpleCommandTest
-#        patterns/command/simple_command_test.c
-#        patterns/command/simple_command_test_command.c)
-#target_link_libraries(SimpleCommandTest PRIVATE puremvc)
-#add_test(NAME PureMVC.SimpleCommandTest COMMAND SimpleCommandTest)
-#
-#add_executable(MacroCommandTest patterns/command/macro_command_test.c
-#        patterns/command/macro_command_test_command.c
-#        patterns/command/macro_command_test_command2.c
-#        patterns/command/macro_command_test_sub1_command.c
-#        patterns/command/macro_command_test_sub2_command.c
-#        patterns/command/macro_command_test_sub3_command.c)
-#target_link_libraries(MacroCommandTest PRIVATE puremvc)
-#add_test(NAME PureMVC.MacroCommandTest COMMAND MacroCommandTest)
+add_executable(SimpleCommandTest
+        patterns/command/simple_command_test.c
+        patterns/command/simple_command_test_command.c)
+target_link_libraries(SimpleCommandTest PRIVATE puremvc)
+add_test(NAME PureMVC.SimpleCommandTest COMMAND SimpleCommandTest)
+
+add_executable(MacroCommandTest patterns/command/macro_command_test.c
+        patterns/command/macro_command_test_command.c
+        patterns/command/macro_command_test_command2.c
+        patterns/command/macro_command_test_sub1_command.c
+        patterns/command/macro_command_test_sub2_command.c
+        patterns/command/macro_command_test_sub3_command.c)
+target_link_libraries(MacroCommandTest PRIVATE puremvc)
+add_test(NAME PureMVC.MacroCommandTest COMMAND MacroCommandTest)
 #
 #add_executable(FacadeTest patterns/facade/facade_test.c
 #        patterns/facade/facade_test_command.c)
