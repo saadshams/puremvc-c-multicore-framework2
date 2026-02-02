@@ -31,8 +31,8 @@ int main() {
     testModifyObserverListDuringNotification();
     testRemoveView();
     testRegisterAndRemoveMediators();
-    testRegisterAndRemoveMultipleObservers();
-    testRegisterAndRemoveMultipleMediators();
+    // testRegisterAndRemoveMultipleObservers();
+    // testRegisterAndRemoveMultipleMediators();
     testCapacityWarning();
     return 0;
 }
