@@ -47,7 +47,7 @@ static void registerProxy(struct IModel *self, struct Proxy proxy) {
 
     // proxy.notifier.initializeNotifier(&proxy.notifier, this->multitonKey); // todo
 
-    strcpy(this->proxyMap[i]->key, proxy.name);
+    snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", proxy.name);
     this->proxyMap[i]->proxy = proxy;
     this->proxyMap[i]->proxy.base.onRegister(&this->proxyMap[i]->proxy.base);
 
@@ -96,7 +96,7 @@ static struct Proxy removeProxy(struct IModel *self, const char *proxyName) {
             mutex_destroy(&this->proxyMapMutex);
         } else {
             if (index != i) { // shift left
-                strcpy(this->proxyMap[index]->key, this->proxyMap[i]->key);
+                snprintf(this->proxyMap[index]->key, KEY_SIZE, "%s", this->proxyMap[i]->key);
                 this->proxyMap[index]->proxy = this->proxyMap[i]->proxy;
 
                 memset(&this->proxyMap[i]->key, 0, KEY_SIZE);
@@ -151,7 +151,7 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
         return NULL;
     }
 
-    snprintf(modelMap[i]->key, KEY_SIZE, "%s", key); // initialize
+    snprintf(modelMap[i]->key, KEY_SIZE, "%s", key); // init
     init(&modelMap[i]->model, key);
     mutex_init(&modelMap[i]->model.proxyMapMutex);
     modelMap[i]->model.base.initializeModel(&modelMap[i]->model.base);
