@@ -8,8 +8,8 @@
 */
 #pragma once
 
-#include "constants.h"
 #include "mutex.h"
+#include "constants.h"
 #include "view.h"
 #include "simple_command.h"
 #include "notification.h"

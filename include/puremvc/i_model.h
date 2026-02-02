@@ -1,0 +1,38 @@
+/**
+ * @file i_model.h
+ * @ingroup PureMVC
+ * @brief IModel Interface
+ *
+ * @author Saad Shams <saad.shams@puremvc.org>
+ * @copyright BSD 3-Clause License
+ */
+#pragma once
+
+#include <stdbool.h>
+
+#include "i_proxy.h"
+#include "proxy.h"
+
+/**
+ * @struct IModel
+ * @brief Interface for the PureMVC Model component.
+ *
+ * The Model is responsible for maintaining a collection of
+ * Proxy instances. Each Proxy is registered and accessed
+ * by a unique name.
+ *
+ * Implementations must ensure thread-safety if used in
+ * concurrent environments.
+ */
+struct IModel {
+
+    void (*initializeModel)(struct IModel *self);
+
+    void (*registerProxy)(struct IModel *self, struct Proxy proxy);
+
+    struct IProxy *(*retrieveProxy)(struct IModel *self, const char *proxyName);
+
+    bool (*hasProxy)(struct IModel *self, const char *proxyName);
+
+    struct Proxy(*removeProxy)(struct IModel *self, const char *proxyName);
+};

@@ -25,7 +25,7 @@ int main() {
 
 void testGetInstance() {
     // Test Factory Method
-    struct Model *model = puremvc_model_getInstance("ModelTestKey1", puremvc_model);
+    struct IModel *model = puremvc_model_getInstance("ModelTestKey1", puremvc_model);
     assert(model != NULL);
 
     // test assertions
@@ -36,7 +36,7 @@ void testGetInstance() {
 
 void testRegisterAndRetrieveProxy() {
     // register a new and retrieve it.
-    struct Model *model = puremvc_model_getInstance("ModelTestKey2", puremvc_model);
+    struct IModel *model = puremvc_model_getInstance("ModelTestKey2", puremvc_model);
 
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
     model->registerProxy(model, puremvc_proxy("colors", colors));
@@ -60,7 +60,7 @@ void testRegisterAndRetrieveProxy() {
 
 void testRegisterAndRemoveProxy() {
     // register a new, remove it, then try to retrieve it
-    struct Model *model = puremvc_model_getInstance("ModelTestKey3", puremvc_model);
+    struct IModel *model = puremvc_model_getInstance("ModelTestKey3", puremvc_model);
 
     int *sizes = (int []) {1, 2, 3, 0};
     struct Proxy p = puremvc_proxy("sizes", sizes);
@@ -81,7 +81,7 @@ void testRegisterAndRemoveProxy() {
 
 void testHasProxy() {
     // register a new
-    struct Model *model = puremvc_model_getInstance("ModelTestKey4", puremvc_model);
+    struct IModel *model = puremvc_model_getInstance("ModelTestKey4", puremvc_model);
 
     const char **aces = (const char *[]) {"clubs", "spades", "hearts", "diamonds", NULL};
     struct Proxy p = puremvc_proxy("aces", aces);
@@ -105,7 +105,7 @@ void testHasProxy() {
 
 void testOnRegisterAndOnRemove() {
     // Get a Multiton Model instance
-    struct Model *model = puremvc_model_getInstance("ModelTestKey5", puremvc_model);
+    struct IModel *model = puremvc_model_getInstance("ModelTestKey5", puremvc_model);
 
     // Create and register the test proxy
     model->registerProxy(model, model_test_proxy("ModelTestProxy", NULL));
@@ -141,8 +141,8 @@ void testRemoveModel() {
 
 void testMultipleModels() {
     // Get a Multiton Model instance
-    struct Model *model1 = puremvc_model_getInstance("ModelTestKey7", puremvc_model);
-    struct Model *model2 = puremvc_model_getInstance("ModelTestKey8", puremvc_model);
+    struct IModel *model1 = puremvc_model_getInstance("ModelTestKey7", puremvc_model);
+    struct IModel *model2 = puremvc_model_getInstance("ModelTestKey8", puremvc_model);
 
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
     const char **aces = (const char *[]) { "clubs", "spades", "hearts", "diamonds", NULL};
@@ -168,7 +168,7 @@ void testMultipleModels() {
 }
 
 void testRegisterAndReplaceProxy() {
-    struct Model *model = puremvc_model_getInstance("ModelTestKey9", puremvc_model);
+    struct IModel *model = puremvc_model_getInstance("ModelTestKey9", puremvc_model);
 
     int *sizes = (int []) {1, 0};
     struct Proxy p1 = puremvc_proxy("sizes", sizes);
@@ -197,60 +197,61 @@ void testRegisterAndReplaceProxy() {
 }
 
 void testRegisterAndRemoveMultipleProxies() {
-    struct Model *model = puremvc_model_getInstance("ModelTestKey10", puremvc_model);
+    struct IModel *model = puremvc_model_getInstance("ModelTestKey10", puremvc_model);
+    const struct Model *self = (struct Model *) model;
 
     // Register five proxies and verify that each is correctly associated to their dictionaries
     model->registerProxy(model, puremvc_proxy("proxy1", NULL));
-    assert(strcmp(model->proxyMap[0].key, "proxy1") == 0);
-    assert(strcmp(model->proxyMap[0].proxy.name, "proxy1") == 0);
+    assert(strcmp(self->proxyMap[0].key, "proxy1") == 0);
+    assert(strcmp(self->proxyMap[0].proxy.name, "proxy1") == 0);
 
     model->registerProxy(model, puremvc_proxy("proxy2", NULL));
-    assert(strcmp(model->proxyMap[1].key, "proxy2") == 0);
-    assert(strcmp(model->proxyMap[1].proxy.name, "proxy2") == 0);
+    assert(strcmp(self->proxyMap[1].key, "proxy2") == 0);
+    assert(strcmp(self->proxyMap[1].proxy.name, "proxy2") == 0);
 
     model->registerProxy(model, puremvc_proxy("proxy3", NULL));
-    assert(strcmp(model->proxyMap[2].key, "proxy3") == 0);
-    assert(strcmp(model->proxyMap[2].proxy.name, "proxy3") == 0);
+    assert(strcmp(self->proxyMap[2].key, "proxy3") == 0);
+    assert(strcmp(self->proxyMap[2].proxy.name, "proxy3") == 0);
 
     model->registerProxy(model, puremvc_proxy("proxy4", NULL));
-    assert(strcmp(model->proxyMap[3].key, "proxy4") == 0);
-    assert(strcmp(model->proxyMap[3].proxy.name, "proxy4") == 0);
+    assert(strcmp(self->proxyMap[3].key, "proxy4") == 0);
+    assert(strcmp(self->proxyMap[3].proxy.name, "proxy4") == 0);
 
     model->registerProxy(model, puremvc_proxy("proxy5", NULL));
-    assert(strcmp(model->proxyMap[4].key, "proxy5") == 0);
-    assert(strcmp(model->proxyMap[4].proxy.name, "proxy5") == 0);
+    assert(strcmp(self->proxyMap[4].key, "proxy5") == 0);
+    assert(strcmp(self->proxyMap[4].proxy.name, "proxy5") == 0);
 
     // Remove the second proxy (middle) and verify that remaining mediators 3, 4, 5 are shifted correctly
     model->removeProxy(model, "proxy2");
-    assert(strcmp(model->proxyMap[0].key, "proxy1") == 0);
-    assert(strcmp(model->proxyMap[0].proxy.name, "proxy1") == 0);
-    assert(strcmp(model->proxyMap[1].key, "proxy3") == 0);
-    assert(strcmp(model->proxyMap[1].proxy.name, "proxy3") == 0);
-    assert(strcmp(model->proxyMap[2].key, "proxy4") == 0);
-    assert(strcmp(model->proxyMap[2].proxy.name, "proxy4") == 0);
-    assert(strcmp(model->proxyMap[3].key, "proxy5") == 0);
-    assert(strcmp(model->proxyMap[3].proxy.name, "proxy5") == 0);
+    assert(strcmp(self->proxyMap[0].key, "proxy1") == 0);
+    assert(strcmp(self->proxyMap[0].proxy.name, "proxy1") == 0);
+    assert(strcmp(self->proxyMap[1].key, "proxy3") == 0);
+    assert(strcmp(self->proxyMap[1].proxy.name, "proxy3") == 0);
+    assert(strcmp(self->proxyMap[2].key, "proxy4") == 0);
+    assert(strcmp(self->proxyMap[2].proxy.name, "proxy4") == 0);
+    assert(strcmp(self->proxyMap[3].key, "proxy5") == 0);
+    assert(strcmp(self->proxyMap[3].proxy.name, "proxy5") == 0);
 
     // Remove the last proxy and verify the remaining ones stay in place
     model->removeProxy(model, "proxy5");
-    assert(strcmp(model->proxyMap[0].key, "proxy1") == 0);
-    assert(strcmp(model->proxyMap[0].proxy.name, "proxy1") == 0);
-    assert(strcmp(model->proxyMap[1].key, "proxy3") == 0);
-    assert(strcmp(model->proxyMap[1].proxy.name, "proxy3") == 0);
-    assert(strcmp(model->proxyMap[2].key, "proxy4") == 0);
-    assert(strcmp(model->proxyMap[2].proxy.name, "proxy4") == 0);
+    assert(strcmp(self->proxyMap[0].key, "proxy1") == 0);
+    assert(strcmp(self->proxyMap[0].proxy.name, "proxy1") == 0);
+    assert(strcmp(self->proxyMap[1].key, "proxy3") == 0);
+    assert(strcmp(self->proxyMap[1].proxy.name, "proxy3") == 0);
+    assert(strcmp(self->proxyMap[2].key, "proxy4") == 0);
+    assert(strcmp(self->proxyMap[2].proxy.name, "proxy4") == 0);
 
     // Remove the first mediator and verify that subsequent mediators 3, 4 shift left
     model->removeProxy(model, "proxy1");
-    assert(strcmp(model->proxyMap[0].key, "proxy3") == 0);
-    assert(strcmp(model->proxyMap[0].proxy.name, "proxy3") == 0);
-    assert(strcmp(model->proxyMap[1].key, "proxy4") == 0);
-    assert(strcmp(model->proxyMap[1].proxy.name, "proxy4") == 0);
+    assert(strcmp(self->proxyMap[0].key, "proxy3") == 0);
+    assert(strcmp(self->proxyMap[0].proxy.name, "proxy3") == 0);
+    assert(strcmp(self->proxyMap[1].key, "proxy4") == 0);
+    assert(strcmp(self->proxyMap[1].proxy.name, "proxy4") == 0);
 
     // Remove all remaining mediators and confirm that the dictionary is NULL
     model->removeProxy(model, "proxy3");
     model->removeProxy(model, "proxy4");
-    assert(model->proxyMap->key[0] == '\0'); // proxyMap is empty
+    assert(self->proxyMap->key[0] == '\0'); // proxyMap is empty
 
     puremvc_model_removeModel("ModelTestKey10");
     model = NULL;
@@ -275,7 +276,7 @@ void testCapacityWarning() {
         puremvc_model_getInstance(key, puremvc_model);
     }
 
-    struct Model *model = puremvc_model_getInstance("model1", puremvc_model);
+    struct IModel *model = puremvc_model_getInstance("model1", puremvc_model);
     for (int i = 0; i < PROXY_MAP_SIZE + 1; i++) {
         char key[32] = {0};
         snprintf(key, sizeof(key), "proxy%d", i);

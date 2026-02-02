@@ -3,12 +3,13 @@
 #include "view_test_mediator6.h"
 #include "puremvc/facade.h"
 
-static const char **listNotificationInterests(const struct Mediator *self) {
+static const char **listNotificationInterests(const struct IMediator *self) {
     static const char *interests[] = { NOTE6, NULL };
     return interests;
 }
 
-static void handleNotification(const struct Mediator *self, struct Notification notification) {
+static void handleNotification(const struct IMediator *self, struct INotification *notification) {
+    (void)notification;
     struct ViewTest *component = self->getComponent(self);
     const char *name = self->getName(self);
 
@@ -20,14 +21,14 @@ static void handleNotification(const struct Mediator *self, struct Notification 
     }
 }
 
-static void onRemove(struct Mediator *self) {
+static void onRemove(struct IMediator *self) {
     ((struct ViewTest *) self->getComponent(self))->counter++;
 }
 
 struct Mediator view_test_mediator6(const char *name, struct ViewTest *component) {
     struct Mediator mediator = puremvc_mediator(name, component);
-    mediator.listNotificationInterests = listNotificationInterests;
-    mediator.handleNotification = handleNotification;
-    mediator.onRemove = onRemove;
+    mediator.base.listNotificationInterests = listNotificationInterests;
+    mediator.base.handleNotification = handleNotification;
+    mediator.base.onRemove = onRemove;
     return mediator;
 }

@@ -7,13 +7,14 @@
 */
 #pragma once
 
-#include <stdbool.h>
-
 #include "mutex.h"
 #include "constants.h"
+#include "i_model.h"
 #include "proxy.h"
 
 struct Model {
+    struct IModel base;
+
     char multitonKey[KEY_SIZE];
 
     Mutex proxyMapMutex;
@@ -21,20 +22,10 @@ struct Model {
         char key[KEY_SIZE];
         struct Proxy proxy;
     } proxyMap[PROXY_MAP_SIZE];
-    
-    void (*initializeModel)(struct Model *self);
-
-    void (*registerProxy)(struct Model *self, struct Proxy proxy);
-
-    struct IProxy *(*retrieveProxy)(struct Model *self, const char *proxyName);
-    
-    bool (*hasProxy)(struct Model *self, const char *proxyName);
-    
-    struct Proxy(*removeProxy)(struct Model *self, const char *proxyName);
 };
 
 struct Model puremvc_model(const char *key);
 
-struct Model *puremvc_model_getInstance(const char *key, struct Model(*factory)(const char *key));
+struct IModel *puremvc_model_getInstance(const char *key, struct Model(*factory)(const char *key));
 
 void puremvc_model_removeModel(const char *key);

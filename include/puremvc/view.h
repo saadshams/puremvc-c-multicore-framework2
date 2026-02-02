@@ -7,14 +7,15 @@
 */
 #pragma once
 
-#include <stdbool.h>
-
-#include "constants.h"
 #include "mutex.h"
+#include "constants.h"
+#include "i_view.h"
 #include "mediator.h"
 #include "observer.h"
 
 struct View {
+    struct IView base;
+
     char multitonKey[KEY_SIZE];
 
     Mutex mediatorMapMutex;
@@ -28,26 +29,10 @@ struct View {
         char key[KEY_SIZE];
         struct Observer observers[OBSERVER_ARRAY_SIZE];
     } observerMap[OBSERVER_MAP_SIZE];
-
-    void (*initializeView)(struct View *self);
-
-    void (*registerObserver)(struct View *self, const char *notificationName, struct Observer observer);
-
-    void (*notifyObservers)(struct View *self, struct Notification notification);
-
-    void (*removeObserver)(struct View *self, const char *notificationName, const void *notifyContext);
-
-    void (*registerMediator)(struct View *self, struct Mediator mediator);
-
-    struct Mediator *(*retrieveMediator)(struct View *self, const char *mediatorName);
-
-    bool (*hasMediator)(struct View *self, const char *mediatorName);
-
-    struct Mediator(*removeMediator)(struct View *self, const char *mediatorName);
 };
 
 struct View puremvc_view(const char *key);
 
-struct View *puremvc_view_getInstance(const char *key, struct View(*factory)(const char *key));
+struct IView *puremvc_view_getInstance(const char *key, struct View(*factory)(const char *key));
 
 void puremvc_view_removeView(const char *key);
