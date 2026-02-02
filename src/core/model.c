@@ -119,7 +119,7 @@ static void init(struct Model *self, const char *key) {
         .removeProxy = removeProxy
     };
 
-    strcpy(self->multitonKey, key);
+    snprintf(self->multitonKey, KEY_SIZE, "%s", key);
 }
 
 static void dispatchOnce(void) {
