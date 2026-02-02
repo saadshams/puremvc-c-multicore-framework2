@@ -18,28 +18,27 @@ int main(void) {
  */
 void testConstructor() {
     // struct Proxy myProxy = {0};
-    const struct Proxy proxy = puremvc_proxy(NULL, NULL);
-    const struct IProxy *p = &proxy.base;
+    struct Proxy p = puremvc_proxy(NULL, NULL);
+    struct IProxy *proxy = &p.base;
 
     // test assertions
-    assert(strcmp(p->getName(p), PROXY_NAME) == 0);
+    assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
 
-    assert(p->getData(p) == NULL);
+    assert(proxy->getData(proxy) == NULL);
 }
 
 /**
  * Tests getting the name using Proxy class accessor method. Setting can only be done in constructor.
  */
 void testNameAccessors() {
-    const struct Proxy proxy = puremvc_proxy("TestProxy", NULL);
-    const struct IProxy *p = &proxy.base;
+    const struct Proxy p = puremvc_proxy("TestProxy", NULL);
+    const struct IProxy *proxy = &p.base;
 
     // test assertions
-    assert(strcmp(p->getName(p), "TestProxy") == 0);
+    assert(strcmp(proxy->getName(proxy), "TestProxy") == 0);
 
     struct Proxy proxy2 = puremvc_proxy(NULL, NULL);
-    const struct IProxy *p2 = &proxy2.base;
-    assert(strcmp(p2->getName(p2), PROXY_NAME) == 0);
+    assert(strcmp(proxy2.name, PROXY_NAME) == 0);
 }
 
 /**
@@ -47,10 +46,10 @@ void testNameAccessors() {
  */
 void testDataAccessors() {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
-    const struct Proxy proxy = puremvc_proxy("colors", colors);
-    const struct IProxy *p = &proxy.base;
+    const struct Proxy p = puremvc_proxy("colors", colors);
+    const struct IProxy *proxy = &p.base;
 
-    const char **data = p->getData(p);
+    const char **data = proxy->getData(proxy);
 
     // test assertions
     assert(strcmp(*data, "red") == 0);
@@ -62,7 +61,7 @@ void testDataAccessors() {
 void testDataReassign() {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
 
-    struct Proxy proxy = puremvc_proxy("colors", colors);
+    const struct Proxy proxy = puremvc_proxy("colors", colors);
     const struct IProxy *p = &proxy.base;
 
     // Re-assign the same data to ensure the proxy does not free it

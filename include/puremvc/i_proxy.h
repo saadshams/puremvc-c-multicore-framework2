@@ -13,9 +13,6 @@
 /**
  * @struct IProxy
  * @brief Represents the state of a data processor.
- *
- * This structure keeps track of memory allocation,
- * current processing index, and results.
  */
 struct IProxy {
     // struct INotifier *notifier;

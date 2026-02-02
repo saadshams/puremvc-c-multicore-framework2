@@ -10,10 +10,10 @@ add_library(puremvc STATIC
 #        src/patterns/command/simple_command.c
 #        src/patterns/command/macro_command.c
 #        src/patterns/facade/facade.c
-#        src/patterns/mediator/mediator.c
-#        src/patterns/observer/notification.c
+        src/patterns/mediator/mediator.c
+        src/patterns/observer/notification.c
         src/patterns/observer/notifier.c
-#        src/patterns/observer/observer.c
+        src/patterns/observer/observer.c
         src/patterns/proxy/proxy.c)
 
 if(WIN32)

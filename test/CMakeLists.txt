@@ -35,23 +35,23 @@ add_test(NAME PureMVC.ModelTest COMMAND ModelTest)
 #        patterns/facade/facade_test_command.c)
 #target_link_libraries(FacadeTest PRIVATE puremvc)
 #add_test(NAME PureMVC.FacadeTest COMMAND FacadeTest)
-#
-#add_executable(MediatorTest patterns/mediator/mediator_test.c)
-#target_link_libraries(MediatorTest PRIVATE puremvc)
-#add_test(NAME PureMVC.MediatorTest COMMAND MediatorTest)
-#
-#add_executable(NotificationTest patterns/observer/notification_test.c)
-#target_link_libraries(NotificationTest PRIVATE puremvc)
-#add_test(NAME PureMVC.NotificationTest COMMAND NotificationTest)
-#
+
+add_executable(MediatorTest patterns/mediator/mediator_test.c)
+target_link_libraries(MediatorTest PRIVATE puremvc)
+add_test(NAME PureMVC.MediatorTest COMMAND MediatorTest)
+
+add_executable(NotificationTest patterns/observer/notification_test.c)
+target_link_libraries(NotificationTest PRIVATE puremvc)
+add_test(NAME PureMVC.NotificationTest COMMAND NotificationTest)
+
 add_executable(NotifierTest patterns/observer/notifier_test.c)
 target_link_libraries(NotifierTest PRIVATE puremvc)
 add_test(NAME PureMVC.NotifierTest COMMAND NotifierTest)
-#
-#add_executable(ObserverTest patterns/observer/observer_test.c)
-#target_link_libraries(ObserverTest PRIVATE puremvc)
-#add_test(NAME PureMVC.ObserverTest COMMAND ObserverTest)
-#
+
+add_executable(ObserverTest patterns/observer/observer_test.c)
+target_link_libraries(ObserverTest PRIVATE puremvc)
+add_test(NAME PureMVC.ObserverTest COMMAND ObserverTest)
+
 add_executable(ProxyTest patterns/proxy/proxy_test.c)
 target_link_libraries(ProxyTest PRIVATE puremvc)
 add_test(NAME PureMVC.ProxyTest COMMAND ProxyTest)

@@ -2,6 +2,7 @@
 
 #include "observer_test.h"
 #include "puremvc/observer.h"
+#include "puremvc/notification.h"
 
 int main() {
     testObserverConstructor();
@@ -20,8 +21,8 @@ static struct ObserverTestVar observerTestVar = {0};
  * A function that is used as the observer notification
  * method.
  */
-static void handleNotification(const void *context, struct Notification notification) {
-    observerTestVar = *(struct ObserverTestVar *) notification.getBody(&notification);
+static void handleNotification(const void *context, struct INotification *notification) {
+    observerTestVar = *(struct ObserverTestVar *) notification->getBody(notification);
 }
 
 /**
@@ -30,16 +31,17 @@ static void handleNotification(const void *context, struct Notification notifica
 void testObserverConstructor() {
     // Create observer
     struct Object { int x; } object = { 0 };
-    struct Observer observer = puremvc_observer(handleNotification, &object);
+    struct Observer o = puremvc_observer(handleNotification, &object);
+    struct IObserver *observer = &o.base;
 
     struct ObserverTestVar var = {.value = 5};
-    struct Notification notification = puremvc_notification("ObserverTestNote", &var, NULL);
-    observer.notifyObserver(&observer, notification);
+    struct Notification note = puremvc_notification("ObserverTestNote", &var, NULL);
+    struct INotification *notification = &note.base;
+    observer->notifyObserver(observer, notification);
 
     // test assertions
     assert(observerTestVar.value == 5);
-    assert(&object == observer.getContext(&observer));
-    assert(&object == observer.context);
+    assert(&object == observer->getContext(observer));
 }
 
 /**
@@ -49,12 +51,14 @@ void testObserverAccessors() {
     // Create observer with null args, then
     // use accessors to set notification method and context
     struct Object {int x;} object;
-    struct Observer observer = puremvc_observer(NULL, NULL);
-    observer.setContext(&observer, &object);
-    observer.setNotify(&observer, handleNotification);
+    struct Observer o = puremvc_observer(NULL, NULL);
+    struct IObserver *observer = &o.base;
 
-    assert(observer.getContext(&observer) == &object);
-    assert(observer.getNotify(&observer) == handleNotification);
+    observer->setContext(observer, &object);
+    observer->setNotify(observer, handleNotification);
+
+    assert(observer->getContext(observer) == &object);
+    assert(observer->getNotify(observer) == handleNotification);
 
     // create a test event, setting a payload value and notify
     // the observer with it. since the observer is this class
@@ -63,8 +67,9 @@ void testObserverAccessors() {
     // observerTestVar being set to the value we pass in
     // on the note body.
     struct ObserverTestVar vo = {.value = 10};
-    struct Notification notification = puremvc_notification("ObserverTestNote", &vo, NULL);
-    observer.notifyObserver(&observer, notification);
+    struct Notification n = puremvc_notification("ObserverTestNote", &vo, NULL);
+    struct INotification *notification = &n.base;
+    observer->notifyObserver(observer, notification);
 }
 
 /**
@@ -75,9 +80,10 @@ void testCompareNotifyContext() {
     struct Object {char dummy;};
     struct Object object = {0};
     struct Object negTestObj = {0};
-    struct Observer observer = puremvc_observer(handleNotification, &object);
+    struct Observer o = puremvc_observer(handleNotification, &object);
+    struct IObserver *observer = &o.base;
 
     // test assertions
-    assert(observer.compareNotifyContext(&observer, &negTestObj) == false);
-    assert(observer.compareNotifyContext(&observer, &object) == true);
+    assert(observer->compareNotifyContext(observer, &negTestObj) == false);
+    assert(observer->compareNotifyContext(observer, &object) == true);
 }

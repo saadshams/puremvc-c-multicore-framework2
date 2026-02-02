@@ -8,26 +8,18 @@
 #pragma once
 
 #include "constants.h"
+#include "i_mediator.h"
 #include "notifier.h"
-#include "notification.h"
 
 #define MEDIATOR_NAME "mediator"
 
 struct Mediator {
+    struct IMediator base;
+
     char name[NAME_SIZE];
     void *component;
 
     struct Notifier notifier;
-    
-    const char *(*getName)(const struct Mediator *self);
-    void (*setComponent)(struct Mediator *self, void *component);
-    void *(*getComponent)(const struct Mediator *self);
-
-    const char **(*listNotificationInterests)(const struct Mediator *self);
-    void (*handleNotification)(const struct Mediator *self, struct Notification notification);
-
-    void (*onRegister)(struct Mediator *self);
-    void (*onRemove)(struct Mediator *self);
 };
 
 struct Mediator puremvc_mediator(const char *name, void *component);

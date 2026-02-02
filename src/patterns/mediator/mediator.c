@@ -10,47 +10,52 @@
 
 #include "puremvc/mediator.h"
 
-static const char *getName(const struct Mediator *self) {
-    return self->name;
+static const char *getName(const struct IMediator *self) {
+    const struct Mediator *this = (struct Mediator *) self;
+    return this->name;
 }
 
-static void setComponent(struct Mediator *self, void *component) {
-    self->component = component;
+static void setComponent(struct IMediator *self, void *component) {
+    struct Mediator *this = (struct Mediator *) self;
+    this->component = component;
 }
 
-static void *getComponent(const struct Mediator *self) {
-    return self->component;
+static void *getComponent(const struct IMediator *self) {
+    const struct Mediator *this = (struct Mediator *) self;
+    return this->component;
 }
 
-static const char **listNotificationInterests(const struct Mediator *self) {
+static const char **listNotificationInterests(const struct IMediator *self) {
     (void)self;
     static const char *interests[] = { NULL };
     return interests;
 }
 
-static void handleNotification(const struct Mediator *self, struct Notification notification) {
+static void handleNotification(const struct IMediator *self, struct INotification *notification) {
     (void)self; (void)notification;
 }
 
-static void onRegister(struct Mediator *self) {
+static void onRegister(struct IMediator *self) {
     (void)self;
 }
 
-static void onRemove(struct Mediator *self) {
+static void onRemove(struct IMediator *self) {
     (void)self;
 }
 
 struct Mediator puremvc_mediator(const char *name, void *component) {
     struct Mediator mediator = {
+        .base = {
+            .getName = getName,
+            .setComponent = setComponent,
+            .getComponent = getComponent,
+            .listNotificationInterests = listNotificationInterests,
+            .handleNotification = handleNotification,
+            .onRegister = onRegister,
+            .onRemove = onRemove
+        },
         .component = component,
         .notifier = puremvc_notifier(),
-        .getName = getName,
-        .setComponent = setComponent,
-        .getComponent = getComponent,
-        .listNotificationInterests = listNotificationInterests,
-        .handleNotification = handleNotification,
-        .onRegister = onRegister,
-        .onRemove = onRemove
     };
 
     int len = snprintf(mediator.name, NAME_SIZE, "%s", name ? name : MEDIATOR_NAME);

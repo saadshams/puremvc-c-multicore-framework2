@@ -32,11 +32,11 @@ struct Object {
 
 void testInstance() {
     // create notifier instance
-    struct Notifier notifier = puremvc_notifier();
-    struct INotifier *n = &notifier.base;
+    struct Notifier n = puremvc_notifier();
+    struct INotifier *notifier = &n.base;
 
     // initialize facade
-    n->initializeNotifier(n, "NotifierTest1");
+    notifier->initializeNotifier(notifier, "NotifierTest1");
     // notifier->getFacade(notifier);
 
     // assert(notifier->getFacade(notifier) != NULL);
