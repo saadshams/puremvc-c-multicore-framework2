@@ -17,18 +17,18 @@ struct Object {
     int result;
 };
 
-static void execute(const struct SimpleCommand *self, struct Notification notification) {
-    struct Object *temp = (struct Object *)notification.getBody(&notification);
-
-    // fabricate a result
-    temp->result = temp->value * 4;
-}
-
-static struct SimpleCommand command() {
-    struct SimpleCommand command = puremvc_simple_command();
-    command.execute = execute;
-    return command;
-}
+// static void execute(const struct SimpleCommand *self, struct Notification notification) {
+//     struct Object *temp = (struct Object *)notification.getBody(&notification);
+//
+//     // fabricate a result
+//     temp->result = temp->value * 4;
+// }
+//
+// static struct SimpleCommand command() {
+//     struct SimpleCommand command = puremvc_simple_command();
+//     command.execute = execute;
+//     return command;
+// }
 
 void testInstance() {
     // create notifier instance
