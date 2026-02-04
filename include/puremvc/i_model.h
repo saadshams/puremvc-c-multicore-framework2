@@ -26,11 +26,11 @@
 struct IModel {
     void (*initializeModel)(struct IModel *self);
 
-    void (*registerProxy)(struct IModel *self, struct Proxy proxy);
+    void (*registerProxy)(struct IModel *self, struct IProxy *proxy);
 
     struct IProxy *(*retrieveProxy)(struct IModel *self, const char *proxyName);
 
     bool (*hasProxy)(struct IModel *self, const char *proxyName);
 
-    struct Proxy(*removeProxy)(struct IModel *self, const char *proxyName);
+    struct IProxy *(*removeProxy)(struct IModel *self, const char *proxyName);
 };

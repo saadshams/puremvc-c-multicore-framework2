@@ -10,7 +10,7 @@
 #include "mutex.h"
 #include "constants.h"
 #include "i_model.h"
-#include "proxy.h"
+#include "i_proxy.h"
 
 struct Model {
     struct IModel base;
@@ -20,7 +20,7 @@ struct Model {
     Mutex proxyMapMutex;
     struct ProxyMap {
         char key[KEY_SIZE];
-        struct Proxy proxy;
+        struct IProxy *proxy; // borrowed
     } **proxyMap;
 };
 

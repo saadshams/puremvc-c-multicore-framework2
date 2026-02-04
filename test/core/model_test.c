@@ -55,7 +55,7 @@ void testRegisterAndRetrieveProxy() {
     struct IModel *model = puremvc_model_getInstance(modelMap, "ModelTestKey2");
 
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
-    model->registerProxy(model, puremvc_proxy("colors", colors));
+    model->registerProxy(model, puremvc_proxy_init("colors", colors));
 
     const struct IProxy *proxy = model->retrieveProxy(model, "colors");
     assert(proxy != NULL);
@@ -83,7 +83,7 @@ void testRegisterAndRemoveProxy() {
     struct IModel *model = puremvc_model_getInstance(modelMap, "ModelTestKey3");
 
     int *sizes = (int []) {1, 2, 3, 0};
-    struct Proxy p = puremvc_proxy("sizes", sizes);
+    struct Proxy p = puremvc_proxy_init("sizes", sizes);
     model->registerProxy(model, p);
 
     // remove the new
@@ -108,7 +108,7 @@ void testHasProxy() {
     struct IModel *model = puremvc_model_getInstance(modelMap, "ModelTestKey4");
 
     const char **aces = (const char *[]) {"clubs", "spades", "hearts", "diamonds", NULL};
-    struct Proxy p = puremvc_proxy("aces", aces);
+    struct Proxy p = puremvc_proxy_init("aces", aces);
     model->registerProxy(model, p);
 
     // assert that the model.hasProxy method returns true
@@ -186,9 +186,9 @@ void testMultipleModels() {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
     const char **aces = (const char *[]) { "clubs", "spades", "hearts", "diamonds", NULL};
 
-    struct Proxy p1 = puremvc_proxy("colors", colors);
+    struct Proxy p1 = puremvc_proxy_init("colors", colors);
     model1->registerProxy(model1, p1);
-    struct Proxy p2 = puremvc_proxy("aces", aces);
+    struct Proxy p2 = puremvc_proxy_init("aces", aces);
     model2->registerProxy(model2, p2);
 
     assert(model1->hasProxy(model1, "colors"));
@@ -216,11 +216,11 @@ void testRegisterAndReplaceProxy() {
     struct IModel *model = puremvc_model_getInstance(modelMap, "ModelTestKey9");
 
     int *sizes = (int []) {1, 0};
-    struct Proxy p1 = puremvc_proxy("sizes", sizes);
+    struct Proxy p1 = puremvc_proxy_init("sizes", sizes);
     model->registerProxy(model, p1);
 
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
-    struct Proxy p2 = puremvc_proxy("sizes", colors);
+    struct Proxy p2 = puremvc_proxy_init("sizes", colors);
     model->registerProxy(model, p2);
 
     const struct IProxy *proxy = model->retrieveProxy(model, "sizes");
@@ -254,19 +254,19 @@ void testRegisterAndRemoveMultipleProxies() {
     const struct Model *self = (struct Model *) model;
 
     // Register four proxies and verify that each is correctly associated to their dictionaries
-    model->registerProxy(model, puremvc_proxy("proxy1", NULL));
+    model->registerProxy(model, puremvc_proxy_init("proxy1", NULL));
     assert(strcmp(self->proxyMap[0]->key, "proxy1") == 0);
     assert(strcmp(self->proxyMap[0]->proxy.name, "proxy1") == 0);
 
-    model->registerProxy(model, puremvc_proxy("proxy2", NULL));
+    model->registerProxy(model, puremvc_proxy_init("proxy2", NULL));
     assert(strcmp(self->proxyMap[1]->key, "proxy2") == 0);
     assert(strcmp(self->proxyMap[1]->proxy.name, "proxy2") == 0);
 
-    model->registerProxy(model, puremvc_proxy("proxy3", NULL));
+    model->registerProxy(model, puremvc_proxy_init("proxy3", NULL));
     assert(strcmp(self->proxyMap[2]->key, "proxy3") == 0);
     assert(strcmp(self->proxyMap[2]->proxy.name, "proxy3") == 0);
 
-    model->registerProxy(model, puremvc_proxy("proxy4", NULL));
+    model->registerProxy(model, puremvc_proxy_init("proxy4", NULL));
     assert(strcmp(self->proxyMap[3]->key, "proxy4") == 0);
     assert(strcmp(self->proxyMap[3]->proxy.name, "proxy4") == 0);
 

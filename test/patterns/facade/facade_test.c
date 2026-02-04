@@ -81,7 +81,7 @@ void testRegisterAndRetrieveProxy() {
         *cursor = strdup(*data);
     }
 
-    facade->registerProxy(facade, puremvc_proxy("colors", colors));
+    facade->registerProxy(facade, puremvc_proxy_init("colors", colors));
     const struct IProxy *proxy = facade->retrieveProxy(facade, "colors");
 
     // test assertions
@@ -110,7 +110,7 @@ void testRegisterAndRemoveProxy() {
         *cursor = strdup(*data);
     }
 
-    facade->registerProxy(facade, puremvc_proxy("sizes", sizes));
+    facade->registerProxy(facade, puremvc_proxy_init("sizes", sizes));
 
     // remove the new
     const struct Proxy removedProxy = facade->removeProxy(facade, "sizes");
@@ -154,7 +154,7 @@ void testHasProxy() {
     for(const int *data = (int []) {1, 2, 3, 0}; *data != 0; data++, cursor++) // 0 as terminator, or use -1
         *cursor = *data;
 
-    facade->registerProxy(facade, puremvc_proxy("hasProxyTest", sizes));
+    facade->registerProxy(facade, puremvc_proxy_init("hasProxyTest", sizes));
 
     // assert that the model.hasProxy method returns true
     // for that new name

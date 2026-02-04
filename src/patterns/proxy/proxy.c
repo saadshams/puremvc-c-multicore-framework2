@@ -34,24 +34,21 @@ static void onRemove(struct IProxy *self) {
     (void)self;
 }
 
-struct Proxy puremvc_proxy(const char *name, void *data) {
-    struct Proxy proxy = {
-        .base = (struct IProxy) {
-            .getName = getName,
-            .getData = getData,
-            .setData = setData,
-            .onRegister = onRegister,
-            .onRemove = onRemove,
-        },
-        .data = data,
-        .notifier = puremvc_notifier(),
-    };
+struct IProxy *puremvc_proxy_init(struct Proxy *const proxy, const char *name, void *data) {
+    proxy->base.getName = getName;
+    proxy->base.getData = getData;
+    proxy->base.setData = setData;
+    proxy->base.onRegister = onRegister;
+    proxy->base.onRemove = onRemove;
 
-    int len = snprintf(proxy.name, NAME_SIZE, "%s", name ? name : PROXY_NAME);
+    proxy->data = data;
+    proxy->notifier = puremvc_notifier();
+
+    int len = snprintf(proxy->name, NAME_SIZE, "%s", name ? name : PROXY_NAME);
     if (len >= NAME_SIZE)
         fprintf(stderr, "[PureMVC::Proxy] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : PROXY_NAME, len, NAME_SIZE);
 
-    return proxy;
+    return &proxy->base;
 }
 
 void puremvc_proxy_deinit(struct Proxy *proxy) {

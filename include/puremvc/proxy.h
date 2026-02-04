@@ -23,6 +23,6 @@ struct Proxy {
     struct Notifier notifier;
 };
 
-struct Proxy puremvc_proxy(const char *name, void *data);
+struct IProxy *puremvc_proxy_init(struct Proxy *proxy, const char *name, void *data);
 
 void puremvc_proxy_deinit(struct Proxy *proxy);

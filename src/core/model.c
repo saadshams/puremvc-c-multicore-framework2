@@ -20,11 +20,11 @@ static void initializeModel(struct IModel *self) {
     (void)self;
 }
 
-static void registerProxy(struct IModel *self, struct Proxy proxy) {
+static void registerProxy(struct IModel *self, struct IProxy *proxy) {
     struct Model *this = (struct Model *) self;
 
-    if (strlen(proxy.name) >= KEY_SIZE) { // Key truncation collision
-        fprintf(stderr, "[PureMVC::Model::registerProxy] Error: Key '%s' too long (max %d) — skipping registration.\n", proxy.name, KEY_SIZE);
+    if (strlen(proxy->getName(proxy)) >= KEY_SIZE) { // Key truncation collision
+        fprintf(stderr, "[PureMVC::Model::registerProxy] Error: Key '%s' too long (max %d) — skipping registration.\n", proxy->getName(proxy), KEY_SIZE);
         return;
     }
 
@@ -36,46 +36,48 @@ static void registerProxy(struct IModel *self, struct Proxy proxy) {
     mutex_lock(&this->proxyMapMutex);
 
     size_t i = 0;
+
     for (; this->proxyMap[i] != NULL && this->proxyMap[i]->key[0] != '\0'; i++) { // find existing
-        if (strcmp(this->proxyMap[i]->key, proxy.base.getName(&proxy.base)) != 0)
+        if (strcmp(this->proxyMap[i]->key, proxy->getName(proxy)) != 0)
             continue;
 
-        this->proxyMap[i]->proxy.base.onRemove(&this->proxyMap[i]->proxy.base);
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerMediator] Warning: Proxy '%s' exists; overridden registration\033[0m.\n", proxy.base.getName(&proxy.base));
+        this->proxyMap[i]->proxy->onRemove(this->proxyMap[i]->proxy);
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerMediator] Warning: Proxy '%s' exists; overridden registration\033[0m.\n", proxy->getName(proxy));
 
         this->proxyMap[i]->proxy = proxy; // registration
         mutex_unlock(&this->proxyMapMutex);
         return;
     }
-
     if (this->proxyMap[i] == NULL) { // overflow (ProxyMap)
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap storage overflow for proxy '%s'; increase slots - skipping registration.\033[0m\n", proxy.name);
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap storage overflow for proxy '%s'; increase slots - skipping registration.\033[0m\n", proxy->getName(proxy));
         mutex_unlock(&this->proxyMapMutex);
         return;
     }
 
-    proxy.notifier.base.initializeNotifier(&proxy.notifier.base, this->multitonKey);
+    // proxy->notifier.initializeNotifier(&proxy->notifier, this->multitonKey);
 
-    snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", proxy.name); // registration
+    snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", proxy->getName(proxy)); // registration
     this->proxyMap[i]->proxy = proxy;
+
     mutex_unlock(&this->proxyMapMutex);
 
-    this->proxyMap[i]->proxy.base.onRegister(&this->proxyMap[i]->proxy.base);
+    this->proxyMap[i]->proxy->onRegister(this->proxyMap[i]->proxy);
 }
 
 static struct IProxy *retrieveProxy(struct IModel *self, const char *proxyName) {
     struct Model *this = (struct Model *) self;
     mutex_lock_shared(&this->proxyMapMutex);
-
+    struct IProxy *proxy = NULL;
     for (size_t i = 0; this->proxyMap != NULL && this->proxyMap[i] != NULL && this->proxyMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->proxyMap[i]->key, proxyName) == 0) {
+            proxy = this->proxyMap[i]->proxy;
             mutex_unlock(&this->proxyMapMutex);
-            return &this->proxyMap[i]->proxy.base;
+            return proxy;
         }
     }
 
     mutex_unlock(&this->proxyMapMutex);
-    return NULL;
+    return proxy;
 }
 
 static bool hasProxy(struct IModel *self, const char *proxyName) {
@@ -92,27 +94,23 @@ static bool hasProxy(struct IModel *self, const char *proxyName) {
     return exists;
 }
 
-static struct Proxy removeProxy(struct IModel *self, const char *proxyName) {
+static struct IProxy *removeProxy(struct IModel *self, const char *proxyName) {
     struct Model *this = (struct Model *) self;
     mutex_lock(&this->proxyMapMutex);
-    struct Proxy proxy = {0};
+    struct IProxy *proxy = NULL;
 
     size_t i = 0;
     size_t index = 0;
     for (; this->proxyMap != NULL && this->proxyMap[i] != NULL && this->proxyMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->proxyMap[i]->key, proxyName) == 0) { // match
             proxy = this->proxyMap[i]->proxy;
-            proxy.base.onRemove(&proxy.base);
-
+            proxy->onRemove(proxy);
             memset(&this->proxyMap[i]->key, 0, KEY_SIZE);
-            puremvc_proxy_deinit(&this->proxyMap[i]->proxy);
         } else {
             if (index != i) { // shift left
                 snprintf(this->proxyMap[index]->key, KEY_SIZE, "%s", this->proxyMap[i]->key);
                 this->proxyMap[index]->proxy = this->proxyMap[i]->proxy;
-
                 memset(&this->proxyMap[i]->key, 0, KEY_SIZE);
-                puremvc_proxy_deinit(&this->proxyMap[i]->proxy);
             }
             index++;
         }
@@ -143,7 +141,7 @@ static void deinit(struct Model *model) {
 
     for (size_t j = 0; model->proxyMap != NULL && model->proxyMap[j] != NULL; j++) { // clear proxyMap
         memset(model->proxyMap[j]->key, 0, KEY_SIZE);
-        puremvc_proxy_deinit(&model->proxyMap[j]->proxy);
+        // puremvc_proxy_deinit(&model->proxyMap[j]->proxy);
     }
 }
 
