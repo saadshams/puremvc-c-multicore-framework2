@@ -67,7 +67,6 @@ static void registerObserver(const struct IView *self, const char *notificationN
 
     snprintf(this->observerMap[i]->key, KEY_SIZE, "%s", notificationName); // registration
     *this->observerMap[i]->observers[0] = observer;
-
     mutex_unlock(&this->observerMapMutex);
 }
 
@@ -85,6 +84,7 @@ static void notifyObservers(const struct IView *self, struct INotification *noti
             break;
         }
     }
+
     mutex_unlock(&this->observerMapMutex);
 }
 
@@ -141,7 +141,7 @@ static void registerMediator(const struct IView *self, struct Mediator mediator)
     mutex_lock(&this->mediatorMapMutex);
 
     size_t i = 0;
-    for (; this->mediatorMap[i] && this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find existing
+    for (; this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find existing
         if (strcmp(this->mediatorMap[i]->key, mediator.base.getName(&mediator.base)) == 0) {
             fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: Mediator '%s' exists; skipping registration\033[0m.\n", mediator.base.getName(&mediator.base));
             mutex_unlock(&this->mediatorMapMutex);
@@ -186,7 +186,7 @@ static bool hasMediator(const struct IView *self, const char *mediatorName) {
     struct View *this = (struct View *) self;
     mutex_lock_shared(&this->mediatorMapMutex);
     bool exists = false;
-    for (size_t i = 0; this->mediatorMap && this->mediatorMap[i] && this->mediatorMap[i]->key[0] != '\0'; i++) {
+    for (size_t i = 0; this->mediatorMap != NULL && this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->mediatorMap[i]->key, mediatorName) == 0) {
             exists = true;
             break;
@@ -260,12 +260,11 @@ static void init(struct View *view, const char *key) {
     snprintf(view->multitonKey, KEY_SIZE, "%s", key);
     mutex_init(&view->observerMapMutex);
     mutex_init(&view->mediatorMapMutex);
-
-    view->base.initializeView(&view->base);
 }
 
 static void deinit(struct View *view) {
     memset(&view->multitonKey, 0, KEY_SIZE);
+    view->base = (struct IView) {0};
 
     mutex_destroy(&view->observerMapMutex);
     mutex_destroy(&view->mediatorMapMutex);
@@ -316,20 +315,28 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
 
     if (viewMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: ViewMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
-
         mutex_unlock(&viewMapMutex);
         return NULL;
     }
 
     snprintf(viewMap[i]->key, KEY_SIZE, "%s", key); // init
     init(&viewMap[i]->view, key);
+    viewMap[i]->view.base.initializeView(&viewMap[i]->view.base);
 
     mutex_unlock(&viewMapMutex);
     return &viewMap[i]->view.base;
 }
 
 void puremvc_view_removeView(struct ViewMap **viewMap, const char *key) {
-    if (key == NULL || viewMap == NULL) return;
+    if (viewMap == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::View::removeView] FATAL: Missing ViewMap storage; skipping registration.\033[0m\n");
+        return;
+    }
+
+    if (key == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::View::removeView] FATAL: Key is NULL; skipping registration.\033[0m\n");
+        return;
+    }
 
     if (strlen(key) >= KEY_SIZE) { // Key truncation collision
         fprintf(stderr, "[PureMVC::View::removeView] Error: Key '%s' too long (max %d) — skipping registration.\n", key, KEY_SIZE);

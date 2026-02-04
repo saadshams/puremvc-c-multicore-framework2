@@ -20,3 +20,7 @@ struct SimpleCommand puremvc_simple_command() {
         .notifier = puremvc_notifier(),
     };
 }
+
+void puremvc_simple_command_deinit(struct SimpleCommand *command) {
+    command->base = (struct ICommand){0};
+}

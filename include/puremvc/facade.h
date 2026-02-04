@@ -24,10 +24,17 @@ struct Facade {
     struct IView *view;
 };
 
-struct Facade puremvc_facade(const char *key);
+struct FacadeMap {
+    char key[KEY_SIZE];
+    struct Facade facade;
 
-struct IFacade *puremvc_facade_getInstance(const char *key, struct Facade(*factory)(const char *));
+    struct ModelMap **modelMap;
+    struct ViewMap **viewMap;
+    struct ControllerMap **controllerMap;
+};
 
-void puremvc_facade_removeFacade(const char *key);
+struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const char *key);
 
-bool puremvc_facade_hasCore(const char *key);
+void puremvc_facade_removeFacade(struct FacadeMap **facadeMap, const char *key);
+
+bool puremvc_facade_hasCore(struct FacadeMap **facadeMap, const char *key);

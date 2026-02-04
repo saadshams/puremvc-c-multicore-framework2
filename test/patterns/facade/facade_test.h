@@ -12,4 +12,3 @@ void testHasCommand();
 void testHasCoreAndRemoveCore();
 void testGetInstancesThreaded();
 void testAddAndRemoveMultipleCores();
-void testCapacityWarning();

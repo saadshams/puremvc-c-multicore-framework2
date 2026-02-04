@@ -24,11 +24,14 @@ struct Controller {
     struct CommandMap {
         char key[KEY_SIZE];
         struct SimpleCommand (*factory)();
-    } commandMap[COMMAND_MAP_SIZE];
+    } **commandMap;
 };
 
-struct Controller puremvc_controller(const char *key);
+struct ControllerMap {
+    char key[KEY_SIZE];
+    struct Controller controller;
+};
 
-struct IController *puremvc_controller_getInstance(const char *key, struct Controller(*factory)(const char *key));
+struct IController *puremvc_controller_getInstance(struct ControllerMap **controllerMap, const char *key);
 
-void puremvc_controller_removeController(const char *key);
+void puremvc_controller_removeController(struct ControllerMap **controllerMap, const char *key);

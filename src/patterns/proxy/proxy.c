@@ -9,6 +9,7 @@
 #include "puremvc/proxy.h"
 
 #include <stdio.h>
+#include <string.h>
 
 static const char *getName(const struct IProxy *self) {
     const struct Proxy *this = (struct Proxy *) self;
@@ -51,4 +52,10 @@ struct Proxy puremvc_proxy(const char *name, void *data) {
         fprintf(stderr, "[PureMVC::Proxy] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : PROXY_NAME, len, NAME_SIZE);
 
     return proxy;
+}
+
+void puremvc_proxy_deinit(struct Proxy *proxy) {
+    proxy->base = (struct IProxy){0};
+    memset(&proxy->name, 0, KEY_SIZE);
+    proxy->data = NULL;
 }

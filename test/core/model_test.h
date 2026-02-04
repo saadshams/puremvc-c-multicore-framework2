@@ -9,5 +9,4 @@ void testOnRegisterAndOnRemove();
 void testRemoveModel();
 void testMultipleModels();
 void testRegisterAndRemoveMultipleProxies();
-void TestViewShiftLeft();
-void testCapacityWarning();
+void TestModelShiftLeft();

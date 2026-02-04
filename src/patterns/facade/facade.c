@@ -16,40 +16,34 @@
 #include "puremvc/view.h"
 #include "puremvc/notification.h"
 
-// The Multiton facadeMap.
-static struct FacadeMap {
-    char key[KEY_SIZE];
-    struct Facade facade;
-} facadeMap[INSTANCE_MAP_SIZE];
-
 // mutex for facadeMap
 static Mutex facadeMapMutex;
 static MutexOnce facadeMutexOnce = MUTEX_ONCE_INIT;
 
-static void initializeFacade(struct IFacade *self) {
-    self->initializeModel(self);
-    self->initializeController(self);
-    self->initializeView(self);
+static void initializeFacade(struct IFacade *self, struct FacadeMap **facadeMap) {
+    self->initializeModel(self, facadeMap->modelMap);
+    self->initializeController(self, facadeMap->controllerMap);
+    self->initializeView(self, facadeMap->viewMap);
 }
 
-static void initializeController(struct IFacade *self) {
+static void initializeController(struct IFacade *self, struct ControllerMap **controllerMap) {
     struct Facade *this = (struct Facade *) self;
     if (this->controller != NULL) return;
-    this->controller = puremvc_controller_getInstance(this->multitonKey, puremvc_controller);
+    this->controller = puremvc_controller_getInstance(controllerMap, this->multitonKey);
     this->controller->initializeController(this->controller);
 }
 
-static void initializeModel(struct IFacade *self) {
+static void initializeModel(struct IFacade *self, struct ModelMap **modelMap) {
     struct Facade *this = (struct Facade *) self;
     if (this->model != NULL) return;
-    this->model = puremvc_model_getInstance(this->multitonKey, puremvc_model);
+    this->model = puremvc_model_getInstance(modelMap, this->multitonKey);
     this->model->initializeModel(this->model);
 }
 
-static void initializeView(struct IFacade *self) {
+static void initializeView(struct IFacade *self, struct ViewMap **viewMap) {
     struct Facade *this = (struct Facade *) self;
     if (this->view != NULL) return;
-    this->view = puremvc_view_getInstance(this->multitonKey, puremvc_view);
+    this->view = puremvc_view_getInstance(viewMap, this->multitonKey);
     this->view->initializeView(this->view);
 }
 
@@ -118,77 +112,85 @@ static void sendNotification(const struct IFacade *self, const char *notificatio
     self->notifyObservers(self, &notification.base);
 }
 
-struct Facade puremvc_facade(const char *key) {
-    struct Facade facade = {
-        .base = {
-            .initializeFacade = initializeFacade,
-            .initializeController = initializeController,
-            .initializeModel = initializeModel,
-            .initializeView = initializeView,
-            .registerCommand = registerCommand,
-            .hasCommand = hasCommand,
-            .removeCommand = removeCommand,
-            .registerProxy = registerProxy,
-            .retrieveProxy = retrieveProxy,
-            .hasProxy = hasProxy,
-            .removeProxy = removeProxy,
-            .registerMediator = registerMediator,
-            .retrieveMediator = retrieveMediator,
-            .hasMediator = hasMediator,
-            .removeMediator = removeMediator,
-            .notifyObservers = notifyObservers,
-            .sendNotification = sendNotification
-        },
+static void init(struct Facade *facade, const char *key) {
+    facade->base = (struct IFacade) {
+        .initializeFacade = initializeFacade,
+        .initializeController = initializeController,
+        .initializeModel = initializeModel,
+        .initializeView = initializeView,
+        .registerCommand = registerCommand,
+        .hasCommand = hasCommand,
+        .removeCommand = removeCommand,
+        .registerProxy = registerProxy,
+        .retrieveProxy = retrieveProxy,
+        .hasProxy = hasProxy,
+        .removeProxy = removeProxy,
+        .registerMediator = registerMediator,
+        .retrieveMediator = retrieveMediator,
+        .hasMediator = hasMediator,
+        .removeMediator = removeMediator,
+        .notifyObservers = notifyObservers,
+        .sendNotification = sendNotification
     };
 
-    int len = snprintf(facade.multitonKey, KEY_SIZE, "%s", key);
-    if (len >= KEY_SIZE)
-        fprintf(stderr, "[PureMVC::Facade] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
+    snprintf(facade->multitonKey, KEY_SIZE, "%s", key);
+}
 
-    return facade;
+static void deinit(struct Facade *facade) {
+    memset(facade->multitonKey, 0, KEY_SIZE);
+    facade->base = (struct IFacade){0}; // todo
 }
 
 static void dispatchOnce(void) {
     mutex_init(&facadeMapMutex);
 }
 
-struct IFacade *puremvc_facade_getInstance(const char *key, struct Facade(*factory)(const char *)) {
-    if (key == NULL || factory == NULL) return NULL;
+struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const char *key) {
+    if (facadeMap == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
+        return NULL;
+    }
+
+    if (key == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: Key is NULL; skipping registration.\033[0m\n");
+        return NULL;
+    }
+
+    if (strlen(key) >= KEY_SIZE) { // Key truncation collision
+        fprintf(stderr, "[PureMVC::Facade::getInstance] Error: Key '%s' too long (max %d) — skipping registration.\n", key, KEY_SIZE);
+        return NULL;
+    }
+
     mutex_once(&facadeMutexOnce, dispatchOnce);
     mutex_lock(&facadeMapMutex);
 
     size_t i = 0;
-    for (; facadeMap[i].key[0] != '\0'; i++) {
-        if (strncmp(facadeMap[i].key, key, KEY_SIZE) == 0) {
+    for (; facadeMap[i] != NULL && facadeMap[i]->key[0] != '\0'; i++) { // find model
+        if (strncmp(facadeMap[i]->key, key, KEY_SIZE) == 0) {
             mutex_unlock(&facadeMapMutex);
-            return &facadeMap[i].facade.base;
+            return &facadeMap[i]->facade.base;
         }
     }
 
-    if (i >= INSTANCE_MAP_SIZE) {
-        fprintf(stderr, "[PureMVC::Facade::getInstance] Warning: facadeMap is at capacity for key '%s' (max %d instances); skipping registration.\n", key, INSTANCE_MAP_SIZE);
+    if (facadeMap[i] == NULL) { // overflow
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: FacadeMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&facadeMapMutex);
         return NULL;
     }
 
-    int len = snprintf(facadeMap[i].key, KEY_SIZE, "%s", key);
-    if (len >= KEY_SIZE)
-        fprintf(stderr, "[PureMVC::Facade::getInstance] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d)\n", key, len, KEY_SIZE);
-
-    facadeMap[i].facade = factory(key);
-
-    facadeMap[i].facade.base.initializeFacade(&facadeMap[i].facade.base);
+    snprintf(facadeMap[i]->key, KEY_SIZE, "%s", key); // init
+    init(&facadeMap[i]->facade, key);
+    facadeMap[i]->facade.base.initializeFacade(facadeMap, &facadeMap[i]->facade.base);
 
     mutex_unlock(&facadeMapMutex);
-    return &facadeMap[i].facade.base;
+    return &facadeMap[i]->facade.base;
 }
 
-bool puremvc_facade_hasCore(const char *key) {
-    if (key == NULL) return false;
+bool puremvc_facade_hasCore(struct FacadeMap **facadeMap, const char *key) {
     mutex_lock_shared(&facadeMapMutex);
     bool exists = false;
-    for (size_t i = 0; i < INSTANCE_MAP_SIZE && facadeMap[i].key[0] != '\0'; i++) {
-        if (strcmp(facadeMap[i].key, key) == 0) {
+    for (size_t i = 0; facadeMap != NULL && facadeMap[i]->key[0] != '\0'; i++) {
+        if (strcmp(facadeMap[i]->key, key) == 0) {
             exists = true;
             break;
         }
@@ -197,23 +199,41 @@ bool puremvc_facade_hasCore(const char *key) {
     return exists;
 }
 
-void puremvc_facade_removeFacade(const char *key) {
-    if (key == NULL) return;
+void puremvc_facade_removeFacade(struct FacadeMap **facadeMap, const char *key) {
+    if (facadeMap == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeFacade] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
+        return;
+    }
+
+    if (key == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeFacade] FATAL: Key is NULL; skipping registration.\033[0m\n");
+        return;
+    }
+
+    if (strlen(key) >= KEY_SIZE) { // Key truncation collision
+        fprintf(stderr, "[PureMVC::Model::removeFacade] Error: Key '%s' too long (max %d) — skipping registration.\n", key, KEY_SIZE);
+        return;
+    }
+
     mutex_once(&facadeMutexOnce, dispatchOnce);
     mutex_lock(&facadeMapMutex);
 
-    puremvc_model_removeModel(key);
-    puremvc_view_removeView(key);
-    puremvc_controller_removeController(key);
+    puremvc_model_removeModel(facadeMap->modelMap, key);
+    puremvc_view_removeView(facadeMap->viewMap, key);
+    puremvc_controller_removeController(facadeMap->controllerMap, key);
 
     size_t index = 0;
-    for (size_t i = 0; i < INSTANCE_MAP_SIZE && facadeMap[i].key[0] != '\0'; i++) {
-        if (strcmp(facadeMap[i].key, key) == 0) {
-            memset(&facadeMap[i], 0, sizeof(struct FacadeMap));
+    for (size_t i = 0; facadeMap[i] != NULL && facadeMap[i]->key[0] != '\0'; i++) { // find facade
+        if (strncmp(facadeMap[i]->key, key, KEY_SIZE) == 0) {
+            memset(facadeMap[i]->key, 0, KEY_SIZE); // clear model
+            deinit(&facadeMap[i]->facade);
         } else {
-            if (index != i) {
-                memmove(&facadeMap[index], &facadeMap[i], sizeof(struct FacadeMap));
-                memset(&facadeMap[i], 0, sizeof(struct FacadeMap));
+            if (index != i) { // shift left
+                snprintf(facadeMap[index]->key, KEY_SIZE, "%s", facadeMap[i]->key); // copy model (destination)
+                facadeMap[index]->facade = facadeMap[i]->facade;
+
+                memset(facadeMap[i]->key, 0, KEY_SIZE); // clear facade (source)
+                deinit(&facadeMap[i]->facade);
             }
             index++;
         }

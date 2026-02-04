@@ -6,7 +6,6 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include "puremvc/constants.h"
 #include "puremvc/macro_command.h"
 
 #include <stddef.h>
@@ -14,7 +13,7 @@
 static void execute(const struct ICommand *self, struct INotification *notification) {
     const struct SimpleCommand *this = (struct SimpleCommand *) self;
 
-    struct SimpleCommand (*subCommands[MACRO_COMMAND_ARRAY_SIZE])() = { NULL };
+    struct SimpleCommand (*subCommands[1])() = { NULL };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {
         struct SimpleCommand (*factory)() = subCommands[i];

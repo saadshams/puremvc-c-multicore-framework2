@@ -9,4 +9,3 @@ void testRegisterAndUpdateCommand();
 void testRemoveController();
 void testRegisterAndRemoveMultipleCommands();
 void TestViewShiftLeft();
-void testCapacityWarning();

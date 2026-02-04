@@ -7,7 +7,7 @@
 static void execute(const struct ICommand *self, struct INotification *notification) {
     const struct SimpleCommand *this = (struct SimpleCommand *) self;
 
-    struct SimpleCommand (*subCommands[MACRO_COMMAND_ARRAY_SIZE])() = {
+    struct SimpleCommand (*subCommands[4])() = {
         macro_command_test_sub1_command,
         macro_command_test_sub2_command,
         macro_command_test_command2,

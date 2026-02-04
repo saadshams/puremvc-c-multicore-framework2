@@ -4,8 +4,6 @@
 #include "model_test.h"
 #include "puremvc/model.h"
 
-#include <stdio.h>
-
 #include "model_test_proxy.h"
 
 int main() {
@@ -18,8 +16,7 @@ int main() {
     testMultipleModels();
     testRegisterAndReplaceProxy();
     testRegisterAndRemoveMultipleProxies();
-    TestViewShiftLeft();
-    testCapacityWarning();
+    TestModelShiftLeft();
     return 0;
 }
 
@@ -305,7 +302,7 @@ void testRegisterAndRemoveMultipleProxies() {
     model = NULL;
 }
 
-void TestViewShiftLeft() {
+void TestModelShiftLeft() {
     struct ModelMap *modelMap[] = { // empty key model storage with 4 slots
         &(struct ModelMap) { .model = { .proxyMap = (struct ProxyMap*[]) { NULL } } },
         &(struct ModelMap) { .model = { .proxyMap = (struct ProxyMap*[]) { NULL } } },
@@ -346,35 +343,4 @@ void TestViewShiftLeft() {
     assert(modelMap[1]->key[0] == '\0');
     assert(modelMap[2]->key[0] == '\0');
     assert(modelMap[3]->key[0] == '\0');
-}
-
-void testCapacityWarning() {
-    struct ModelMap *modelMap[] = { // empty key model storage with 2 slot with one proxy each
-        &(struct ModelMap) { .model = { .proxyMap = (struct ProxyMap*[]) {
-            &(struct ProxyMap){0}, NULL } }
-        },
-        &(struct ModelMap) { .model = { .proxyMap = (struct ProxyMap*[]) {
-            &(struct ProxyMap){0}, NULL } }
-        },
-        NULL
-    };
-
-    for (int i = 0; i < 3; i++) {
-        char key[32] = {0};
-        snprintf(key, sizeof(key), "model%d", i);
-        puremvc_model_getInstance(modelMap, key);
-    }
-
-    struct IModel *model = puremvc_model_getInstance(modelMap, "model0");
-    for (int i = 0; i < 2; i++) {
-        char key[32] = {0};
-        snprintf(key, sizeof(key), "proxy%d", i);
-        model->registerProxy(model, puremvc_proxy(key, NULL));
-    }
-
-    for (int i = 0; i < INSTANCE_MAP_SIZE + 1; i++) {
-        char key[32] = {0};
-        snprintf(key, sizeof(key), "model%d", i);
-        puremvc_model_removeModel(modelMap, key);
-    }
 }

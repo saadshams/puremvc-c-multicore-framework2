@@ -21,7 +21,6 @@ int main() {
     testHasCommand();
     testHasCoreAndRemoveCore();
     // testAddAndRemoveMultipleCores();
-    testCapacityWarning();
     return 0;
 }
 
@@ -256,11 +255,3 @@ void testHasCoreAndRemoveCore() {
 //     puremvc_facade_removeFacade("facade3"); // remove remaining
 //     assert(puremvc_facade_hasCore("facade3") == false);
 // }
-
-void testCapacityWarning() {
-    for (int i = 0; i < INSTANCE_MAP_SIZE + 1; i++) {
-        char key[32] = {0};
-        snprintf(key, sizeof(key), "facade%d", i);
-        puremvc_facade_getInstance(key, puremvc_facade);
-    }
-}

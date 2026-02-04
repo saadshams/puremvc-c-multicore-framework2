@@ -17,3 +17,5 @@ struct SimpleCommand {
 };
 
 struct SimpleCommand puremvc_simple_command();
+
+void puremvc_simple_command_deinit(struct SimpleCommand *command);

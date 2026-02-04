@@ -4,7 +4,7 @@
 static void execute(const struct ICommand *self, struct INotification *notification) {
     const struct SimpleCommand *this = (struct SimpleCommand *) self;
 
-    struct SimpleCommand (*subCommands[MACRO_COMMAND_ARRAY_SIZE])() = { macro_command_test_sub3_command };
+    struct SimpleCommand (*subCommands[2])() = { macro_command_test_sub3_command, NULL };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {
         struct SimpleCommand (*factory)() = subCommands[i];

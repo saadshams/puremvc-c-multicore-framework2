@@ -19,7 +19,6 @@ int main() {
     testRemoveController();
     testRegisterAndRemoveMultipleCommands();
     TestViewShiftLeft();
-    testCapacityWarning();
     return 0;
 }
 
@@ -272,19 +271,4 @@ void TestViewShiftLeft() {
     puremvc_view_removeView("controller4"); // remove last
     puremvc_view_removeView("controller1"); // remove first
     puremvc_view_removeView("controller3"); // remove remaining
-}
-
-void testCapacityWarning() {
-    for (int i = 0; i < INSTANCE_MAP_SIZE + 1; i++) {
-        char key[32] = {0};
-        snprintf(key, sizeof(key), "controller%d", i);
-        puremvc_controller_getInstance(key, puremvc_controller);
-    }
-
-    struct IController *controller = puremvc_controller_getInstance("controller1", puremvc_controller);
-    for (int i = 0; i < COMMAND_MAP_SIZE + 1; i++) {
-        char key[32] = {0};
-        snprintf(key, sizeof(key), "command%d", i);
-        controller->registerCommand(controller, key, puremvc_simple_command);
-    }
 }

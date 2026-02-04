@@ -6,10 +6,9 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include <stdio.h>
-
 #include "puremvc/mediator.h"
 
+#include <stdio.h>
 #include <string.h>
 
 static const char *getName(const struct IMediator *self) {
