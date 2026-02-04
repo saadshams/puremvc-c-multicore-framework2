@@ -10,6 +10,8 @@
 
 #include "puremvc/mediator.h"
 
+#include <string.h>
+
 static const char *getName(const struct IMediator *self) {
     const struct Mediator *this = (struct Mediator *) self;
     return this->name;
@@ -63,4 +65,10 @@ struct Mediator puremvc_mediator(const char *name, void *component) {
         fprintf(stderr, "[PureMVC::Mediator] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : MEDIATOR_NAME, len, NAME_SIZE);
 
     return mediator;
+}
+
+void puremvc_mediator_deinit(struct Mediator *mediator) {
+    mediator->base = (struct IMediator){0};
+    memset(&mediator->name, 0, KEY_SIZE);
+    mediator->component = NULL;
 }

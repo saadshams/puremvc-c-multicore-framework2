@@ -18,7 +18,7 @@ int main() {
     testRegisterAndUpdateCommand();
     testRemoveController();
     testRegisterAndRemoveMultipleCommands();
-    testGetAndRemoveMultipleInstances();
+    TestViewShiftLeft();
     testCapacityWarning();
     return 0;
 }
@@ -257,7 +257,7 @@ void testRegisterAndRemoveMultipleCommands() {
     controller = NULL;
 }
 
-void testGetAndRemoveMultipleInstances() {
+void TestViewShiftLeft() {
     puremvc_controller_getInstance("controller1", puremvc_controller);
     puremvc_controller_getInstance("controller2", puremvc_controller);
     puremvc_controller_getInstance("controller3", puremvc_controller);

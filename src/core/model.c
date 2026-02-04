@@ -23,7 +23,7 @@ static void initializeModel(struct IModel *self) {
 static void registerProxy(struct IModel *self, struct Proxy proxy) {
     struct Model *this = (struct Model *) self;
 
-    if (strlen(proxy.name) >= KEY_SIZE) { // Key Truncation Collision
+    if (strlen(proxy.name) >= KEY_SIZE) { // Key truncation collision
         fprintf(stderr, "[PureMVC::Model::registerProxy] Error: Key '%s' too long (max %d) — skipping registration.\n", proxy.name, KEY_SIZE);
         return;
     }
@@ -39,15 +39,15 @@ static void registerProxy(struct IModel *self, struct Proxy proxy) {
         }
     }
 
-    if (this->proxyMap[i] == NULL) {
-        fprintf(stderr, "[PureMVC::Model::registerProxy] Warning: Proxy storage overflow for key '%s' at index %zu; increase array size - skipping registration.\n", proxy.name, i);
+    if (this->proxyMap[i] == NULL) { // overflow
+        fprintf(stderr, "[PureMVC::Model::registerProxy] Warning: Proxy storage overflow for key '%s' at index %zu; increase slots - skipping registration.\n", proxy.name, i);
         mutex_unlock(&this->proxyMapMutex);
         return;
     }
 
-    // proxy.notifier.initializeNotifier(&proxy.notifier, this->multitonKey); // todo
+    proxy.notifier.base.initializeNotifier(&proxy.notifier.base, this->multitonKey);
 
-    snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", proxy.name);
+    snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", proxy.name); // registration
     this->proxyMap[i]->proxy = proxy;
     this->proxyMap[i]->proxy.base.onRegister(&this->proxyMap[i]->proxy.base);
 
@@ -93,7 +93,6 @@ static struct Proxy removeProxy(struct IModel *self, const char *proxyName) {
 
             memset(&this->proxyMap[i]->key, 0, KEY_SIZE);
             this->proxyMap[i]->proxy.base = (struct IProxy){0};
-            // mutex_destroy(&this->proxyMapMutex);
         } else {
             if (index != i) { // shift left
                 snprintf(this->proxyMap[index]->key, KEY_SIZE, "%s", this->proxyMap[i]->key);
@@ -110,8 +109,8 @@ static struct Proxy removeProxy(struct IModel *self, const char *proxyName) {
     return proxy;
 }
 
-static void init(struct Model *self, const char *key) {
-    self->base = (struct IModel) {
+static void init(struct Model *model, const char *key) {
+    model->base = (struct IModel) {
         .initializeModel = initializeModel,
         .registerProxy = registerProxy,
         .retrieveProxy = retrieveProxy,
@@ -119,7 +118,21 @@ static void init(struct Model *self, const char *key) {
         .removeProxy = removeProxy
     };
 
-    snprintf(self->multitonKey, KEY_SIZE, "%s", key);
+    snprintf(model->multitonKey, KEY_SIZE, "%s", key);
+    mutex_init(&model->proxyMapMutex);
+
+    model->base.initializeModel(&model->base);
+}
+
+static void deinit(struct Model *model) {
+    memset(model->multitonKey, 0, KEY_SIZE);
+    model->base = (struct IModel){0}; // todo
+    mutex_destroy(&model->proxyMapMutex);
+
+    for (size_t j = 0; model->proxyMap && model->proxyMap[j] != NULL; j++) { // clear proxyMap
+        memset(model->proxyMap[j]->key, 0, KEY_SIZE);
+        model->proxyMap[j]->proxy = (struct Proxy){0};
+    }
 }
 
 static void dispatchOnce(void) {
@@ -129,7 +142,7 @@ static void dispatchOnce(void) {
 struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key) {
     if (key == NULL || modelMap == NULL) return NULL;
 
-    if (strlen(key) >= KEY_SIZE) { // Key Truncation Collision
+    if (strlen(key) >= KEY_SIZE) { // Key truncation collision
         fprintf(stderr, "[PureMVC::Model::getInstance] Error: Key '%s' too long (max %d) — skipping registration.\n", key, KEY_SIZE);
         return NULL;
     }
@@ -145,16 +158,14 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
         }
     }
 
-    if (modelMap[i] == NULL) { // storage overflow
-        fprintf(stderr, "[PureMVC::Model::getInstance] Warning: Model storage overflow for key '%s' at index %zu; increase array size - skipping registration.\n", key, i);
+    if (modelMap[i] == NULL) { // overflow
+        fprintf(stderr, "[PureMVC::Model::getInstance] Warning: Model storage overflow for key '%s' at index %zu; increase slots - skipping registration.\n", key, i);
         mutex_unlock(&modelMapMutex);
         return NULL;
     }
 
     snprintf(modelMap[i]->key, KEY_SIZE, "%s", key); // init
     init(&modelMap[i]->model, key);
-    mutex_init(&modelMap[i]->model.proxyMapMutex);
-    modelMap[i]->model.base.initializeModel(&modelMap[i]->model.base);
 
     mutex_unlock(&modelMapMutex);
     return &modelMap[i]->model.base;
@@ -163,7 +174,7 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
 void puremvc_model_removeModel(struct ModelMap **modelMap, const char *key) {
     if (key == NULL || modelMap == NULL) return;
 
-    if (strlen(key) >= KEY_SIZE) { // Key Truncation Collision
+    if (strlen(key) >= KEY_SIZE) { // Key truncation collision
         fprintf(stderr, "[PureMVC::Model::removeModel] Error: Key '%s' too long (max %d) — skipping registration.\n", key, KEY_SIZE);
         return;
     }
@@ -175,28 +186,14 @@ void puremvc_model_removeModel(struct ModelMap **modelMap, const char *key) {
     for (size_t i = 0; modelMap[i] != NULL && modelMap[i]->key[0] != '\0'; i++) { // find model
         if (strncmp(modelMap[i]->key, key, KEY_SIZE) == 0) {
             memset(modelMap[i]->key, 0, KEY_SIZE); // clear model
-            memset(modelMap[i]->model.multitonKey, 0, KEY_SIZE);
-            modelMap[i]->model.base = (struct IModel){0};
-            mutex_destroy(&modelMap[i]->model.proxyMapMutex);
-
-            for (size_t j = 0; modelMap[i]->model.proxyMap[j] != NULL; j++) { // clear proxyMap
-                memset(modelMap[i]->model.proxyMap[j]->key, 0, KEY_SIZE);
-                modelMap[i]->model.proxyMap[j]->proxy = (struct Proxy){0};
-            }
+            deinit(&modelMap[i]->model);
         } else {
             if (index != i) { // shift left
                 snprintf(modelMap[index]->key, KEY_SIZE, "%s", modelMap[i]->key); // copy model (destination)
                 modelMap[index]->model = modelMap[i]->model;
 
                 memset(modelMap[i]->key, 0, KEY_SIZE); // clear model (source)
-                memset(&modelMap[i]->model.multitonKey, 0, KEY_SIZE);
-                modelMap[i]->model.base = (struct IModel){0};
-                mutex_destroy(&modelMap[i]->model.proxyMapMutex);
-
-                for (size_t j = 0; modelMap[i]->model.proxyMap[j] != NULL; j++) { // clear proxyMap (source)
-                    memset(modelMap[i]->model.proxyMap[j]->key, 0, KEY_SIZE);
-                    modelMap[i]->model.proxyMap[j]->proxy = (struct Proxy){0};
-                }
+                deinit(&modelMap[i]->model);
             }
             index++;
         }

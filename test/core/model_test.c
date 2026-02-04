@@ -18,7 +18,7 @@ int main() {
     testMultipleModels();
     testRegisterAndReplaceProxy();
     testRegisterAndRemoveMultipleProxies();
-    testGetAndRemoveMultipleInstances();
+    TestViewShiftLeft();
     testCapacityWarning();
     return 0;
 }
@@ -305,7 +305,7 @@ void testRegisterAndRemoveMultipleProxies() {
     model = NULL;
 }
 
-void testGetAndRemoveMultipleInstances() {
+void TestViewShiftLeft() {
     struct ModelMap *modelMap[] = { // empty key model storage with 4 slots
         &(struct ModelMap) { .model = { .proxyMap = (struct ProxyMap*[]) { NULL } } },
         &(struct ModelMap) { .model = { .proxyMap = (struct ProxyMap*[]) { NULL } } },

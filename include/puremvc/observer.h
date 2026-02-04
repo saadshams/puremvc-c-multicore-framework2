@@ -19,3 +19,5 @@ struct Observer {
 };
 
 struct Observer puremvc_observer(void (*notify)(const void *context, struct INotification *notification), void *context);
+
+void puremvc_observer_deinit(struct Observer *observer);

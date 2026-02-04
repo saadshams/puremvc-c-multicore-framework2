@@ -22,17 +22,20 @@ struct View {
     struct MediatorMap {
         char key[KEY_SIZE];
         struct Mediator mediator;
-    } mediatorMap[MEDIATOR_MAP_SIZE];
+    } **mediatorMap;
 
     Mutex observerMapMutex;
     struct ObserverMap {
         char key[KEY_SIZE];
-        struct Observer observers[OBSERVER_ARRAY_SIZE];
-    } observerMap[OBSERVER_MAP_SIZE];
+        struct Observer **observers;
+    } **observerMap;
 };
 
-struct View puremvc_view(const char *key);
+struct ViewMap {
+    char key[KEY_SIZE];
+    struct View view;
+};
 
-struct IView *puremvc_view_getInstance(const char *key, struct View(*factory)(const char *key));
+struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key);
 
-void puremvc_view_removeView(const char *key);
+void puremvc_view_removeView(struct ViewMap **viewMap, const char *key);

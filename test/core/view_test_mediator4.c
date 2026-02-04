@@ -1,7 +1,6 @@
 #include "view_test_mediator4.h"
 
 static const char **listNotificationInterests(const struct IMediator *self) {
-    (void)self;
     static const char *interests[] = {NOTE4, NULL};
     return interests;
 }

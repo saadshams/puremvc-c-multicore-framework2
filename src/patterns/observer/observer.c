@@ -54,3 +54,9 @@ struct Observer puremvc_observer(void (*notify)(const void *context, struct INot
         .context = context,
     };
 }
+
+void puremvc_observer_deinit(struct Observer *observer) {
+    observer->base = (struct IObserver){0};
+    observer->context = NULL;
+    observer->notify = NULL;
+}

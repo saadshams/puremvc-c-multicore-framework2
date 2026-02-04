@@ -8,5 +8,5 @@ void testReregisterAndExecuteCommand();
 void testRegisterAndUpdateCommand();
 void testRemoveController();
 void testRegisterAndRemoveMultipleCommands();
-void testGetAndRemoveMultipleInstances();
+void TestViewShiftLeft();
 void testCapacityWarning();
