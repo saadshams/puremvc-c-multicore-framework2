@@ -8,7 +8,6 @@
 */
 #include "puremvc/view.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -36,7 +35,7 @@ static void registerObserver(const struct IView *self, const char *notificationN
     mutex_lock(&this->observerMapMutex);
 
     size_t i = 0;
-    for (; this->observerMap[i] && this->observerMap[i]->key[0] != '\0'; i++) { // find existing
+    for (; this->observerMap[i] != NULL && this->observerMap[i]->key[0] != '\0'; i++) { // find existing
         if (strcmp(this->observerMap[i]->key, notificationName) != 0) // mismatch
             continue;
 
