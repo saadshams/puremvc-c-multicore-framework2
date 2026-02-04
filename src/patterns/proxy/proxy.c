@@ -34,7 +34,7 @@ static void onRemove(struct IProxy *self) {
     (void)self;
 }
 
-struct IProxy *puremvc_proxy_init(struct Proxy *const proxy, const char *name, void *data) {
+struct IProxy *puremvc_proxy(struct Proxy *const proxy, const char *name, void *data) {
     proxy->base.getName = getName;
     proxy->base.getData = getData;
     proxy->base.setData = setData;

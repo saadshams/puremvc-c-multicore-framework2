@@ -55,7 +55,7 @@ void testRegisterAndRetrieveProxy() {
     struct IModel *model = puremvc_model_getInstance(modelMap, "ModelTestKey2");
 
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
-    model->registerProxy(model, puremvc_proxy_init("colors", colors));
+    model->registerProxy(model, puremvc_proxy(&(struct Proxy){0}, "colors", colors));
 
     const struct IProxy *proxy = model->retrieveProxy(model, "colors");
     assert(proxy != NULL);
@@ -66,8 +66,8 @@ void testRegisterAndRetrieveProxy() {
     assert(strcmp(*(data + 1), "green") == 0);
     assert(strcmp(*(data + 2), "blue") == 0);
 
-    const struct Proxy removedProxy = model->removeProxy(model, "colors");
-    assert(strcmp(removedProxy.base.getName(&removedProxy.base), "colors") == 0);
+    const struct IProxy *removedProxy = model->removeProxy(model, "colors");
+    assert(strcmp(removedProxy->getName(removedProxy), "colors") == 0);
 
     assert(model->retrieveProxy(model, "colors") == NULL);
     puremvc_model_removeModel(modelMap, "ModelTestKey2");
@@ -83,14 +83,14 @@ void testRegisterAndRemoveProxy() {
     struct IModel *model = puremvc_model_getInstance(modelMap, "ModelTestKey3");
 
     int *sizes = (int []) {1, 2, 3, 0};
-    struct Proxy p = puremvc_proxy_init("sizes", sizes);
-    model->registerProxy(model, p);
+    struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, "sizes", sizes);
+    model->registerProxy(model, proxy);
 
     // remove the new
-    const struct Proxy removedProxy = model->removeProxy(model, "sizes");
+    const struct IProxy *removedProxy = model->removeProxy(model, "sizes");
 
     // assert that we removed the appropriate new
-    assert(strcmp(removedProxy.name, "sizes") == 0);
+    assert(strcmp(removedProxy->getName(removedProxy), "sizes") == 0);
 
     // ensure that the new is no longer retrievable from the model
     assert(model->retrieveProxy(model, "sizes") == NULL);
@@ -108,16 +108,16 @@ void testHasProxy() {
     struct IModel *model = puremvc_model_getInstance(modelMap, "ModelTestKey4");
 
     const char **aces = (const char *[]) {"clubs", "spades", "hearts", "diamonds", NULL};
-    struct Proxy p = puremvc_proxy_init("aces", aces);
-    model->registerProxy(model, p);
+    struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, "aces", aces);
+    model->registerProxy(model, proxy);
 
     // assert that the model.hasProxy method returns true
     // for that new name
     assert(model->hasProxy(model, "aces") == true);
 
     // remove the new
-    const struct Proxy proxy = model->removeProxy(model, "aces");
-    assert(strcmp(proxy.name, "aces") == 0);
+    const struct IProxy *removedProxy = model->removeProxy(model, "aces");
+    assert(strcmp(removedProxy->getName(removedProxy), "aces") == 0);
 
     // assert that the model.hasProxy method returns false
     // for that new name
@@ -136,18 +136,18 @@ void testOnRegisterAndOnRemove() {
     struct IModel *model = puremvc_model_getInstance(modelMap, "ModelTestKey5");
 
     // Create and register the test proxy
-    model->registerProxy(model, model_test_proxy("ModelTestProxy", NULL));
+    model->registerProxy(model, model_test_proxy(&(struct Proxy){0}, "ModelTestProxy", NULL));
 
     // assert that onRegister was called, and the new responded by setting its data accordingly
     const struct IProxy *proxy = model->retrieveProxy(model, "ModelTestProxy");
     assert(strcmp(proxy->getData(proxy), ON_REGISTER_CALLED) == 0);
 
     // Remove the proxy
-    const struct Proxy removedProxy = model->removeProxy(model, "ModelTestProxy");
-    assert(strcmp(removedProxy.name, "ModelTestProxy") == 0);
+    const struct IProxy *removedProxy = model->removeProxy(model, "ModelTestProxy");
+    assert(strcmp(removedProxy->getName(proxy), "ModelTestProxy") == 0);
 
     // assert that onRemove was called, and the new responded by setting its data accordingly
-    assert(strcmp(removedProxy.data, ON_REMOVE_CALLED) == 0);
+    assert(strcmp(removedProxy->getData(removedProxy), ON_REMOVE_CALLED) == 0);
 
     puremvc_model_removeModel(modelMap, "ModelTestKey5");
     model = NULL;
@@ -186,9 +186,9 @@ void testMultipleModels() {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
     const char **aces = (const char *[]) { "clubs", "spades", "hearts", "diamonds", NULL};
 
-    struct Proxy p1 = puremvc_proxy_init("colors", colors);
+    struct IProxy *p1 = puremvc_proxy(&(struct Proxy){0}, "colors", colors);
     model1->registerProxy(model1, p1);
-    struct Proxy p2 = puremvc_proxy_init("aces", aces);
+    struct IProxy *p2 = puremvc_proxy(&(struct Proxy){0}, "aces", aces);
     model2->registerProxy(model2, p2);
 
     assert(model1->hasProxy(model1, "colors"));
@@ -197,10 +197,10 @@ void testMultipleModels() {
     assert(!model1->hasProxy(model1, "aces"));
     assert(model2->hasProxy(model2, "aces"));
 
-    const struct Proxy proxy = model1->removeProxy(model1, "colors");
-    assert(strcmp(proxy.name, "colors") == 0);
-    const struct Proxy removedProxy = model2->removeProxy(model2, "aces");
-    assert(strcmp(removedProxy.name, "aces") == 0);
+    const struct IProxy *removedProxy1 = model1->removeProxy(model1, "colors");
+    assert(strcmp(removedProxy1->getName(removedProxy1), "colors") == 0);
+    const struct IProxy *removedProxy2 = model2->removeProxy(model2, "aces");
+    assert(strcmp(removedProxy2->getName(removedProxy2), "aces") == 0);
 
     puremvc_model_removeModel(modelMap, "ModelTestKey7");
     puremvc_model_removeModel(modelMap, "ModelTestKey8");
@@ -216,11 +216,11 @@ void testRegisterAndReplaceProxy() {
     struct IModel *model = puremvc_model_getInstance(modelMap, "ModelTestKey9");
 
     int *sizes = (int []) {1, 0};
-    struct Proxy p1 = puremvc_proxy_init("sizes", sizes);
+    struct IProxy *p1 = puremvc_proxy(&(struct Proxy){0}, "sizes", sizes);
     model->registerProxy(model, p1);
 
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
-    struct Proxy p2 = puremvc_proxy_init("sizes", colors);
+    struct IProxy *p2 = puremvc_proxy(&(struct Proxy){0}, "sizes", colors);
     model->registerProxy(model, p2);
 
     const struct IProxy *proxy = model->retrieveProxy(model, "sizes");
@@ -233,8 +233,8 @@ void testRegisterAndReplaceProxy() {
     assert(strcmp(*(data + 1), "green") == 0);
     assert(strcmp(*(data + 2), "blue") == 0);
 
-    const struct Proxy removedProxy = model->removeProxy(model, "sizes");
-    assert(strcmp(removedProxy.name, "sizes") == 0);
+    const struct IProxy *removedProxy = model->removeProxy(model, "sizes");
+    assert(strcmp(removedProxy->getName(proxy), "sizes") == 0);
 
     assert(model->retrieveProxy(model, "sizes") == NULL);
     puremvc_model_removeModel(modelMap, "ModelTestKey9");
@@ -242,63 +242,64 @@ void testRegisterAndReplaceProxy() {
 }
 
 void testRegisterAndRemoveMultipleProxies() {
-    struct ModelMap *modelMap[] = { &(struct ModelMap) { // empty key model storage with four slots for proxy
+    struct ModelMap *storage[] = { &(struct ModelMap) { // empty key model storage with four slots for proxy
         .model = {
             .proxyMap = (struct ProxyMap*[]) {
-                &(struct ProxyMap){0}, &(struct ProxyMap){0}, &(struct ProxyMap){0}, &(struct ProxyMap){0}, NULL
+                &(struct ProxyMap){0}, &(struct ProxyMap){0},
+                &(struct ProxyMap){0}, &(struct ProxyMap){0}, NULL
             }
         }
     }, NULL };
 
-    struct IModel *model = puremvc_model_getInstance(modelMap, "ModelTestKey10");
+    struct IModel *model = puremvc_model_getInstance(storage, "ModelTestKey10");
     const struct Model *self = (struct Model *) model;
 
     // Register four proxies and verify that each is correctly associated to their dictionaries
-    model->registerProxy(model, puremvc_proxy_init("proxy1", NULL));
-    assert(strcmp(self->proxyMap[0]->key, "proxy1") == 0);
-    assert(strcmp(self->proxyMap[0]->proxy.name, "proxy1") == 0);
+    model->registerProxy(model, puremvc_proxy(&(struct Proxy){0}, "proxy0", NULL));
+    assert(strcmp(storage[0]->model.proxyMap[0]->key, "proxy0") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[0]->proxy->getName(storage[0]->model.proxyMap[0]->proxy), "proxy0") == 0);
 
-    model->registerProxy(model, puremvc_proxy_init("proxy2", NULL));
-    assert(strcmp(self->proxyMap[1]->key, "proxy2") == 0);
-    assert(strcmp(self->proxyMap[1]->proxy.name, "proxy2") == 0);
+    model->registerProxy(model, puremvc_proxy(&(struct Proxy){0}, "proxy1", NULL));
+    assert(strcmp(storage[0]->model.proxyMap[1]->key, "proxy1") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[1]->proxy->getName(storage[0]->model.proxyMap[1]->proxy), "proxy1") == 0);
 
-    model->registerProxy(model, puremvc_proxy_init("proxy3", NULL));
-    assert(strcmp(self->proxyMap[2]->key, "proxy3") == 0);
-    assert(strcmp(self->proxyMap[2]->proxy.name, "proxy3") == 0);
+    model->registerProxy(model, puremvc_proxy(&(struct Proxy){0}, "proxy2", NULL));
+    assert(strcmp(storage[0]->model.proxyMap[2]->key, "proxy2") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[2]->proxy->getName(storage[0]->model.proxyMap[2]->proxy), "proxy2") == 0);
 
-    model->registerProxy(model, puremvc_proxy_init("proxy4", NULL));
-    assert(strcmp(self->proxyMap[3]->key, "proxy4") == 0);
-    assert(strcmp(self->proxyMap[3]->proxy.name, "proxy4") == 0);
+    model->registerProxy(model, puremvc_proxy(&(struct Proxy){0}, "proxy3", NULL));
+    assert(strcmp(storage[0]->model.proxyMap[3]->key, "proxy3") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[3]->proxy->getName(storage[0]->model.proxyMap[3]->proxy), "proxy3") == 0);
 
-    // Remove the second proxy (middle) and verify that remaining mediators 3, 4 are shifted correctly
-    model->removeProxy(model, "proxy2");
-    assert(strcmp(self->proxyMap[0]->key, "proxy1") == 0);
-    assert(strcmp(self->proxyMap[0]->proxy.name, "proxy1") == 0);
-    assert(strcmp(self->proxyMap[1]->key, "proxy3") == 0);
-    assert(strcmp(self->proxyMap[1]->proxy.name, "proxy3") == 0);
-    assert(strcmp(self->proxyMap[2]->key, "proxy4") == 0);
-    assert(strcmp(self->proxyMap[2]->proxy.name, "proxy4") == 0);
-
-    // Remove the last proxy and verify the remaining mediator3 stay in place
-    model->removeProxy(model, "proxy4");
-    assert(strcmp(self->proxyMap[0]->key, "proxy1") == 0);
-    assert(strcmp(self->proxyMap[0]->proxy.name, "proxy1") == 0);
-    assert(strcmp(self->proxyMap[1]->key, "proxy3") == 0);
-    assert(strcmp(self->proxyMap[1]->proxy.name, "proxy3") == 0);
-
-    // Remove the first mediator and verify that subsequent mediator 3 shift left
+    // Remove the second proxy (middle) and verify that remaining mediators 0, 2, 3 are shifted correctly
     model->removeProxy(model, "proxy1");
-    assert(strcmp(self->proxyMap[0]->key, "proxy3") == 0);
-    assert(strcmp(self->proxyMap[0]->proxy.name, "proxy3") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[0]->key, "proxy0") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[0]->proxy->getName(storage[0]->model.proxyMap[0]->proxy), "proxy0") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[1]->key, "proxy2") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[1]->proxy->getName(storage[0]->model.proxyMap[1]->proxy), "proxy2") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[2]->key, "proxy3") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[2]->proxy->getName(storage[0]->model.proxyMap[2]->proxy), "proxy3") == 0);
+
+    // Remove the last proxy and verify the remaining 0, 2 stay in place
+    model->removeProxy(model, "proxy3");
+    assert(strcmp(storage[0]->model.proxyMap[0]->key, "proxy0") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[0]->proxy->getName(storage[0]->model.proxyMap[0]->proxy), "proxy0") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[1]->key, "proxy2") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[1]->proxy->getName(storage[0]->model.proxyMap[1]->proxy), "proxy2") == 0);
+
+    // Remove the first mediator and verify that subsequent mediator 2 shift left
+    model->removeProxy(model, "proxy0");
+    assert(strcmp(storage[0]->model.proxyMap[0]->key, "proxy2") == 0);
+    assert(strcmp(storage[0]->model.proxyMap[0]->proxy->getName(storage[0]->model.proxyMap[0]->proxy), "proxy2") == 0);
 
     // Remove the remaining mediator3 and confirm that the dictionary is NULL
-    model->removeProxy(model, "proxy3");
-    assert(self->proxyMap[0]->key[0] == '\0'); // proxyMap is empty
-    assert(self->proxyMap[1]->key[0] == '\0');
-    assert(self->proxyMap[2]->key[0] == '\0');
-    assert(self->proxyMap[3]->key[0] == '\0');
+    model->removeProxy(model, "proxy2");
+    assert(storage[0]->model.proxyMap[0]->key[0] == '\0'); // proxyMap is empty
+    assert(storage[0]->model.proxyMap[1]->key[0] == '\0');
+    assert(storage[0]->model.proxyMap[2]->key[0] == '\0');
+    assert(storage[0]->model.proxyMap[3]->key[0] == '\0');
 
-    puremvc_model_removeModel(modelMap, "ModelTestKey10");
+    puremvc_model_removeModel(storage, "ModelTestKey10");
     model = NULL;
 }
 
