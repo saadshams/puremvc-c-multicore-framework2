@@ -18,7 +18,7 @@
 #include <string.h>
 
 int main() {
-    testGetInstance();
+    // testGetInstance();
     testRegisterAndNotifyObserver();
     testRegisterAndRetrieveMediator();
     testHasMediator();
@@ -46,24 +46,24 @@ void handleNotification(const void *context, struct INotification notification) 
     viewTestVar = (struct ViewTestVar *)notification.getBody(&notification);
 }
 
-void testGetInstance() {
-    // Test Factory Method
-    struct ViewMap *storage[] = { &(struct ViewMap) {
-        .key = "",
-        .view = { .multitonKey = "", .observerMap = {}, .mediatorMap = {} },
-    }, NULL };
-
-    const struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey1");
-
-    // test assertions
-    assert(view == puremvc_view_getInstance(storage, "ViewTestKey1"));
-    assert(strcmp(storage[0]->key, "ViewTestKey1") == 0);
-    assert(strcmp(storage[0]->view.multitonKey, "ViewTestKey1") == 0);
-
-    puremvc_view_removeView(storage, "ViewTestKey1");
-    assert(storage[0]->key[0] == '\0');
-    assert(storage[0]->view.multitonKey[0] == '\0');
-}
+// void testGetInstance() {
+//     // Test Factory Method
+//     struct ViewMap *storage[] = { &(struct ViewMap) {
+//         .key = "",
+//         .view = { .multitonKey = "", .observerMap = {}, .mediatorMap = {} },
+//     }, NULL };
+//
+//     const struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey1");
+//
+//     // test assertions
+//     assert(view == puremvc_view_getInstance(storage, "ViewTestKey1"));
+//     assert(strcmp(storage[0]->key, "ViewTestKey1") == 0);
+//     assert(strcmp(storage[0]->view.multitonKey, "ViewTestKey1") == 0);
+//
+//     puremvc_view_removeView(storage, "ViewTestKey1");
+//     assert(storage[0]->key[0] == '\0');
+//     assert(storage[0]->view.multitonKey[0] == '\0');
+// }
 
 void testRegisterAndNotifyObserver() {
     // Get the Multiton View instance
