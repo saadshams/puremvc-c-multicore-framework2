@@ -44,26 +44,23 @@ static void onRemove(struct IMediator *self) {
     (void)self;
 }
 
-struct Mediator puremvc_mediator(const char *name, void *component) {
-    struct Mediator mediator = {
-        .base = {
-            .getName = getName,
-            .setComponent = setComponent,
-            .getComponent = getComponent,
-            .listNotificationInterests = listNotificationInterests,
-            .handleNotification = handleNotification,
-            .onRegister = onRegister,
-            .onRemove = onRemove
-        },
-        .component = component,
-        .notifier = puremvc_notifier(),
-    };
+struct IMediator *puremvc_mediator(struct Mediator *const mediator, const char *name, void *component) {
+    mediator->base.getName = getName;
+    mediator->base.setComponent = setComponent;
+    mediator->base.getComponent = getComponent;
+    mediator->base.listNotificationInterests = listNotificationInterests;
+    mediator->base.handleNotification = handleNotification;
+    mediator->base.onRegister = onRegister;
+    mediator->base.onRemove = onRemove;
 
-    int len = snprintf(mediator.name, NAME_SIZE, "%s", name ? name : MEDIATOR_NAME);
+    mediator->component = component;
+    mediator->notifier = puremvc_notifier();
+
+    int len = snprintf(mediator->name, NAME_SIZE, "%s", name ? name : MEDIATOR_NAME);
     if (len >= NAME_SIZE)
         fprintf(stderr, "[PureMVC::Mediator] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : MEDIATOR_NAME, len, NAME_SIZE);
 
-    return mediator;
+    return &mediator->base;
 }
 
 void puremvc_mediator_deinit(struct Mediator *mediator) {

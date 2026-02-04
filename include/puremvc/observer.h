@@ -18,6 +18,6 @@ struct Observer {
     void (*notify)(const void *context, struct INotification *notification);
 };
 
-struct Observer puremvc_observer(void (*notify)(const void *context, struct INotification *notification), void *context);
+struct IObserver *puremvc_observer(struct Observer *observer, void (*notify)(const void *context, struct INotification *notification), void *context);
 
 void puremvc_observer_deinit(struct Observer *observer);

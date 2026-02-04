@@ -44,28 +44,25 @@ void toString(const struct INotification *self, char *buffer, size_t buffer_size
         fprintf(stderr, "[PureMVC::Notification::toString] Warning: Buffer Truncated: '%zu' (Original length: %d, Buffer size: %d)\n", buffer_size, len, NAME_SIZE);
 }
 
-struct Notification puremvc_notification(const char *name, void *body, const char *type) {
-    struct Notification notification = {
-        .base = (struct INotification) {
-            .getName = getName,
-            .getBody = getBody,
-            .setBody = setBody,
-            .getType = getType,
-            .setType = setType,
-            .toString = toString,
-        },
-        .body = body,
-    };
+struct INotification *puremvc_notification(struct Notification *const notification, const char *name, void *body, const char *type) {
+    notification->base.getName = getName;
+    notification->base.getBody = getBody;
+    notification->base.setBody = setBody;
+    notification->base.getType = getType;
+    notification->base.setType = setType;
+    notification->base.toString = toString;
 
-    int len = snprintf(notification.name, NAME_SIZE, "%s", name);
+    notification->body = body;
+
+    int len = snprintf(notification->name, NAME_SIZE, "%s", name);
     if (len >= NAME_SIZE)
         fprintf(stderr, "[PureMVC::Notification] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name, len, NAME_SIZE);
 
     if (type != NULL) {
-        len = snprintf(notification.type, NAME_SIZE, "%s", type);
+        len = snprintf(notification->type, NAME_SIZE, "%s", type);
         if (len >= NAME_SIZE)
             fprintf(stderr, "[PureMVC::Notification] Warning: Type Truncated: '%s' (Original length: %d, Buffer size: %d)\n", type, len, NAME_SIZE);
     }
 
-    return notification;
+    return &notification->base;
 }

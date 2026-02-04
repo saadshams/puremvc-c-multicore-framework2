@@ -1,5 +1,3 @@
-#include <assert.h>
-
 #include "puremvc/macro_command.h"
 #include "puremvc/controller.h"
 #include "puremvc/notification.h"
@@ -8,6 +6,8 @@
 #include "macro_command_test.h"
 #include "macro_command_test_command.h"
 #include "macro_command_test_vo.h"
+
+#include <assert.h>
 
 int main() {
     testMacroCommandExecute();
@@ -18,13 +18,13 @@ int main() {
 void testMacroCommandExecute() {
     struct MacroCommandTestVO vo = { .input = 5, 0, 0, 0};
 
-    struct Notification notification = puremvc_notification("MacroCommandTest", &vo, NULL);
+    struct INotification *notification = puremvc_notification(&(struct Notification){0}, "MacroCommandTest", &vo, NULL);
 
-    struct SimpleCommand command = macro_command_test_command();
+    struct ICommand *command = macro_command_test_command(&(struct SimpleCommand){0});
 
-    command.notifier.base.initializeNotifier(&command.notifier.base, "MacroCommandTestkey1");
+    // command->notifier.initializeNotifier(&command.notifier.base, "MacroCommandTestkey1");
 
-    command.base.execute(&command.base, &notification.base);
+    command->execute(command, notification);
 
     assert(vo.result1 == 10);
     assert(vo.result2 == 25);

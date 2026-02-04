@@ -16,8 +16,7 @@ int main() {
  * Test Constructor
  */
 void testConstructor() {
-    const struct Mediator m = puremvc_mediator(NULL, NULL);
-    const struct IMediator *mediator = &m.base;
+    const struct IMediator *mediator = puremvc_mediator(&(struct Mediator){0}, NULL, NULL);
 
     // test assertions
     assert(strcmp(mediator->getName(mediator), MEDIATOR_NAME) == 0);
@@ -27,8 +26,7 @@ void testConstructor() {
  * Tests getting the name using Mediator class accessor method.
  */
 void testNameAccessor() {
-    const struct Mediator m = puremvc_mediator("TestMediator", NULL);
-    const struct IMediator *mediator = &m.base;
+    const struct IMediator *mediator = puremvc_mediator(&(struct Mediator){0}, "TestMediator", NULL);
 
     // test assertions
     assert(strcmp(mediator->getName(mediator), "TestMediator") == 0);
@@ -40,8 +38,7 @@ void testNameAccessor() {
 void testViewAccessor() {
     // Create a view object
     struct Component {int x;} component;
-    struct Mediator m = puremvc_mediator(MEDIATOR_NAME, &component);
-    struct IMediator *mediator = &m.base;
+    struct IMediator *mediator = puremvc_mediator(&(struct Mediator){0}, MEDIATOR_NAME, &component);
 
     // test assertions
     assert(mediator->getComponent(mediator) == &component);

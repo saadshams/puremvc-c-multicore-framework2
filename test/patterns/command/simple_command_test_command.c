@@ -15,8 +15,8 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     vo->result = 2 * vo->input;
 }
 
-struct SimpleCommand test_simple_command() {
-    struct SimpleCommand command = puremvc_simple_command();
-    command.base.execute = execute;
+struct ICommand *test_simple_command(struct SimpleCommand *const simpleCommand) {
+    struct ICommand *command = puremvc_simple_command(simpleCommand);
+    command->execute = execute;
     return command;
 }

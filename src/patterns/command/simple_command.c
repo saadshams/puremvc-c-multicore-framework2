@@ -12,13 +12,11 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     (void)self; (void)notification;
 }
 
-struct SimpleCommand puremvc_simple_command() {
-    return (struct SimpleCommand) {
-        .base = {
-            .execute = execute
-        },
-        .notifier = puremvc_notifier(),
-    };
+struct ICommand *puremvc_simple_command(struct SimpleCommand *const command) {
+    command->base.execute = execute;
+    command->notifier = puremvc_notifier();
+
+    return &command->base;
 }
 
 void puremvc_simple_command_deinit(struct SimpleCommand *command) {

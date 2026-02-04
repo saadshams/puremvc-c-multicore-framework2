@@ -27,13 +27,13 @@ void testSimpleCommandExecute() {
     struct SimpleCommandTestVO vo = {.input = 5};
 
     // Create the Notification (note)
-    struct Notification notification = puremvc_notification("SimpleCommandTestNote", &vo, NULL);
+    struct INotification *notification = puremvc_notification(&(struct Notification){0}, "SimpleCommandTestNote", &vo, NULL);
 
     // Create the SimpleCommand
-    const struct SimpleCommand command = test_simple_command();
+    const struct ICommand *command = test_simple_command(&(struct SimpleCommand){0});
 
     // Execute the SimpleCommand
-    command.base.execute(&command.base, &notification.base);
+    command->execute(command, notification);
 
     // test assertions
     assert(vo.result == 10);

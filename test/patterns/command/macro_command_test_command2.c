@@ -2,21 +2,22 @@
 #include "macro_command_test_sub3_command.h"
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
-    const struct SimpleCommand *this = (struct SimpleCommand *) self;
-
-    struct SimpleCommand (*subCommands[2])() = { macro_command_test_sub3_command, NULL };
+    struct ICommand *(*subCommands[2])(struct SimpleCommand *) = {
+        macro_command_test_sub3_command,
+        NULL
+    };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {
-        struct SimpleCommand (*factory)() = subCommands[i];
-        struct SimpleCommand command = factory();
-        command.notifier.base.initializeNotifier(&command.notifier.base, this->notifier.base.getMultitonKey(&this->notifier.base));
+        struct ICommand *(*factory)(struct SimpleCommand *) = subCommands[i];
+        const struct ICommand *command = factory(&(struct SimpleCommand){0});
+        // command->notifier.base.initializeNotifier(&command.notifier.base, this->notifier.base.getMultitonKey(&this->notifier.base));
         //command.notifier.initializeNotifier(&command.notifier, self->notifier.getMultitonKey(&self->notifier));
-        command.base.execute(&command.base, notification);
+        command->execute(command, notification);
     }
 }
 
-struct SimpleCommand macro_command_test_command2() {
-    struct SimpleCommand command = puremvc_simple_command();
-    command.base.execute = execute;
+struct ICommand *macro_command_test_command2(struct SimpleCommand *const simpleCommand) {
+    struct ICommand *command = puremvc_simple_command(simpleCommand);
+    command->execute = execute;
     return command;
 }

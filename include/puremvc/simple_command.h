@@ -16,6 +16,6 @@ struct SimpleCommand {
     struct Notifier notifier;
 };
 
-struct SimpleCommand puremvc_simple_command();
+struct ICommand *puremvc_simple_command(struct SimpleCommand *command);
 
 void puremvc_simple_command_deinit(struct SimpleCommand *command);

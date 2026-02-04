@@ -9,4 +9,4 @@
 
 #include "simple_command.h"
 
-struct SimpleCommand puremvc_macro_command();
+struct ICommand *puremvc_macro_command(struct SimpleCommand *simple_command);
