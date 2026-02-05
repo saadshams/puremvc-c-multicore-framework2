@@ -18,7 +18,10 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     for (size_t i = 0; subCommands[i] != NULL; i++) {
         struct ICommand *(*factory)() = subCommands[i];
         const struct ICommand *command = factory();
-        command->notifier->initializeNotifier(command->notifier, self->notifier->getMultitonKey(self->notifier));
+
+        struct INotifier *notifier = command->getNotifier(command);
+        notifier->initializeNotifier(notifier, notifier->getMultitonKey(notifier));
+
         command->execute(command, notification);
     }
 }

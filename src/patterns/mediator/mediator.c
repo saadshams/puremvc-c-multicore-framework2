@@ -7,7 +7,7 @@
 * @copyright BSD 3-Clause License
 */
 #include "puremvc/mediator.h"
-#include "puremvc/notifier.h"
+#include "puremvc/i_notifier.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -25,6 +25,11 @@ static void setComponent(struct IMediator *self, void *component) {
 static void *getComponent(const struct IMediator *self) {
     const struct Mediator *this = (struct Mediator *) self;
     return this->component;
+}
+
+static struct INotifier *getNotifier(const struct IMediator *self) {
+    const struct Mediator *this = (struct Mediator *) self;
+    return &this->notifier.base;
 }
 
 static const char **listNotificationInterests(const struct IMediator *self) {
@@ -49,13 +54,14 @@ struct IMediator *puremvc_mediator(struct Mediator *const mediator, const char *
     mediator->base.getName = getName;
     mediator->base.setComponent = setComponent;
     mediator->base.getComponent = getComponent;
+    mediator->base.getNotifier = getNotifier;
     mediator->base.listNotificationInterests = listNotificationInterests;
     mediator->base.handleNotification = handleNotification;
     mediator->base.onRegister = onRegister;
     mediator->base.onRemove = onRemove;
 
     mediator->component = component;
-    mediator->base.notifier = puremvc_notifier(&(struct Notifier){0});
+    puremvc_notifier(&mediator->notifier);
 
     int len = snprintf(mediator->name, NAME_SIZE, "%s", name ? name : MEDIATOR_NAME);
     if (len >= NAME_SIZE)

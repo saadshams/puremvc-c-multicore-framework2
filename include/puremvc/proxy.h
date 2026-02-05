@@ -10,11 +10,14 @@
 
 #include "constants.h"
 #include "i_proxy.h"
+#include "notifier.h"
 
 #define PROXY_NAME "Proxy"
 
 struct Proxy {
     struct IProxy base;
+
+    struct Notifier notifier;
 
     char name[NAME_SIZE];
     void *data;

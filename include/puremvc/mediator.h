@@ -9,11 +9,14 @@
 
 #include "constants.h"
 #include "i_mediator.h"
+#include "notifier.h"
 
 #define MEDIATOR_NAME "mediator"
 
 struct Mediator {
     struct IMediator base;
+
+    struct Notifier notifier;
 
     char name[NAME_SIZE];
     void *component;

@@ -3,3 +3,4 @@
 void testConstructor();
 void testNameAccessor();
 void testViewAccessor();
+void testNotifier();

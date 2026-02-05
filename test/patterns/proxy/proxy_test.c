@@ -72,8 +72,8 @@ void testDataReassign() {
 }
 
 void testNotifier() {
-    const struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, NULL, NULL);
+    const struct IProxy *proxy = puremvc_proxy(&(struct Proxy){}, NULL, NULL);
     assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
 
-    proxy->notifier->initializeNotifier(proxy->notifier, "testing");
+    proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), "testing");
 }

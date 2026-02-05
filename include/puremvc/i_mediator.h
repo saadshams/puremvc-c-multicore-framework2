@@ -8,8 +8,8 @@
  */
 #pragma once
 
-#include "i_notification.h"
 #include "i_notifier.h"
+#include "i_notification.h"
 
 #define MEDIATOR_NAME "mediator"
 
@@ -18,12 +18,10 @@
  * @brief Represents a mediator in the PureMVC framework.
  */
 struct IMediator {
-    // struct INotifier base;
-    struct INotifier *notifier;
-
     const char *(*getName)(const struct IMediator *self);
     void (*setComponent)(struct IMediator *self, void *component);
     void *(*getComponent)(const struct IMediator *self);
+    struct INotifier *(*getNotifier)(const struct IMediator *self);
 
     const char **(*listNotificationInterests)(const struct IMediator *self);
     void (*handleNotification)(const struct IMediator *self, struct INotification *notification);

@@ -9,6 +9,7 @@ int main() {
     testConstructor();
     testNameAccessor();
     testViewAccessor();
+    testNotifier();
     return 0;
 }
 
@@ -44,4 +45,11 @@ void testViewAccessor() {
     assert(mediator->getComponent(mediator) == &component);
     mediator->setComponent(mediator, NULL);
     assert(mediator->getComponent(mediator) == NULL);
+}
+
+void testNotifier() {
+    struct Component {int x;} component;
+    struct IMediator *mediator = puremvc_mediator(&(struct Mediator){0}, MEDIATOR_NAME, &component);
+
+    mediator->getNotifier(mediator)->initializeNotifier(mediator->getNotifier(mediator), "testing");
 }

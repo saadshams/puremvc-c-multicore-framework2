@@ -11,13 +11,16 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     for (size_t i = 0; subCommands[i] != NULL; i++) {
         struct ICommand *(*factory)(struct SimpleCommand *) = subCommands[i];
         const struct ICommand *command = factory(&(struct SimpleCommand){0});
-        // command->notifier->initializeNotifier(command->notifier, self->notifier->getMultitonKey(self->notifier));
+
+        struct INotifier *notifier = command->getNotifier(command); // get multitonKey from the parent macro command
+        notifier->initializeNotifier(notifier, self->getNotifier(self)->getMultitonKey(self->getNotifier(self)));
+
         command->execute(command, notification);
     }
 }
 
-struct ICommand *macro_command_test_command2(struct SimpleCommand *const simpleCommand) {
-    struct ICommand *command = puremvc_simple_command(simpleCommand);
-    command->execute = execute;
-    return command;
+struct ICommand *macro_command_test_command2(struct SimpleCommand *const command) {
+    puremvc_simple_command(command);
+    command->base.execute = execute;
+    return &command->base;
 }

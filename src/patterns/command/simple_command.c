@@ -9,13 +9,19 @@
 #include "puremvc/simple_command.h"
 #include "puremvc/notifier.h"
 
+static struct INotifier *getNotifier(const struct ICommand *self) {
+    struct SimpleCommand *this = (struct SimpleCommand *) self;
+    return &this->notifier.base;
+}
+
 static void execute(const struct ICommand *self, struct INotification *notification) {
     (void)self; (void)notification;
 }
 
 struct ICommand *puremvc_simple_command(struct SimpleCommand *const command) {
+    command->base.getNotifier = getNotifier;
     command->base.execute = execute;
-    puremvc_notifier((struct Notifier *) command->base.notifier);
+    puremvc_notifier(&command->notifier);
     return &command->base;
 }
 

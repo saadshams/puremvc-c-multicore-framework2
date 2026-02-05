@@ -7,6 +7,7 @@
  * @copyright BSD 3-Clause License
  */
 #pragma once
+
 #include "i_notifier.h"
 
 /**
@@ -14,11 +15,10 @@
  * @brief Represents the state of a data processor.
  */
 struct IProxy {
-    struct INotifier *notifier;
-
     const char* (*getName)(const struct IProxy* self);
     void* (*getData)(const struct IProxy* self);
     void (*setData)(struct IProxy* self, void* data);
+    struct INotifier *(*getNotifier)(const struct IProxy *self);
 
     void (*onRegister)(struct IProxy* self);
     void (*onRemove)(struct IProxy* self);

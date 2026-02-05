@@ -20,7 +20,6 @@
  * @see INotification
  */
 struct ICommand {
-    struct INotifier *notifier;
-
+    struct INotifier *(*getNotifier)(const struct ICommand *self);
     void (*execute)(const struct ICommand *self, struct INotification *notification);
 };
