@@ -7,6 +7,7 @@
 * @copyright BSD 3-Clause License
 */
 #include "puremvc/mediator.h"
+#include "puremvc/notifier.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -54,7 +55,7 @@ struct IMediator *puremvc_mediator(struct Mediator *const mediator, const char *
     mediator->base.onRemove = onRemove;
 
     mediator->component = component;
-    mediator->notifier = puremvc_notifier();
+    mediator->base.notifier = puremvc_notifier(&(struct Notifier){0});
 
     int len = snprintf(mediator->name, NAME_SIZE, "%s", name ? name : MEDIATOR_NAME);
     if (len >= NAME_SIZE)

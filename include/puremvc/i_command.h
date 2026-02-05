@@ -9,6 +9,7 @@
 #pragma once
 
 #include "i_notification.h"
+#include "i_notifier.h"
 
 /**
  * @struct ICommand
@@ -19,6 +20,7 @@
  * @see INotification
  */
 struct ICommand {
+    struct INotifier *notifier;
+
     void (*execute)(const struct ICommand *self, struct INotification *notification);
 };
-

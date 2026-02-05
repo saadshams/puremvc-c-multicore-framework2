@@ -20,7 +20,7 @@ struct Model {
     Mutex proxyMapMutex;
     struct ProxyMap {
         char key[KEY_SIZE];
-        struct IProxy *proxy; // borrowed
+        struct IProxy *proxy;
     } **proxyMap;
 };
 

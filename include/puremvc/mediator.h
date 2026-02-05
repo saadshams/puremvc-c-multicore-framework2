@@ -9,7 +9,6 @@
 
 #include "constants.h"
 #include "i_mediator.h"
-#include "notifier.h"
 
 #define MEDIATOR_NAME "mediator"
 
@@ -18,8 +17,6 @@ struct Mediator {
 
     char name[NAME_SIZE];
     void *component;
-
-    struct Notifier notifier;
 };
 
 struct IMediator *puremvc_mediator(struct Mediator *mediator, const char *name, void *component);

@@ -1,5 +1,6 @@
 #include "macro_command_test_command2.h"
 #include "macro_command_test_sub3_command.h"
+#include "puremvc/i_notifier.h"
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
     struct ICommand *(*subCommands[2])(struct SimpleCommand *) = {
@@ -10,8 +11,7 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     for (size_t i = 0; subCommands[i] != NULL; i++) {
         struct ICommand *(*factory)(struct SimpleCommand *) = subCommands[i];
         const struct ICommand *command = factory(&(struct SimpleCommand){0});
-        // command->notifier.base.initializeNotifier(&command.notifier.base, this->notifier.base.getMultitonKey(&this->notifier.base));
-        //command.notifier.initializeNotifier(&command.notifier, self->notifier.getMultitonKey(&self->notifier));
+        // command->notifier->initializeNotifier(command->notifier, self->notifier->getMultitonKey(self->notifier));
         command->execute(command, notification);
     }
 }

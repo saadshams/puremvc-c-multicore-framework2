@@ -10,16 +10,16 @@
 
 #include <stddef.h>
 
-static void execute(const struct ICommand *self, struct INotification *notification) {
-    const struct SimpleCommand *this = (struct SimpleCommand *) self;
+#include "puremvc/i_notifier.h"
 
-    struct SimpleCommand (*subCommands[1])() = { NULL };
+static void execute(const struct ICommand *self, struct INotification *notification) {
+    struct ICommand *(*subCommands[1])() = { NULL };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {
-        struct SimpleCommand (*factory)() = subCommands[i];
-        struct SimpleCommand command = factory();
-        command.notifier.base.initializeNotifier(&command.notifier.base, this->notifier.base.getMultitonKey(&this->notifier.base));
-        command.base.execute(&command.base, notification);
+        struct ICommand *(*factory)() = subCommands[i];
+        const struct ICommand *command = factory();
+        command->notifier->initializeNotifier(command->notifier, self->notifier->getMultitonKey(self->notifier));
+        command->execute(command, notification);
     }
 }
 

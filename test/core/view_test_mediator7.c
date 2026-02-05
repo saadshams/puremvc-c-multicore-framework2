@@ -8,8 +8,8 @@ static const char **listNotificationInterests(const struct IMediator *self) {
     return interests;
 }
 
-struct Mediator view_test_mediator7(const char *name, struct ViewTest *component) {
-    struct Mediator mediator = puremvc_mediator(name, component);
-    mediator.base.listNotificationInterests = listNotificationInterests;
-    return mediator;
+struct IMediator *view_test_mediator7(struct Mediator *const mediator, const char *name, struct ViewTest *component) {
+    struct IMediator *base = puremvc_mediator(mediator, name, component);
+    base->listNotificationInterests = listNotificationInterests;
+    return base;
 }

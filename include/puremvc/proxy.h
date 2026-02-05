@@ -10,7 +10,6 @@
 
 #include "constants.h"
 #include "i_proxy.h"
-#include "notifier.h"
 
 #define PROXY_NAME "Proxy"
 
@@ -19,8 +18,6 @@ struct Proxy {
 
     char name[NAME_SIZE];
     void *data;
-
-    struct Notifier notifier;
 };
 
 struct IProxy *puremvc_proxy(struct Proxy *proxy, const char *name, void *data);

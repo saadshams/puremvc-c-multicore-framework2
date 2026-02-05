@@ -69,7 +69,7 @@ void testTypeAccessors() {
 void testToString() {
     struct { int value; } test = {.value = 5};
 
-    struct INotification *notification = puremvc_notification(&(struct Notification){0}, "TestNote", NULL, "TestNoteType");
+    const struct INotification *notification = puremvc_notification(&(struct Notification){0}, "TestNote", NULL, "TestNoteType");
 
     char buffer[256];
     notification->toString(notification, buffer, sizeof(buffer));

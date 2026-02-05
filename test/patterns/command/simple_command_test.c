@@ -4,6 +4,7 @@
 #include "puremvc/notification.h"
 #include "simple_command_test_command.h"
 #include "simple_command_test_vo.h"
+#include "puremvc/i_notifier.h"
 
 int main() {
     testSimpleCommandExecute();
@@ -29,11 +30,21 @@ void testSimpleCommandExecute() {
     // Create the Notification (note)
     struct INotification *notification = puremvc_notification(&(struct Notification){0}, "SimpleCommandTestNote", &vo, NULL);
 
+    struct SimpleCommand *storage = &(struct SimpleCommand) {
+        .base = (struct ICommand) { .notifier = &(struct INotifier){0} }
+    };
+
     // Create the SimpleCommand
-    const struct ICommand *command = test_simple_command(&(struct SimpleCommand){0});
+    struct ICommand *command = test_simple_command(storage);
+
+    // assertions
+    assert(storage->base.notifier == command->notifier);
+
+    command->notifier->initializeNotifier(command->notifier, "test");
 
     // Execute the SimpleCommand
     command->execute(command, notification);
+
 
     // test assertions
     assert(vo.result == 10);

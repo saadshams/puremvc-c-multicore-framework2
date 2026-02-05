@@ -35,13 +35,11 @@ static void initializeNotifier(struct INotifier *self, const char *key) {
 //     facade->sendNotification(facade, notificationName, body, type);
 // }
 
-struct Notifier puremvc_notifier() {
-    return (struct Notifier) {
-        .base = (struct INotifier) {
-            // .getFacade = getFacade,
-            .getMultitonKey = getMultitonKey,
-            .initializeNotifier = initializeNotifier,
-            // .sendNotification = sendNotification
-        }
-    };
+struct INotifier *puremvc_notifier(struct Notifier *const notifier) {
+    // notifier->base.getFacade = getFacade;
+    notifier->base.getMultitonKey = getMultitonKey;
+    notifier->base.initializeNotifier = initializeNotifier;
+    // notifier->base.sendNotification = sendNotification;
+
+    return &notifier->base;
 }

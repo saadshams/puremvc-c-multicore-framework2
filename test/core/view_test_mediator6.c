@@ -23,10 +23,10 @@ static void onRemove(struct IMediator *self) {
     ((struct ViewTest *) self->getComponent(self))->counter++;
 }
 
-struct Mediator view_test_mediator6(const char *name, struct ViewTest *component) {
-    struct Mediator mediator = puremvc_mediator(name, component);
-    mediator.base.listNotificationInterests = listNotificationInterests;
-    mediator.base.handleNotification = handleNotification;
-    mediator.base.onRemove = onRemove;
-    return mediator;
+struct IMediator *view_test_mediator6(struct Mediator *const mediator, const char *name, struct ViewTest *component) {
+    struct IMediator *base = puremvc_mediator(mediator, name, component);
+    base->listNotificationInterests = listNotificationInterests;
+    base->handleNotification = handleNotification;
+    base->onRemove = onRemove;
+    return base;
 }

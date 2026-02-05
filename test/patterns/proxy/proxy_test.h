@@ -5,3 +5,4 @@ void testNameAccessors();
 void testDataAccessors();
 void testDataAccessors2();
 void testDataReassign();
+void testNotifier();

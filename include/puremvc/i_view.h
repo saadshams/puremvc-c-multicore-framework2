@@ -9,8 +9,8 @@
 #pragma once
 
 #include "i_notification.h"
-#include "mediator.h"
-#include "observer.h"
+#include "i_mediator.h"
+#include "i_observer.h"
 
 #include <stdbool.h>
 
@@ -24,17 +24,17 @@
 struct IView {
     void (*initializeView)(struct IView *self);
 
-    void (*registerObserver)(const struct IView *self, const char *notificationName, struct Observer observer);
+    void (*registerObserver)(const struct IView *self, const char *notificationName, struct IObserver *observer);
 
     void (*notifyObservers)(const struct IView *self, struct INotification *notification);
 
     void (*removeObserver)(const struct IView *self, const char *notificationName, const void *notifyContext);
 
-    void (*registerMediator)(const struct IView *self, struct Mediator mediator);
+    void (*registerMediator)(const struct IView *self, struct IMediator *mediator);
 
     struct IMediator *(*retrieveMediator)(const struct IView *self, const char *mediatorName);
 
     bool (*hasMediator)(const struct IView *self, const char *mediatorName);
 
-    struct Mediator(*removeMediator)(const struct IView *self, const char *mediatorName);
+    struct IMediator *(*removeMediator)(const struct IView *self, const char *mediatorName);
 };

@@ -10,6 +10,7 @@ int main(void) {
     testNameAccessors();
     testDataAccessors();
     testDataReassign();
+    testNotifier();
     return 0;
 }
 
@@ -68,4 +69,11 @@ void testDataReassign() {
     assert(strcmp(*(data + 1), "green") == 0);
     assert(strcmp(*(data + 2), "blue") == 0);
     assert(*(data + 3) == NULL);
+}
+
+void testNotifier() {
+    const struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, NULL, NULL);
+    assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
+
+    proxy->notifier->initializeNotifier(proxy->notifier, "testing");
 }

@@ -7,6 +7,7 @@
 * @copyright BSD 3-Clause License
 */
 #include "puremvc/simple_command.h"
+#include "puremvc/notifier.h"
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
     (void)self; (void)notification;
@@ -14,8 +15,7 @@ static void execute(const struct ICommand *self, struct INotification *notificat
 
 struct ICommand *puremvc_simple_command(struct SimpleCommand *const command) {
     command->base.execute = execute;
-    command->notifier = puremvc_notifier();
-
+    puremvc_notifier((struct Notifier *) command->base.notifier);
     return &command->base;
 }
 

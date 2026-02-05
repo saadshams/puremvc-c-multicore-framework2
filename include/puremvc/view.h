@@ -21,13 +21,13 @@ struct View {
     Mutex mediatorMapMutex;
     struct MediatorMap {
         char key[KEY_SIZE];
-        struct Mediator mediator;
+        struct IMediator *mediator;
     } **mediatorMap;
 
     Mutex observerMapMutex;
     struct ObserverMap {
         char key[KEY_SIZE];
-        struct Observer **observers;
+        struct IObserver **observers;
     } **observerMap;
 };
 

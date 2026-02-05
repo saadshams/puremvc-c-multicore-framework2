@@ -7,6 +7,7 @@
 * @copyright BSD 3-Clause License
 */
 #include "puremvc/proxy.h"
+#include "puremvc/notifier.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -42,7 +43,7 @@ struct IProxy *puremvc_proxy(struct Proxy *const proxy, const char *name, void *
     proxy->base.onRemove = onRemove;
 
     proxy->data = data;
-    proxy->notifier = puremvc_notifier();
+    proxy->base.notifier = puremvc_notifier(&(struct Notifier){0});
 
     int len = snprintf(proxy->name, NAME_SIZE, "%s", name ? name : PROXY_NAME);
     if (len >= NAME_SIZE)

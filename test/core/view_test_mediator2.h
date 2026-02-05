@@ -5,4 +5,4 @@
 
 #define view_test_mediator2_NAME "Mediator2"
 
-struct Mediator view_test_mediator2(struct ViewTest *component);
+struct IMediator *view_test_mediator2(struct Mediator *const mediator, struct ViewTest *component);
