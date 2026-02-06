@@ -69,6 +69,7 @@ struct IMediator *puremvc_mediator_init(struct IMediator *const mediator, const 
     this->component = component;
 
     puremvc_notifier(&this->notifier);
+
     return mediator;
 }
 

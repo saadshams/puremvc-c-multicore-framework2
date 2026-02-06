@@ -20,11 +20,11 @@ static void initializeModel(struct IModel *self) {
     (void)self;
 }
 
-static void registerProxy(struct IModel *self, struct IProxy *proxy) {
+static void registerProxy(struct IModel *self, struct IProxy *(*factory)(struct IProxy *proxy, const char *name, void *data), const char *name, void *data) {
     struct Model *this = (struct Model *) self;
 
-    if (strlen(proxy->getName(proxy)) >= KEY_SIZE) { // Key truncation collision
-        fprintf(stderr, "[PureMVC::Model::registerProxy] Error: Key '%s' too long (max %d) — skipping registration.\n", proxy->getName(proxy), KEY_SIZE);
+    if (strlen(name) >= KEY_SIZE) { // Key truncation collision
+        fprintf(stderr, "[PureMVC::Model::registerProxy] Error: Key '%s' too long (max %d) — skipping registration.\n", name, KEY_SIZE);
         return;
     }
 
@@ -38,30 +38,31 @@ static void registerProxy(struct IModel *self, struct IProxy *proxy) {
     size_t i = 0;
 
     for (; this->proxyMap[i] != NULL && this->proxyMap[i]->key[0] != '\0'; i++) { // find existing
-        if (strcmp(this->proxyMap[i]->key, proxy->getName(proxy)) != 0)
+        if (strcmp(this->proxyMap[i]->key, name) != 0)
             continue;
 
         this->proxyMap[i]->proxy->onRemove(this->proxyMap[i]->proxy);
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerMediator] Warning: Proxy '%s' exists; overridden registration\033[0m.\n", proxy->getName(proxy));
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerMediator] Warning: Proxy '%s' exists; overridden registration\033[0m.\n", name);
 
-        this->proxyMap[i]->proxy = proxy; // registration
+        puremvc_proxy_init(this->proxyMap[i]->proxy, name, data); // registration
         mutex_unlock(&this->proxyMapMutex);
         return;
     }
     if (this->proxyMap[i] == NULL) { // overflow (ProxyMap)
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap storage overflow for proxy '%s'; increase slots - skipping registration.\033[0m\n", proxy->getName(proxy));
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap storage overflow for proxy '%s'; increase slots - skipping registration.\033[0m\n", name);
         mutex_unlock(&this->proxyMapMutex);
         return;
     }
 
-    proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), this->multitonKey);
+    // todo check if proxy exists
+    struct IProxy *proxy = factory(this->proxyMap[i]->proxy, name, data); // registration
+    snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", proxy->getName(proxy));
 
-    snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", proxy->getName(proxy)); // registration
-    this->proxyMap[i]->proxy = proxy;
+    proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), this->multitonKey);
 
     mutex_unlock(&this->proxyMapMutex);
 
-    this->proxyMap[i]->proxy->onRegister(this->proxyMap[i]->proxy);
+    proxy->onRegister(proxy);
 }
 
 static struct IProxy *retrieveProxy(struct IModel *self, const char *proxyName) {

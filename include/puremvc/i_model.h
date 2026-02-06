@@ -26,7 +26,7 @@
 struct IModel {
     void (*initializeModel)(struct IModel *self);
 
-    void (*registerProxy)(struct IModel *self, struct IProxy *proxy);
+    void (*registerProxy)(struct IModel *self, struct IProxy *(*factory)(struct IProxy *proxy, const char *name, void *data), const char *name, void *data);
 
     struct IProxy *(*retrieveProxy)(struct IModel *self, const char *proxyName);
 

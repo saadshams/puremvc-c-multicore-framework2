@@ -18,7 +18,7 @@ int main(void) {
  * Test Constructor
  */
 void testConstructor() {
-    const struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, NULL, NULL);
+    const struct IProxy *proxy = puremvc_proxy_init(&(struct Proxy){0}, NULL, NULL);
 
     // test assertions
     assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
@@ -30,12 +30,12 @@ void testConstructor() {
  * Tests getting the name using Proxy class accessor method. Setting can only be done in constructor.
  */
 void testNameAccessors() {
-    const struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, "TestProxy", NULL);
+    const struct IProxy *proxy = puremvc_proxy_init(&(struct Proxy){0}, "TestProxy", NULL);
 
     // test assertions
     assert(strcmp(proxy->getName(proxy), "TestProxy") == 0);
 
-    const struct IProxy *proxy2 = puremvc_proxy(&(struct Proxy){0}, NULL, NULL);
+    const struct IProxy *proxy2 = puremvc_proxy_init(&(struct Proxy){0}, NULL, NULL);
     assert(strcmp(proxy2->getName(proxy2), PROXY_NAME) == 0);
 }
 
@@ -44,7 +44,7 @@ void testNameAccessors() {
  */
 void testDataAccessors() {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
-    const struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, "colors", colors);
+    const struct IProxy *proxy = puremvc_proxy_init(&(struct Proxy){0}, "colors", colors);
 
     const char **data = proxy->getData(proxy);
 
@@ -58,7 +58,7 @@ void testDataAccessors() {
 void testDataReassign() {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
 
-    struct IProxy *proxy = puremvc_proxy(&(struct Proxy){0}, "colors", colors);
+    struct IProxy *proxy = puremvc_proxy_init(&(struct Proxy){0}, "colors", colors);
 
     // Re-assign the same data to ensure the proxy does not free it
     proxy->setData(proxy, colors);
@@ -72,7 +72,7 @@ void testDataReassign() {
 }
 
 void testNotifier() {
-    const struct IProxy *proxy = puremvc_proxy(&(struct Proxy){}, NULL, NULL);
+    const struct IProxy *proxy = puremvc_proxy_init(&(struct Proxy){}, NULL, NULL);
     assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
 
     proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), "testing");
