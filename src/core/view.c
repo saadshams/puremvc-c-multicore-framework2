@@ -177,10 +177,6 @@ static void registerMediator2(const struct IView *self, struct IMediator *(*fact
     mediator->onRegister(mediator);
 }
 
-static void registerMediator(const struct IView *self, struct IMediator *mediator) {
-
-}
-
 static struct IMediator *retrieveMediator(const struct IView *self, const char *mediatorName) {
     struct View *this = (struct View *) self;
     mutex_lock_shared(&this->mediatorMapMutex);
@@ -274,8 +270,7 @@ static void init(struct View *view, const char *key) {
         .registerObserver = registerObserver,
         .notifyObservers = notifyObservers,
         .removeObserver = removeObserver,
-        .registerMediator2 = registerMediator2,
-        .registerMediator = registerMediator,
+        .registerMediator = registerMediator2,
         .retrieveMediator = retrieveMediator,
         .hasMediator = hasMediator,
         .removeMediator = removeMediator

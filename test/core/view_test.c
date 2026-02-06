@@ -121,7 +121,7 @@ void testRegisterAndRetrieveMediator() {
 
     // Create and register the test mediator
     struct ViewComponent viewComponent = {0};
-    view->registerMediator2(view, puremvc_mediator_init, "testing", &viewComponent);
+    view->registerMediator(view, puremvc_mediator_init, "testing", &viewComponent);
     assert(strcmp(storage[0]->view.mediatorMap[0]->key, "testing") == 0);
     assert(strcmp(storage[0]->view.mediatorMap[0]->mediator->getName(storage[0]->view.mediatorMap[0]->mediator), "testing") == 0);
 
@@ -153,7 +153,7 @@ void testHasMediator() {
 
     // Create and register the test mediator
     struct ViewComponent viewComponent = {0};
-    view->registerMediator2(view, puremvc_mediator_init, "hasMediatorTest", &viewComponent);
+    view->registerMediator(view, puremvc_mediator_init, "hasMediatorTest", &viewComponent);
     assert(strcmp(storage[0]->view.mediatorMap[0]->key, "hasMediatorTest") == 0);
     assert(strcmp(storage[0]->view.mediatorMap[0]->mediator->getName(storage[0]->view.mediatorMap[0]->mediator), "hasMediatorTest") == 0);
 
@@ -184,7 +184,7 @@ void testRegisterAndRemoveMediator() {
 
     // Create and register the test mediator
     struct ViewComponent viewComponent = {0};
-    view->registerMediator2(view, puremvc_mediator_init, "testing", &viewComponent);
+    view->registerMediator(view, puremvc_mediator_init, "testing", &viewComponent);
     assert(strcmp(storage[0]->view.mediatorMap[0]->key, "testing") == 0);
     assert(strcmp(storage[0]->view.mediatorMap[0]->mediator->getName(storage[0]->view.mediatorMap[0]->mediator), "testing") == 0);
 
@@ -216,7 +216,7 @@ void testOnRegisterAndOnRemove() {
     const struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey6");
     struct ViewTest viewTest = {"", false, false, 0};
 
-    view->registerMediator2(view, view_test_mediator4, view_test_mediator4_NAME, &viewTest);
+    view->registerMediator(view, view_test_mediator4, view_test_mediator4_NAME, &viewTest);
     assert(strcmp(storage[0]->view.mediatorMap[0]->key, view_test_mediator4_NAME) == 0);
     assert(storage[0]->view.mediatorMap[0]->mediator != NULL);
     assert(strcmp(storage[0]->view.mediatorMap[0]->mediator->getName(storage[0]->view.mediatorMap[0]->mediator), view_test_mediator4_NAME) == 0); // crash
@@ -265,7 +265,7 @@ void testSuccessiveRegisterAndRemoveMediator() {
     // Create and register the test mediator,
     // but not so we have a reference to it
     struct ViewComponent viewComponent = {0};
-    view->registerMediator2(view, view_test_mediator, view_test_mediator_NAME, &viewComponent);
+    view->registerMediator(view, view_test_mediator, view_test_mediator_NAME, &viewComponent);
 
     // test that we can retrieve it
     assert(view->retrieveMediator(view, view_test_mediator_NAME) != NULL);
@@ -299,7 +299,7 @@ void testSuccessiveRegisterAndRemoveMediator() {
     view->removeMediator(view, view_test_mediator_NAME);
 
     // Create and register another instance of the test mediator,
-    view->registerMediator2(view, view_test_mediator, view_test_mediator_NAME, &viewComponent);
+    view->registerMediator(view, view_test_mediator, view_test_mediator_NAME, &viewComponent);
     assert(strcmp(storage[0]->view.mediatorMap[0]->key, view_test_mediator_NAME) == 0);
     assert(strcmp(storage[0]->view.mediatorMap[0]->mediator->getName(storage[0]->view.mediatorMap[0]->mediator), view_test_mediator_NAME) == 0);
 
@@ -345,7 +345,7 @@ void testRemoveMediatorAndSubsequentNotify() {
     // Create and register the test mediator to be removed.
     struct ViewTest viewTest = {.lastNotification = NULL };
     // struct IMediator *mediator = view_test_mediator2(&(struct Mediator){0}, &viewTest);
-    view->registerMediator2(view, view_test_mediator2, view_test_mediator2_NAME, &viewTest);
+    view->registerMediator(view, view_test_mediator2, view_test_mediator2_NAME, &viewTest);
 
     // test that we can retrieve it
     assert(view->retrieveMediator(view, view_test_mediator2_NAME) != NULL);
@@ -414,7 +414,7 @@ void testRemoveOneOfTwoMediatorsAndSubsequentNotify() {
     struct ViewTest viewTest = {};
 
     // Create and register that responds to notifications 1 and 2
-    view->registerMediator2(view, view_test_mediator2, view_test_mediator2_NAME, &viewTest);
+    view->registerMediator(view, view_test_mediator2, view_test_mediator2_NAME, &viewTest);
 
     // assertions
     assert(strcmp(storage[0]->view.mediatorMap[0]->key, view_test_mediator2_NAME) == 0);
@@ -425,7 +425,7 @@ void testRemoveOneOfTwoMediatorsAndSubsequentNotify() {
     assert(storage[0]->view.observerMap[1]->observers[0]->getContext(storage[0]->view.observerMap[1]->observers[0]) == storage[0]->view.mediatorMap[0]->mediator);
 
     // Create and register that responds to notification 3
-    view->registerMediator2(view, view_test_mediator3, view_test_mediator3_NAME, &viewTest);
+    view->registerMediator(view, view_test_mediator3, view_test_mediator3_NAME, &viewTest);
 
     // assertions
     assert(strcmp(storage[0]->view.mediatorMap[1]->key, view_test_mediator3_NAME) == 0);
@@ -503,7 +503,7 @@ void testMediatorReregistration() {
     struct ViewTest viewTest = {};
 
     // try to register another instance of that mediator (uses the same NAME constant).
-    view->registerMediator2(view, view_test_mediator5, view_test_mediator5_NAME, &viewTest);
+    view->registerMediator(view, view_test_mediator5, view_test_mediator5_NAME, &viewTest);
 
     // assertions
     assert(strcmp(storage[0]->view.mediatorMap[0]->key, view_test_mediator5_NAME) == 0);
@@ -591,14 +591,14 @@ void testModifyObserverListDuringNotification() {
     // Create and register several mediator instances that respond to notification 6
     // by removing themselves, which will cause the observer list for that notification
     // to change.
-    view->registerMediator2(view, view_test_mediator6, "view_test_mediator6/1", &viewTest);
-    view->registerMediator2(view, view_test_mediator6, "view_test_mediator6/2", &viewTest);
-    view->registerMediator2(view, view_test_mediator6, "view_test_mediator6/3", &viewTest);
-    view->registerMediator2(view, view_test_mediator6, "view_test_mediator6/4", &viewTest);
-    view->registerMediator2(view, view_test_mediator6, "view_test_mediator6/5", &viewTest);
-    view->registerMediator2(view, view_test_mediator6, "view_test_mediator6/6", &viewTest);
-    view->registerMediator2(view, view_test_mediator6, "view_test_mediator6/7", &viewTest);
-    view->registerMediator2(view, view_test_mediator6, "view_test_mediator6/8", &viewTest);
+    view->registerMediator(view, view_test_mediator6, "view_test_mediator6/1", &viewTest);
+    view->registerMediator(view, view_test_mediator6, "view_test_mediator6/2", &viewTest);
+    view->registerMediator(view, view_test_mediator6, "view_test_mediator6/3", &viewTest);
+    view->registerMediator(view, view_test_mediator6, "view_test_mediator6/4", &viewTest);
+    view->registerMediator(view, view_test_mediator6, "view_test_mediator6/5", &viewTest);
+    view->registerMediator(view, view_test_mediator6, "view_test_mediator6/6", &viewTest);
+    view->registerMediator(view, view_test_mediator6, "view_test_mediator6/7", &viewTest);
+    view->registerMediator(view, view_test_mediator6, "view_test_mediator6/8", &viewTest);
 
     // assertions
     for (size_t i = 0; i < 8; i++) {
@@ -736,7 +736,7 @@ void testGarbageStorageForMediator() {
     }, NULL };
 
     const struct IView *view1 = puremvc_view_getInstance(storage1, "ViewTestKey15");
-    view1->registerMediator2(view1, puremvc_mediator_init, MEDIATOR_NAME, NULL);
+    view1->registerMediator(view1, puremvc_mediator_init, MEDIATOR_NAME, NULL);
     view1->hasMediator(view1, MEDIATOR_NAME);
     view1->retrieveMediator(view1, MEDIATOR_NAME);
     view1->removeMediator(view1, MEDIATOR_NAME);
@@ -747,7 +747,7 @@ void testGarbageStorageForMediator() {
         .view = { .mediatorMap = (struct MediatorMap*[]){ NULL} },
     }, NULL };
     const struct IView *view2 = puremvc_view_getInstance(storage2, "ViewTestKey15");
-    view2->registerMediator2(view2, puremvc_mediator_init, MEDIATOR_NAME, NULL);
+    view2->registerMediator(view2, puremvc_mediator_init, MEDIATOR_NAME, NULL);
     view2->hasMediator(view2, MEDIATOR_NAME);
     view2->retrieveMediator(view2, MEDIATOR_NAME);
     view2->removeMediator(view2, MEDIATOR_NAME);
@@ -862,19 +862,19 @@ void testMediatorsShiftLeft() {
 
     // Register four mediators and verify that each is correctly associated to their observers
     // view->registerMediator(view, view_test_mediator7(&(struct Mediator){0}, "mediator0", NULL));
-    view->registerMediator2(view, view_test_mediator7, "mediator0", NULL);
+    view->registerMediator(view, view_test_mediator7, "mediator0", NULL);
     assert(strcmp(storage[0]->view.mediatorMap[0]->mediator->getName(storage[0]->view.mediatorMap[0]->mediator), "mediator0") == 0);
     assert(storage[0]->view.observerMap[0]->observers[0]->getContext(storage[0]->view.observerMap[0]->observers[0]) == storage[0]->view.mediatorMap[0]->mediator);
 
-    view->registerMediator2(view, view_test_mediator7, "mediator1", NULL);
+    view->registerMediator(view, view_test_mediator7, "mediator1", NULL);
     assert(strcmp(storage[0]->view.mediatorMap[1]->mediator->getName(storage[0]->view.mediatorMap[1]->mediator), "mediator1") == 0);
     assert(storage[0]->view.observerMap[0]->observers[1]->getContext(storage[0]->view.observerMap[0]->observers[1]) == storage[0]->view.mediatorMap[1]->mediator);
 
-    view->registerMediator2(view, view_test_mediator7, "mediator2", NULL);
+    view->registerMediator(view, view_test_mediator7, "mediator2", NULL);
     assert(strcmp(storage[0]->view.mediatorMap[2]->mediator->getName(storage[0]->view.mediatorMap[2]->mediator), "mediator2") == 0);
     assert(storage[0]->view.observerMap[0]->observers[2]->getContext(storage[0]->view.observerMap[0]->observers[2]) == storage[0]->view.mediatorMap[2]->mediator);
 
-    view->registerMediator2(view, view_test_mediator7, "mediator3", NULL);
+    view->registerMediator(view, view_test_mediator7, "mediator3", NULL);
     assert(strcmp(storage[0]->view.mediatorMap[3]->mediator->getName(storage[0]->view.mediatorMap[3]->mediator), "mediator3") == 0);
     assert(storage[0]->view.observerMap[0]->observers[3]->getContext(storage[0]->view.observerMap[0]->observers[3]) == storage[0]->view.mediatorMap[3]->mediator);
 

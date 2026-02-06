@@ -29,9 +29,7 @@ struct IView {
 
     void (*removeObserver)(const struct IView *self, const char *notificationName, const void *notifyContext);
 
-    void (*registerMediator2)(const struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component);
-
-    void (*registerMediator)(const struct IView *self, struct IMediator *mediator);
+    void (*registerMediator)(const struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component);
 
     struct IMediator *(*retrieveMediator)(const struct IView *self, const char *mediatorName);
 
