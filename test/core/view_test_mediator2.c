@@ -11,8 +11,8 @@ static void handleNotification(const struct IMediator *self, struct INotificatio
 }
 
 struct IMediator *view_test_mediator2(struct Mediator *const mediator, struct ViewTest *component) {
-    struct IMediator *base = puremvc_mediator(mediator, view_test_mediator2_NAME, component);
-    base->listNotificationInterests = listNotificationInterests;
-    base->handleNotification = handleNotification;
-    return base;
+    puremvc_mediator(mediator, view_test_mediator2_NAME, component);
+    mediator->base.listNotificationInterests = listNotificationInterests;
+    mediator->base.handleNotification = handleNotification;
+    return &mediator->base;
 }

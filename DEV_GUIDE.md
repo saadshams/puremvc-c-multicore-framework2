@@ -26,3 +26,32 @@ This is how serious C APIs avoid the question entirely.
 
 * Key Truncation Collision
 * library is thread-safe because it uses internal mutexes,
+
+### lives for entire program
+
+```c++
+struct ViewMap *storage[] = {
+  ({
+      static struct Observer observers[3]; // lives for entire program
+      &(struct ViewMap){
+        .view = {
+          .mediatorMap = (struct MediatorMap*[]){ &(struct MediatorMap){0}, NULL },
+          .observerMap = (struct ObserverMap*[]){
+            &(struct ObserverMap){ .observers = (struct IObserver *[]){ &observers[0].base, NULL } },
+            &(struct ObserverMap){ .observers = (struct IObserver *[]){ &observers[1].base, NULL } },
+            &(struct ObserverMap){ .observers = (struct IObserver *[]){ &observers[2].base, NULL } },
+            NULL
+          },
+        },
+      };
+  }),
+  NULL
+};
+
+```
+
+Option 2 — make it static (lives forever)
+```c++
+static struct Mediator obj;
+view->registerMediator(view, view_test_mediator4(&obj, &viewTest)
+```

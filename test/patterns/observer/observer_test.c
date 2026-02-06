@@ -31,7 +31,7 @@ static void handleNotification(const void *context, struct INotification *notifi
 void testObserverConstructor() {
     // Create observer
     struct Object { int x; } object = { 0 };
-    struct IObserver *observer = puremvc_observer(&(struct Observer){0}, handleNotification, &object);
+    struct IObserver *observer = puremvc_observer_init(&(struct Observer){0}, handleNotification, &object);
 
     struct ObserverTestVar var = {.value = 5};
     struct INotification *notification = puremvc_notification(&(struct Notification){0}, "ObserverTestNote", &var, NULL);
@@ -49,7 +49,7 @@ void testObserverAccessors() {
     // Create observer with null args, then
     // use accessors to set notification method and context
     struct Object {int x;} object;
-    struct IObserver *observer = puremvc_observer(&(struct Observer){0}, NULL, NULL);
+    struct IObserver *observer = puremvc_observer_init(&(struct Observer){0}, NULL, NULL);
 
     observer->setContext(observer, &object);
     observer->setNotify(observer, handleNotification);
@@ -76,7 +76,7 @@ void testCompareNotifyContext() {
     struct Object {char dummy;};
     struct Object object = {0};
     struct Object negTestObj = {0};
-    struct IObserver *observer = puremvc_observer(&(struct Observer){0}, handleNotification, &object);
+    struct IObserver *observer = puremvc_observer_init(&(struct Observer){0}, handleNotification, &object);
 
     // test assertions
     assert(observer->compareNotifyContext(observer, &negTestObj) == false);

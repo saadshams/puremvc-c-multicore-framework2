@@ -54,7 +54,7 @@ static void registerProxy(struct IModel *self, struct IProxy *proxy) {
         return;
     }
 
-    // proxy->notifier.initializeNotifier(&proxy->notifier, this->multitonKey);
+    proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), this->multitonKey);
 
     snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", proxy->getName(proxy)); // registration
     this->proxyMap[i]->proxy = proxy;

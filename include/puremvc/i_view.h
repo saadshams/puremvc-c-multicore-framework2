@@ -24,7 +24,7 @@
 struct IView {
     void (*initializeView)(struct IView *self);
 
-    void (*registerObserver)(const struct IView *self, const char *notificationName, struct IObserver *observer);
+    void (*registerObserver)(const struct IView *self, const char *notificationName, void (*notify)(const void *context, struct INotification *notification), void *context);
 
     void (*notifyObservers)(const struct IView *self, struct INotification *notification);
 

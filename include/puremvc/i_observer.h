@@ -13,7 +13,6 @@
 #include <stdbool.h>
 
 struct IObserver {
-
     void *(*getContext)(const struct IObserver *observer);
 
     void (*setContext)(struct IObserver *observer, void *notifyContext);
