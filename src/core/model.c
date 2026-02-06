@@ -20,17 +20,17 @@ static void initializeModel(struct IModel *self) {
     (void)self;
 }
 
-static void registerProxy(struct IModel *self, struct IProxy *(*factory)(struct IProxy *proxy, const char *name, void *data), const char *name, void *data) {
+static bool registerProxy(struct IModel *self, struct IProxy *(*factory)(struct IProxy *proxy, const char *name, void *data), const char *name, void *data) {
     struct Model *this = (struct Model *) self;
 
     if (strlen(name) >= KEY_SIZE) { // Key truncation collision
         fprintf(stderr, "[PureMVC::Model::registerProxy] Error: Key '%s' too long (max %d) — skipping registration.\n", name, KEY_SIZE);
-        return;
+        return false;
     }
 
     if (this->proxyMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] FATAL: Missing ProxyMap field in ModelMap; skipping registration.\033[0m\n");
-        return;
+        return false;
     }
 
     mutex_lock(&this->proxyMapMutex);
@@ -46,12 +46,12 @@ static void registerProxy(struct IModel *self, struct IProxy *(*factory)(struct 
 
         puremvc_proxy_init(this->proxyMap[i]->proxy, name, data); // registration
         mutex_unlock(&this->proxyMapMutex);
-        return;
+        return false;
     }
     if (this->proxyMap[i] == NULL) { // overflow (ProxyMap)
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap storage overflow for proxy '%s'; increase slots - skipping registration.\033[0m\n", name);
         mutex_unlock(&this->proxyMapMutex);
-        return;
+        return false;
     }
 
     // todo check if proxy exists
@@ -63,6 +63,7 @@ static void registerProxy(struct IModel *self, struct IProxy *(*factory)(struct 
     mutex_unlock(&this->proxyMapMutex);
 
     proxy->onRegister(proxy);
+    return true;
 }
 
 static struct IProxy *retrieveProxy(struct IModel *self, const char *proxyName) {

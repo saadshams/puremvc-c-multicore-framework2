@@ -24,3 +24,7 @@ struct ICommand *puremvc_simple_command_init(struct SimpleCommand *const command
     puremvc_notifier_init(&command->notifier);
     return &command->base;
 }
+
+void puremvc_simple_command_deinit(struct SimpleCommand *command) {
+
+}

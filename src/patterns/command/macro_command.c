@@ -31,3 +31,7 @@ struct ICommand *puremvc_macro_command_init(struct SimpleCommand *const simple_c
     command->execute = execute;
     return command;
 }
+
+void puremvc_macro_command_deinit(struct SimpleCommand *command) {
+
+}

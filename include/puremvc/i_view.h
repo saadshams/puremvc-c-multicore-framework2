@@ -23,13 +23,13 @@
 struct IView {
     void (*initializeView)(struct IView *self);
 
-    void (*registerObserver)(const struct IView *self, const char *notificationName, void (*notify)(const void *context, struct INotification *notification), void *context);
+    bool (*registerObserver)(const struct IView *self, const char *notificationName, void (*notify)(const void *context, struct INotification *notification), void *context);
 
     void (*notifyObservers)(const struct IView *self, struct INotification *notification);
 
-    void (*removeObserver)(const struct IView *self, const char *notificationName, const void *notifyContext);
+    bool (*removeObserver)(const struct IView *self, const char *notificationName, const void *notifyContext);
 
-    void (*registerMediator)(const struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component);
+    bool (*registerMediator)(const struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component);
 
     struct IMediator *(*retrieveMediator)(const struct IView *self, const char *mediatorName);
 

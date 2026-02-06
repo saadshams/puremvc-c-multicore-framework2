@@ -20,17 +20,17 @@ static void initializeView(struct IView *self) {
 }
 
 // api change since the search needs to happen on the user slots and instantiate it
-static void registerObserver(const struct IView *self, const char *notificationName, void (*notify)(const void *context, struct INotification *notification), void *context) {
+static bool registerObserver(const struct IView *self, const char *notificationName, void (*notify)(const void *context, struct INotification *notification), void *context) {
     struct View *this = (struct View *) self;
 
     if (strlen(notificationName) >= KEY_SIZE) { // Key truncation collision
         fprintf(stderr, "[PureMVC::Observer::registerObserver] Error: notification name '%s' too long (max %d) — skipping registration.\n", notificationName, KEY_SIZE);
-        return;
+        return false;
     }
 
     if (this->observerMap == NULL) { // missing ObserverMap field
         fprintf(stderr, "\033[0;31m[PureMVC::View::registerObserver] FATAL: Missing ObserverMap field in ViewMap; skipping registration.\033[0m\n");
-        return;
+        return false;
     }
 
     mutex_lock(&this->observerMapMutex);
@@ -48,29 +48,30 @@ static void registerObserver(const struct IView *self, const char *notificationN
         if (observers[j] == NULL) { // overflow (Observer)
             fprintf(stderr, "\033[0;31m[PureMVC::View::registerObserver] ERROR: Observer storage overflow for notification '%s' at ObserverMap index %zu; increase slots - skipping registration.\033[0m\n", notificationName, i);
             mutex_unlock(&this->observerMapMutex);
-            return;
+            return false;
         }
 
         puremvc_observer_init((struct Observer *) observers[j], notify, context); // registration (existing key)
         mutex_unlock(&this->observerMapMutex);
-        return;
+        return false;
     }
 
     if (this->observerMap[i] == NULL) { // overflow (ObserverMap)
         fprintf(stderr, "\033[0;31m[PureMVC::View::registerObserver] Error: ObserverMap storage overflow for notification '%s'; increase slots - skipping registration.\033[0m\n", notificationName);
         mutex_unlock(&this->observerMapMutex);
-        return;
+        return false;
     }
 
     if (this->observerMap[i]->observers == NULL || this->observerMap[i]->observers[0] == NULL) { // overflow (Observer)
         fprintf(stderr, "\033[0;31m[PureMVC::View::registerObserver] Error: Observer storage overflow for notification '%s' at ObserverMap index %zu; increase slots - skipping registration.\033[0m\n", notificationName, i);
         mutex_unlock(&this->observerMapMutex);
-        return;
+        return false;
     }
 
     snprintf(this->observerMap[i]->key, KEY_SIZE, "%s", notificationName); // registration (new key)
     puremvc_observer_init((struct Observer *) this->observerMap[i]->observers[0], notify, context);
     mutex_unlock(&this->observerMapMutex);
+    return true;
 }
 
 static void notifyObservers(const struct IView *self, struct INotification *notification) {
@@ -92,9 +93,11 @@ static void notifyObservers(const struct IView *self, struct INotification *noti
     mutex_unlock(&this->observerMapMutex);
 }
 
-void removeObserver(const struct IView *self, const char *notificationName, const void *notifyContext) {
+bool removeObserver(const struct IView *self, const char *notificationName, const void *notifyContext) {
     struct View *this = (struct View *) self;
+
     mutex_lock(&this->observerMapMutex);
+    bool exists = false;
 
     for (size_t i = 0; this->observerMap != NULL && this->observerMap[i] != NULL && this->observerMap[i]->key[0] != '\0'; i++) { // find observer
         if (strcmp(this->observerMap[i]->key, notificationName) == 0) { // match (observerMap key)
@@ -103,7 +106,9 @@ void removeObserver(const struct IView *self, const char *notificationName, cons
             size_t index = 0, j = 0; // find observer to remove
             for (; observers != NULL && observers[j] != NULL && observers[j]->getContext(observers[j]) != NULL; j++) {
                 const struct IObserver *observer = observers[j];
-                if (observer->compareNotifyContext(observer, notifyContext) == false) { // mismatch (shift left to remove)
+                if (observer->compareNotifyContext(observer, notifyContext) == true) { // match
+                    exists = true;
+                } else {
                     if (index != j) { // shift observers left
                         observers[index] = observers[j];
                     }
@@ -115,9 +120,8 @@ void removeObserver(const struct IView *self, const char *notificationName, cons
                 puremvc_observer_init((struct Observer *) this->observerMap[i]->observers[k], NULL, NULL);
             }
 
-            if (index == 0) { // ObserverMap empty; shift left ObservrerMap
+            if (index == 0) { // ObserverMap empty; shift left ObserverMap
                 memset(&this->observerMap[i]->key, 0, KEY_SIZE);
-
                 for (size_t j = i; this->observerMap[j + 1] != NULL && this->observerMap[j + 1]->key[0] != '\0'; j++) { // shift observerMap left
                     struct ObserverMap *temp = this->observerMap[j];
                     this->observerMap[j] = this->observerMap[j + 1];
@@ -128,20 +132,22 @@ void removeObserver(const struct IView *self, const char *notificationName, cons
             break; // handled match
         }
     }
+
     mutex_unlock(&this->observerMapMutex);
+    return exists;
 }
 
-static void registerMediator(const struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component) {
+bool registerMediator(const struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component) {
     struct View *this = (struct View *) self;
 
     if (strlen(name) >= KEY_SIZE) { // Key truncation collision
         fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: Key '%s' too long (max %d) — skipping registration.\033[0m\n", name, KEY_SIZE);
-        return;
+        return false;
     }
 
     if (this->mediatorMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] FATAL: Missing MediatorMap field in ViewMap; skipping registration.\033[0m\n");
-        return;
+        return false;
     }
 
     mutex_lock(&this->mediatorMapMutex);
@@ -151,14 +157,14 @@ static void registerMediator(const struct IView *self, struct IMediator *(*facto
         if (strcmp(this->mediatorMap[i]->key, name) == 0) {
             fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: Mediator '%s' exists; skipping registration\033[0m.\n", name);
             mutex_unlock(&this->mediatorMapMutex);
-            return;
+            return false;
         }
     }
 
     if (this->mediatorMap[i] == NULL) { // overflow (MediatorMap)
         fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: MediatorMap storage overflow for mediator '%s'; increase slots - skipping registration.\033[0m\n", name);
         mutex_unlock(&this->mediatorMapMutex);
-        return;
+        return false;
     }
 
     // todo check if mediator exists
@@ -175,6 +181,7 @@ static void registerMediator(const struct IView *self, struct IMediator *(*facto
     mutex_unlock(&this->mediatorMapMutex);
 
     mediator->onRegister(mediator);
+    return true;
 }
 
 static struct IMediator *retrieveMediator(const struct IView *self, const char *mediatorName) {
