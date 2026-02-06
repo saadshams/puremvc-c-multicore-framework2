@@ -28,7 +28,7 @@ void testSimpleCommandExecute() {
     struct SimpleCommandTestVO vo = {.input = 5};
 
     // Create the Notification (note)
-    struct INotification *notification = puremvc_notification(&(struct Notification){0}, "SimpleCommandTestNote", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}, "SimpleCommandTestNote", &vo, NULL);
 
     // Create the SimpleCommand
     const struct ICommand *command = test_simple_command(&(struct SimpleCommand){0});

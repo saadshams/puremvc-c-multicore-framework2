@@ -44,7 +44,7 @@ void toString(const struct INotification *self, char *buffer, size_t buffer_size
         fprintf(stderr, "[PureMVC::Notification::toString] Warning: Buffer Truncated: '%zu' (Original length: %d, Buffer size: %d)\n", buffer_size, len, NAME_SIZE);
 }
 
-struct INotification *puremvc_notification(struct Notification *const notification, const char *name, void *body, const char *type) {
+struct INotification *puremvc_notification_init(struct Notification *const notification, const char *name, void *body, const char *type) {
     notification->base.getName = getName;
     notification->base.getBody = getBody;
     notification->base.setBody = setBody;

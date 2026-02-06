@@ -18,13 +18,9 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     (void)self; (void)notification;
 }
 
-struct ICommand *puremvc_simple_command(struct SimpleCommand *const command) {
+struct ICommand *puremvc_simple_command_init(struct SimpleCommand *const command) {
     command->base.getNotifier = getNotifier;
     command->base.execute = execute;
-    puremvc_notifier(&command->notifier);
+    puremvc_notifier_init(&command->notifier);
     return &command->base;
-}
-
-void puremvc_simple_command_deinit(struct SimpleCommand *command) {
-    command->base = (struct ICommand){0};
 }

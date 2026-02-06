@@ -56,13 +56,7 @@ struct IProxy *puremvc_proxy_init(struct IProxy *const proxy, const char *name, 
 
     this->data = data;
 
-    puremvc_notifier(&this->notifier);
+    puremvc_notifier_init(&this->notifier);
 
     return proxy;
-}
-
-void puremvc_proxy_deinit(struct Proxy *proxy) {
-    proxy->base = (struct IProxy){0};
-    memset(&proxy->name, 0, KEY_SIZE);
-    proxy->data = NULL;
 }
