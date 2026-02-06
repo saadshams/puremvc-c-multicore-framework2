@@ -1,6 +1,7 @@
-#include <stdio.h>
-
 #include "view_test_mediator6.h"
+#include "view_test.h"
+
+#include <stdio.h>
 
 static const char **listNotificationInterests(const struct IMediator *self) {
     static const char *interests[] = { NOTE6, NULL };
@@ -23,10 +24,10 @@ static void onRemove(struct IMediator *self) {
     ((struct ViewTest *) self->getComponent(self))->counter++;
 }
 
-struct IMediator *view_test_mediator6(struct Mediator *const mediator, const char *name, struct ViewTest *component) {
-    puremvc_mediator(mediator, name, component);
-    mediator->base.listNotificationInterests = listNotificationInterests;
-    mediator->base.handleNotification = handleNotification;
-    mediator->base.onRemove = onRemove;
-    return &mediator->base;
+struct IMediator *view_test_mediator6(struct IMediator *const mediator, const char *name, void *component) {
+    struct IMediator *self = puremvc_mediator_init(mediator, name, component);
+    self->listNotificationInterests = listNotificationInterests;
+    self->handleNotification = handleNotification;
+    self->onRemove = onRemove;
+    return self;
 }

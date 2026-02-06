@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "view_test_mediator7.h"
+#include "view_test.h"
 
 static const char **listNotificationInterests(const struct IMediator *self) {
     (void)self;
@@ -8,8 +9,8 @@ static const char **listNotificationInterests(const struct IMediator *self) {
     return interests;
 }
 
-struct IMediator *view_test_mediator7(struct Mediator *const mediator, const char *name, struct ViewTest *component) {
-    struct IMediator *base = puremvc_mediator(mediator, name, component);
-    base->listNotificationInterests = listNotificationInterests;
-    return base;
+struct IMediator *view_test_mediator7(struct IMediator *const mediator, const char *name, void *component) {
+    struct IMediator *self = puremvc_mediator_init(mediator, name, component);
+    self->listNotificationInterests = listNotificationInterests;
+    return self;
 }

@@ -1,4 +1,5 @@
 #include "view_test_mediator4.h"
+#include "view_test.h"
 
 static const char **listNotificationInterests(const struct IMediator *self) {
     static const char *interests[] = {NOTE4, NULL};
@@ -15,10 +16,10 @@ static void onRemove(struct IMediator *self) {
     viewTest->onRemoveCalled = true;
 }
 
-struct IMediator *view_test_mediator4(struct Mediator *const mediator, struct ViewTest *component) {
-    puremvc_mediator(mediator, view_test_mediator4_NAME, component);
-    mediator->base.listNotificationInterests = listNotificationInterests;
-    mediator->base.onRegister = onRegister;
-    mediator->base.onRemove = onRemove;
-    return &mediator->base;
+struct IMediator *view_test_mediator4(struct IMediator *const mediator, const char *name, void *component) {
+    struct IMediator *self = puremvc_mediator_init(mediator, name, component);
+    self->listNotificationInterests = listNotificationInterests;
+    self->onRegister = onRegister;
+    self->onRemove = onRemove;
+    return self;
 }

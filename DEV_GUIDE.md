@@ -55,3 +55,35 @@ Option 2 — make it static (lives forever)
 static struct Mediator obj;
 view->registerMediator(view, view_test_mediator4(&obj, &viewTest)
 ```
+
+loop
+
+```c++
+#define NUM_MEDIATORS 4
+
+// Pre-allocate storage for Mediators
+struct Mediator mediatorStorage[NUM_MEDIATORS] = {0};
+
+// Pre-allocate storage for MediatorMap slots
+struct MediatorMap mediatorMapStorage[NUM_MEDIATORS] = {0};
+
+// Fill the mediatorMap in a loop
+for (int i = 0; i < NUM_MEDIATORS; i++) {
+    mediatorMapStorage[i].mediator = &mediatorStorage[i].base;
+    mediatorMapStorage[i].key[0] = '\0'; // empty key
+}
+
+// Then build the mediatorMap array with NULL terminator
+struct MediatorMap *mediatorMapArray[NUM_MEDIATORS + 1];
+for (int i = 0; i < NUM_MEDIATORS; i++) {
+    mediatorMapArray[i] = &mediatorMapStorage[i];
+}
+mediatorMapArray[NUM_MEDIATORS] = NULL; // terminate array
+
+// Now you can assign to your View
+struct View viewStorage = {
+    .mediatorMap = mediatorMapArray,
+    .observerMap = NULL // fill separately if needed
+};
+
+```

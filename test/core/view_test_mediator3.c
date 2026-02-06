@@ -1,4 +1,5 @@
 #include "view_test_mediator3.h"
+#include "view_test.h"
 
 static const char **listNotificationInterests(const struct IMediator *self) {
     (void)self;
@@ -11,9 +12,9 @@ static void handleNotification(const struct IMediator *self, struct INotificatio
     viewTest->lastNotification = notification->getName(notification);
 }
 
-struct IMediator *view_test_mediator3(struct Mediator *const mediator, struct ViewTest *component) {
-    puremvc_mediator(mediator, view_test_mediator3_NAME, component);
-    mediator->base.listNotificationInterests = listNotificationInterests;
-    mediator->base.handleNotification = handleNotification;
-    return &mediator->base;
+struct IMediator *view_test_mediator3(struct IMediator *const mediator, const char *name, void *component) {
+    struct IMediator *self = puremvc_mediator_init(mediator, name, component);
+    self->listNotificationInterests = listNotificationInterests;
+    self->handleNotification = handleNotification;
+    return self;
 }

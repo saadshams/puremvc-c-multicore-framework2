@@ -22,6 +22,6 @@ struct Mediator {
     void *component;
 };
 
-struct IMediator *puremvc_mediator(struct Mediator *mediator, const char *name, void *component);
+struct IMediator *puremvc_mediator_init(struct IMediator *mediator, const char *name, void *component);
 
 void puremvc_mediator_deinit(struct Mediator *mediator);

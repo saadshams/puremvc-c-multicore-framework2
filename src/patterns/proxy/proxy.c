@@ -48,12 +48,13 @@ struct IProxy *puremvc_proxy(struct Proxy *const proxy, const char *name, void *
     proxy->base.onRegister = onRegister;
     proxy->base.onRemove = onRemove;
 
-    proxy->data = data;
-    puremvc_notifier(&proxy->notifier);
-
     int len = snprintf(proxy->name, NAME_SIZE, "%s", name ? name : PROXY_NAME);
     if (len >= NAME_SIZE)
         fprintf(stderr, "[PureMVC::Proxy] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : PROXY_NAME, len, NAME_SIZE);
+
+    proxy->data = data;
+
+    puremvc_notifier(&proxy->notifier);
 
     return &proxy->base;
 }

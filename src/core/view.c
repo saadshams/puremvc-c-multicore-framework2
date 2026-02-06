@@ -131,11 +131,11 @@ void removeObserver(const struct IView *self, const char *notificationName, cons
     mutex_unlock(&this->observerMapMutex);
 }
 
-static void registerMediator(const struct IView *self, struct IMediator *mediator) {
+static void registerMediator2(const struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component) {
     struct View *this = (struct View *) self;
 
-    if (strlen(mediator->getName(mediator)) >= KEY_SIZE) { // Key truncation collision
-        fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: Key '%s' too long (max %d) — skipping registration.\033[0m\n", mediator->getName(mediator), KEY_SIZE);
+    if (strlen(name) >= KEY_SIZE) { // Key truncation collision
+        fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: Key '%s' too long (max %d) — skipping registration.\033[0m\n", name, KEY_SIZE);
         return;
     }
 
@@ -147,24 +147,25 @@ static void registerMediator(const struct IView *self, struct IMediator *mediato
     mutex_lock(&this->mediatorMapMutex);
 
     size_t i = 0;
-    for (; this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find existing
-        if (strcmp(this->mediatorMap[i]->key, mediator->getName(mediator)) == 0) {
-            fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: Mediator '%s' exists; skipping registration\033[0m.\n", mediator->getName(mediator));
+    for (; this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find existing, no override; return;
+        if (strcmp(this->mediatorMap[i]->key, name) == 0) {
+            fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: Mediator '%s' exists; skipping registration\033[0m.\n", name);
             mutex_unlock(&this->mediatorMapMutex);
             return;
         }
     }
 
     if (this->mediatorMap[i] == NULL) { // overflow (MediatorMap)
-        fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: MediatorMap storage overflow for mediator '%s'; increase slots - skipping registration.\033[0m\n", mediator->getName(mediator));
+        fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: MediatorMap storage overflow for mediator '%s'; increase slots - skipping registration.\033[0m\n", name);
         mutex_unlock(&this->mediatorMapMutex);
         return;
     }
 
-    mediator->getNotifier(mediator)->initializeNotifier(mediator->getNotifier(mediator), this->multitonKey);
+    // todo check if mediator exists
+    struct IMediator *mediator = factory(this->mediatorMap[i]->mediator, name, component); // registration
+    snprintf(this->mediatorMap[i]->key, KEY_SIZE, "%s", mediator->getName(mediator));
 
-    snprintf(this->mediatorMap[i]->key, KEY_SIZE, "%s", mediator->getName(mediator)); // registration
-    this->mediatorMap[i]->mediator = mediator;
+    mediator->getNotifier(mediator)->initializeNotifier(mediator->getNotifier(mediator), this->multitonKey);
 
     const char **interests = mediator->listNotificationInterests(mediator);
     for (const char **interest = interests; *interest; interest++) { // register observers (mutex guards context if mediator is removed)
@@ -173,7 +174,11 @@ static void registerMediator(const struct IView *self, struct IMediator *mediato
 
     mutex_unlock(&this->mediatorMapMutex);
 
-    this->mediatorMap[i]->mediator->onRegister(mediator);
+    mediator->onRegister(mediator);
+}
+
+static void registerMediator(const struct IView *self, struct IMediator *mediator) {
+
 }
 
 static struct IMediator *retrieveMediator(const struct IView *self, const char *mediatorName) {
@@ -203,37 +208,36 @@ static bool hasMediator(const struct IView *self, const char *mediatorName) {
     return exists;
 }
 
-static struct IMediator *removeMediator(const struct IView *self, const char *mediatorName) {
+static struct Mediator removeMediator(const struct IView *self, const char *mediatorName) {
     struct View *this = (struct View *) self;
     mutex_lock(&this->mediatorMapMutex);
-    struct IMediator *mediator = NULL;
+    struct Mediator mediator = {0};
 
-    size_t index = 0;
-    size_t i = 0;
+    size_t index = 0, i = 0;
     for (; this->mediatorMap != NULL && this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find mediator
         if (strcmp(this->mediatorMap[i]->key, mediatorName) == 0) { // match
-            mediator = this->mediatorMap[i]->mediator;
-            const char **interests = mediator->listNotificationInterests(mediator);
+            memcpy(&mediator, this->mediatorMap[i]->mediator, sizeof(struct Mediator));
+
+            const char **interests = this->mediatorMap[i]->mediator->listNotificationInterests(this->mediatorMap[i]->mediator);
             for (const char **cursor = interests; *cursor != NULL; cursor++) { // remove interests
-                this->base.removeObserver(self, *cursor, mediator);
+                this->base.removeObserver(self, *cursor, this->mediatorMap[i]->mediator);
             }
-            mediator->onRemove(mediator);
+            this->mediatorMap[i]->mediator->onRemove(this->mediatorMap[i]->mediator);
 
             memset(&this->mediatorMap[i]->key, 0, KEY_SIZE);
-            this->mediatorMap[i]->mediator = NULL;
+            puremvc_mediator_init(this->mediatorMap[i]->mediator, NULL, NULL);
         } else {
             if (index != i) { // shift mediatorMap left
                 const struct IMediator *previous = this->mediatorMap[i]->mediator;
 
                 snprintf(this->mediatorMap[index]->key, KEY_SIZE, "%s", this->mediatorMap[i]->key);
                 this->mediatorMap[index] = this->mediatorMap[i];
-                // this->mediatorMap[index]->mediator = NULL;
 
                 memset(&this->mediatorMap[i]->key, 0, KEY_SIZE);
-                this->mediatorMap[i]->mediator = NULL;
+                puremvc_mediator_init(this->mediatorMap[i]->mediator, NULL, NULL);
 
                 const char **interests = this->mediatorMap[index]->mediator->listNotificationInterests(this->mediatorMap[index]->mediator);
-                for (const char **cursor = interests; *cursor; cursor++) { // update observer context to relocated meditors
+                for (const char **cursor = interests; *cursor; cursor++) { // update observer context to relocated mediators
 
                     for (size_t j = 0; this->observerMap[j] != NULL && this->observerMap[j]->key[0] != '\0'; j++) {
                         if (strcmp(this->observerMap[j]->key, *cursor) == 0) {
@@ -270,6 +274,7 @@ static void init(struct View *view, const char *key) {
         .registerObserver = registerObserver,
         .notifyObservers = notifyObservers,
         .removeObserver = removeObserver,
+        .registerMediator2 = registerMediator2,
         .registerMediator = registerMediator,
         .retrieveMediator = retrieveMediator,
         .hasMediator = hasMediator,

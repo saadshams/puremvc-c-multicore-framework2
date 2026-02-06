@@ -10,7 +10,6 @@
 
 #include "i_notification.h"
 #include "i_mediator.h"
-#include "i_observer.h"
 
 #include <stdbool.h>
 
@@ -30,11 +29,13 @@ struct IView {
 
     void (*removeObserver)(const struct IView *self, const char *notificationName, const void *notifyContext);
 
+    void (*registerMediator2)(const struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component);
+
     void (*registerMediator)(const struct IView *self, struct IMediator *mediator);
 
     struct IMediator *(*retrieveMediator)(const struct IView *self, const char *mediatorName);
 
     bool (*hasMediator)(const struct IView *self, const char *mediatorName);
 
-    struct IMediator *(*removeMediator)(const struct IView *self, const char *mediatorName);
+    struct Mediator(*removeMediator)(const struct IView *self, const char *mediatorName);
 };
