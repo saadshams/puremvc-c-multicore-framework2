@@ -131,7 +131,7 @@ void removeObserver(const struct IView *self, const char *notificationName, cons
     mutex_unlock(&this->observerMapMutex);
 }
 
-static void registerMediator2(const struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component) {
+static void registerMediator(const struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component) {
     struct View *this = (struct View *) self;
 
     if (strlen(name) >= KEY_SIZE) { // Key truncation collision
@@ -270,7 +270,7 @@ static void init(struct View *view, const char *key) {
         .registerObserver = registerObserver,
         .notifyObservers = notifyObservers,
         .removeObserver = removeObserver,
-        .registerMediator = registerMediator2,
+        .registerMediator = registerMediator,
         .retrieveMediator = retrieveMediator,
         .hasMediator = hasMediator,
         .removeMediator = removeMediator
