@@ -116,6 +116,8 @@ void testRegisterAndRetrieveMediator() {
     struct ViewMap *storage[] = { &(struct ViewMap) {
         .view = {
             .mediatorMap = (struct MediatorMap *[]) { &(struct MediatorMap){ .mediator = &(struct Mediator){0}.base }, NULL },
+
+
             .observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) { .observers = (struct IObserver*[]){ &(struct Observer){0}.base, NULL } }, NULL },
         }
     }, NULL };

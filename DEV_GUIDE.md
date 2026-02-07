@@ -87,3 +87,24 @@ struct View viewStorage = {
 };
 
 ```
+
+Controller storage
+
+```c++
+// Step 1: static storage for empty commandMap
+static struct CommandMap initialCommandMap[] = { { .key = "", .factory = NULL } };
+static struct CommandMap *commandMapArray[] = { &initialCommandMap[0], NULL };
+
+// Step 2: static storage for controllers
+static struct Controller controllerStorage[] = {
+    {
+        .base = {0},
+        .multitonKey = "",
+        .view = NULL,
+        .commandMapMutex = {0},
+        .commandMap = commandMapArray
+    }
+};
+static struct Controller *storage[] = { &controllerStorage[0], NULL };
+
+```

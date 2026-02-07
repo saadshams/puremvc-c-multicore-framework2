@@ -24,7 +24,7 @@ static void initializeController(struct IController *self) {
     this->view = puremvc_view_getInstance(NULL, this->multitonKey);
 }
 
-static void registerCommand(struct IController *self, const char *notificationName, struct ICommand *(*factory)()) {
+static void registerCommand(struct IController *self, const char *notificationName, struct ICommand *(*factory)(struct ICommand *)) {
     struct Controller *this = (struct Controller *) self;
 
     if (strlen(notificationName) >= KEY_SIZE) { // Key truncation collision
@@ -59,7 +59,7 @@ static void registerCommand(struct IController *self, const char *notificationNa
     // const struct Observer observer = puremvc_observer((void (*)(const void *, struct INotification *)) self->executeCommand, self);
     // this->view->registerObserver(this->view, notificationName, observer);
 
-    this->view->registerObserver(this->view, notificationName, (void (*)(const void *, const struct INotification *)) self->executeCommand, self);
+    // this->view->registerObserver(this->view, notificationName, (void (*)(const void *, const struct INotification *)) self->executeCommand, self);
 
 
     snprintf(this->commandMap[i]->key, KEY_SIZE, "%s", notificationName); // registration
@@ -73,8 +73,8 @@ static void executeCommand(const struct IController *self, struct INotification 
 
     for (size_t i = 0; this->commandMap != NULL && this->commandMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->commandMap[i]->key, notification->getName(notification)) == 0) {
-            struct ICommand *(*factory)() = this->commandMap[i]->factory;
-            struct ICommand *command = factory();
+            struct ICommand *(*factory)(struct ICommand *) = this->commandMap[i]->factory;
+            const struct ICommand *command = factory(&(struct SimpleCommand){}.base);
             command->getNotifier(command)->initializeNotifier(command->getNotifier(command), this->multitonKey);
             command->execute(command, notification);
             break;
@@ -98,7 +98,7 @@ static bool hasCommand(const struct IController *self, const char *notificationN
     return exists;
 }
 
-static bool removeCommand(struct IController *self, struct ICommand *(**factory)(), const char *notificationName) {
+static bool removeCommand(struct IController *self, struct ICommand *(**factory)(struct ICommand *), const char *notificationName) {
     struct Controller *this = (struct Controller *) self;
     bool exists = false;
 
@@ -108,24 +108,24 @@ static bool removeCommand(struct IController *self, struct ICommand *(**factory)
     for (size_t i = 0; this->commandMap != NULL && this->commandMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->commandMap[i]->key, notificationName) == 0) { // match
             exists = true;
-            memset(&this->commandMap[i], 0, sizeof(struct CommandMap));
-            this->view->removeObserver(this->view, notificationName, self);
+            memset(&this->commandMap[i]->key, 0, sizeof(struct CommandMap));
+            // this->view->removeObserver(this->view, notificationName, self); // todo
 
             if (factory != NULL)
                 *factory = this->commandMap[i]->factory;
         } else {
             if (index != i) { // shift left
-                this->view->removeObserver(this->view, notificationName, self); // remove observer before the shift
+                // this->view->removeObserver(this->view, notificationName, self); // todo remove observer before the shift
 
-                snprintf(this->commandMap[index]->key, KEY_SIZE, "%s", this->commandMap[i]->key);
-                this->commandMap[index]->factory = this->commandMap[i]->factory;;
+                *this->commandMap[index] = *this->commandMap[i];
+                memset(&this->commandMap[i]->key, 0, KEY_SIZE); // remove
+                // snprintf(this->commandMap[index]->key, KEY_SIZE, "%s", this->commandMap[i]->key);
+                // this->commandMap[index]->factory = this->commandMap[i]->factory;;
 
                 // const struct Observer observer = puremvc_observer((void (*)(const void *, struct INotification *)) executeCommand, self);
                 // this->view->registerObserver(this->view, notificationName, observer); // register after the shift
 
-                this->view->registerObserver(this->view, notificationName, (void (*)(const void *, const struct INotification *)) self->executeCommand, self);
-
-                memset(&this->commandMap[i]->key, 0, KEY_SIZE);
+                // this->view->registerObserver(this->view, notificationName, (void (*)(const void *, const struct INotification *)) self->executeCommand, self);
             }
             index++;
         }
