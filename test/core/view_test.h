@@ -25,8 +25,9 @@ void testRemoveView();
 void testGarbageStorageForView();
 void testGarbageStorageForObserver();
 void testGarbageStorageForMediator();
-void testObserversShiftLeft();
-void testMediatorsShiftLeft();
+void testObserverMapShiftLeft();
+void testObserverShiftLeft();
+void testMediatorMapShiftLeft();
 void testViewShiftLeft();
 
 struct ViewTest {

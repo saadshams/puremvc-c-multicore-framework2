@@ -62,7 +62,8 @@ struct IMediator *puremvc_mediator_init(struct IMediator *const mediator, const 
     mediator->onRegister = onRegister;
     mediator->onRemove = onRemove;
 
-    int len = snprintf(this->name, NAME_SIZE, "%s", name ? name : MEDIATOR_NAME);
+    memset(&this->name, 0, NAME_SIZE);
+    int len = snprintf(this->name, NAME_SIZE, "%s", name != NULL ? name : MEDIATOR_NAME);
     if (len >= NAME_SIZE)
         fprintf(stderr, "[PureMVC::Mediator] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : MEDIATOR_NAME, len, NAME_SIZE);
 

@@ -10,8 +10,8 @@
 #include "mutex.h"
 #include "constants.h"
 #include "i_view.h"
-#include "mediator.h"
-#include "observer.h"
+#include "i_mediator.h"
+#include "i_observer.h"
 
 struct View {
     struct IView base;

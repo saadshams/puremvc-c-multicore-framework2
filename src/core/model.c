@@ -107,7 +107,9 @@ static struct IProxy *removeProxy(struct IModel *self, const char *proxyName) {
         if (strcmp(this->proxyMap[i]->key, proxyName) == 0) { // match
             proxy = this->proxyMap[i]->proxy;
             proxy->onRemove(proxy);
+
             memset(&this->proxyMap[i]->key, 0, KEY_SIZE);
+            puremvc_proxy_deinit((struct Proxy *) this->proxyMap[i]->proxy);
         } else {
             if (index != i) { // shift left
                 snprintf(this->proxyMap[index]->key, KEY_SIZE, "%s", this->proxyMap[i]->key);

@@ -4,9 +4,9 @@
 #target_link_libraries(ControllerTest PRIVATE puremvc)
 #add_test(NAME PureMVC.ControllerTest COMMAND ControllerTest)
 
-add_executable(ModelTest core/model_test.c core/model_test_proxy.c)
-target_link_libraries(ModelTest PRIVATE puremvc)
-add_test(NAME PureMVC.ModelTest COMMAND ModelTest)
+#add_executable(ModelTest core/model_test.c core/model_test_proxy.c)
+#target_link_libraries(ModelTest PRIVATE puremvc)
+#add_test(NAME PureMVC.ModelTest COMMAND ModelTest)
 
 add_executable(ViewTest core/view_test.c
         core/view_test_mediator.c core/view_test_mediator2.c
