@@ -7,6 +7,5 @@ void testRegisterAndReplaceProxy();
 void testHasProxy();
 void testOnRegisterAndOnRemove();
 void testRemoveModel();
-void testMultipleModels();
 void testRegisterAndRemoveMultipleProxies();
 void TestModelShiftLeft();

@@ -18,17 +18,17 @@ static void setContext(struct IObserver *self, void *notifyContext) {
     this->context = notifyContext;
 }
 
-static void (*getNotify(const struct IObserver *self))(const void *context, struct INotification *notification) {
+static void (*getNotify(const struct IObserver *self))(const void *context, const struct INotification *notification) {
     const struct Observer *this = (struct Observer *) self;
     return this->notify;
 }
 
-static void setNotify(struct IObserver *self, void (*notify)(const void *context, struct INotification *notification)) {
+static void setNotify(struct IObserver *self, void (*notify)(const void *context, const struct INotification *notification)) {
     struct Observer *this = (struct Observer *) self;
     this->notify = notify;
 }
 
-static void notifyObserver(const struct IObserver *self, struct INotification *notification) {
+static void notifyObserver(const struct IObserver *self, const struct INotification *notification) {
     const struct Observer *this = (struct Observer *) self;
     if (this->notify == NULL && this->context == NULL) return;
     this->notify(this->context, notification);
@@ -40,7 +40,7 @@ static bool compareNotifyContext(const struct IObserver *self, const void *conte
     return this->context == context;
 }
 
-struct IObserver *puremvc_observer_init(struct Observer *const observer, void (*notify)(const void *context, struct INotification *notification), void *context) {
+struct IObserver *puremvc_observer_init(struct Observer *const observer, void (*notify)(const void *context, const struct INotification *notification), void *context) {
     observer->base.getContext = getContext;
     observer->base.setContext = setContext;
     observer->base.getNotify = getNotify;

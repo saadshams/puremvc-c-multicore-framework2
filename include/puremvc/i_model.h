@@ -28,9 +28,9 @@ struct IModel {
 
     bool (*registerProxy)(struct IModel *self, struct IProxy *(*factory)(struct IProxy *proxy, const char *name, void *data), const char *name, void *data);
 
-    struct IProxy *(*retrieveProxy)(struct IModel *self, const char *proxyName);
+    struct IProxy *(*retrieveProxy)(const struct IModel *self, const char *proxyName);
 
-    bool (*hasProxy)(struct IModel *self, const char *proxyName);
+    bool (*hasProxy)(const struct IModel *self, const char *proxyName);
 
-    struct IProxy *(*removeProxy)(struct IModel *self, const char *proxyName);
+    struct Proxy(*removeProxy)(struct IModel *self, const char *proxyName);
 };

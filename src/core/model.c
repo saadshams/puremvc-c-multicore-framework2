@@ -9,6 +9,7 @@
 #include "puremvc/mutex.h"
 #include "puremvc/model.h"
 
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -36,18 +37,17 @@ static bool registerProxy(struct IModel *self, struct IProxy *(*factory)(struct 
     mutex_lock(&this->proxyMapMutex);
 
     size_t i = 0;
-
     for (; this->proxyMap[i] != NULL && this->proxyMap[i]->key[0] != '\0'; i++) { // find existing
-        if (strcmp(this->proxyMap[i]->key, name) != 0)
-            continue;
+        if (strcmp(this->proxyMap[i]->key, name) == 0) { // match
+            this->proxyMap[i]->proxy->onRemove(this->proxyMap[i]->proxy);
+            fprintf(stderr, "\033[0;31m[PureMVC::Model::registerMediator] Warning: Proxy '%s' exists; overridden registration\033[0m.\n", name);
 
-        this->proxyMap[i]->proxy->onRemove(this->proxyMap[i]->proxy);
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerMediator] Warning: Proxy '%s' exists; overridden registration\033[0m.\n", name);
-
-        puremvc_proxy_init(this->proxyMap[i]->proxy, name, data); // registration
-        mutex_unlock(&this->proxyMapMutex);
-        return false;
+            factory(this->proxyMap[i]->proxy, name, data); // re-registration
+            mutex_unlock(&this->proxyMapMutex);
+            return true;
+        }
     }
+
     if (this->proxyMap[i] == NULL) { // overflow (ProxyMap)
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap storage overflow for proxy '%s'; increase slots - skipping registration.\033[0m\n", name);
         mutex_unlock(&this->proxyMapMutex);
@@ -66,7 +66,7 @@ static bool registerProxy(struct IModel *self, struct IProxy *(*factory)(struct 
     return true;
 }
 
-static struct IProxy *retrieveProxy(struct IModel *self, const char *proxyName) {
+static struct IProxy *retrieveProxy(const struct IModel *self, const char *proxyName) {
     struct Model *this = (struct Model *) self;
     mutex_lock_shared(&this->proxyMapMutex);
     struct IProxy *proxy = NULL;
@@ -82,7 +82,7 @@ static struct IProxy *retrieveProxy(struct IModel *self, const char *proxyName) 
     return proxy;
 }
 
-static bool hasProxy(struct IModel *self, const char *proxyName) {
+static bool hasProxy(const struct IModel *self, const char *proxyName) {
     struct Model *this = (struct Model *) self;
     mutex_lock_shared(&this->proxyMapMutex);
     bool exists = false;
@@ -96,24 +96,23 @@ static bool hasProxy(struct IModel *self, const char *proxyName) {
     return exists;
 }
 
-static struct IProxy *removeProxy(struct IModel *self, const char *proxyName) {
+static struct Proxy removeProxy(struct IModel *self, const char *proxyName) {
     struct Model *this = (struct Model *) self;
-    mutex_lock(&this->proxyMapMutex);
-    struct IProxy *proxy = NULL;
 
-    size_t i = 0;
-    size_t index = 0;
+    mutex_lock(&this->proxyMapMutex);
+    struct Proxy result = {0};
+
+    size_t index = 0, i = 0;
     for (; this->proxyMap != NULL && this->proxyMap[i] != NULL && this->proxyMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->proxyMap[i]->key, proxyName) == 0) { // match
-            proxy = this->proxyMap[i]->proxy;
+            struct IProxy *proxy = this->proxyMap[i]->proxy;
             proxy->onRemove(proxy);
-
             memset(&this->proxyMap[i]->key, 0, KEY_SIZE);
-            puremvc_proxy_deinit((struct Proxy *) this->proxyMap[i]->proxy);
+
+            result = *(struct Proxy *)((char *) proxy - offsetof(struct Proxy, base));
         } else {
             if (index != i) { // shift left
-                snprintf(this->proxyMap[index]->key, KEY_SIZE, "%s", this->proxyMap[i]->key);
-                this->proxyMap[index]->proxy = this->proxyMap[i]->proxy;
+                *this->proxyMap[index] = *this->proxyMap[i];
                 memset(&this->proxyMap[i]->key, 0, KEY_SIZE);
             }
             index++;
@@ -121,7 +120,7 @@ static struct IProxy *removeProxy(struct IModel *self, const char *proxyName) {
     }
 
     mutex_unlock(&this->proxyMapMutex);
-    return proxy;
+    return result;
 }
 
 static void init(struct Model *model, const char *key) {
@@ -135,18 +134,6 @@ static void init(struct Model *model, const char *key) {
 
     snprintf(model->multitonKey, KEY_SIZE, "%s", key);
     mutex_init(&model->proxyMapMutex);
-}
-
-static void deinit(struct Model *model) {
-    memset(model->multitonKey, 0, KEY_SIZE);
-    model->base = (struct IModel){0}; // todo
-
-    mutex_destroy(&model->proxyMapMutex);
-
-    for (size_t j = 0; model->proxyMap != NULL && model->proxyMap[j] != NULL; j++) { // clear proxyMap
-        memset(model->proxyMap[j]->key, 0, KEY_SIZE);
-        // puremvc_proxy_deinit(&model->proxyMap[j]->proxy);
-    }
 }
 
 static void dispatchOnce(void) {
@@ -216,15 +203,11 @@ void puremvc_model_removeModel(struct ModelMap **modelMap, const char *key) {
     size_t index = 0;
     for (size_t i = 0; modelMap[i] != NULL && modelMap[i]->key[0] != '\0'; i++) { // find model
         if (strncmp(modelMap[i]->key, key, KEY_SIZE) == 0) {
-            memset(modelMap[i]->key, 0, KEY_SIZE); // clear model
-            deinit(&modelMap[i]->model);
+            memset(&modelMap[i]->key, 0, KEY_SIZE); // remove
         } else {
             if (index != i) { // shift left
-                snprintf(modelMap[index]->key, KEY_SIZE, "%s", modelMap[i]->key); // copy model (destination)
-                modelMap[index]->model = modelMap[i]->model;
-
-                memset(modelMap[i]->key, 0, KEY_SIZE); // clear model (source)
-                deinit(&modelMap[i]->model);
+                *modelMap[index] = *modelMap[i];
+                memset(modelMap[i]->key, 0, KEY_SIZE);
             }
             index++;
         }
