@@ -18,4 +18,4 @@ struct Notifier {
     char key[NAME_SIZE];
 };
 
-struct INotifier *puremvc_notifier_init(struct Notifier *notifier);
+struct INotifier *puremvc_notifier_init(struct INotifier *notifier);

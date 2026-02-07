@@ -21,5 +21,6 @@
  */
 struct ICommand {
     struct INotifier *(*getNotifier)(const struct ICommand *self);
+
     void (*execute)(const struct ICommand *self, struct INotification *notification);
 };

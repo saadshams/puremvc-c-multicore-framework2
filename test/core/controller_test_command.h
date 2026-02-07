@@ -2,4 +2,4 @@
 
 #include "puremvc/puremvc.h"
 
-struct SimpleCommand test_controller_command_new();
+struct ICommand *test_controller_command_new(struct ICommand *command);

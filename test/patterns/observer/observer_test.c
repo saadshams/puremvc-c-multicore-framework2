@@ -6,8 +6,8 @@
 
 int main() {
     testObserverConstructor();
-    // testObserverAccessors();
-    // testCompareNotifyContext();
+    testObserverAccessors();
+    testCompareNotifyContext();
     return 0;
 }
 
@@ -21,7 +21,7 @@ static struct ObserverTestVar observerTestVar = {0};
  * A function that is used as the observer notification
  * method.
  */
-static void handleNotification(const void *context, struct INotification *notification) {
+static void handleNotification(const void *context, const struct INotification *notification) {
     observerTestVar = *(struct ObserverTestVar *) notification->getBody(notification);
 }
 
@@ -31,10 +31,10 @@ static void handleNotification(const void *context, struct INotification *notifi
 void testObserverConstructor() {
     // Create observer
     struct Object { int x; } object = { 0 };
-    struct IObserver *observer = puremvc_observer_init(&(struct Observer){0}, handleNotification, &object);
+    struct IObserver *observer = puremvc_observer_init(&(struct Observer){0}.base, handleNotification, &object);
 
     struct ObserverTestVar var = {.value = 5};
-    struct INotification *notification = puremvc_notification(&(struct Notification){0}, "ObserverTestNote", &var, NULL);
+    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, "ObserverTestNote", &var, NULL);
     observer->notifyObserver(observer, notification);
 
     // test assertions
@@ -49,7 +49,7 @@ void testObserverAccessors() {
     // Create observer with null args, then
     // use accessors to set notification method and context
     struct Object {int x;} object;
-    struct IObserver *observer = puremvc_observer_init(&(struct Observer){0}, NULL, NULL);
+    struct IObserver *observer = puremvc_observer_init(&(struct Observer){0}.base, NULL, NULL);
 
     observer->setContext(observer, &object);
     observer->setNotify(observer, handleNotification);
@@ -64,7 +64,7 @@ void testObserverAccessors() {
     // observerTestVar being set to the value we pass in
     // on the note body.
     struct ObserverTestVar vo = {.value = 10};
-    struct INotification *notification = puremvc_notification(&(struct Notification){0}, "ObserverTestNote", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, "ObserverTestNote", &vo, NULL);
     observer->notifyObserver(observer, notification);
 }
 
@@ -75,8 +75,8 @@ void testCompareNotifyContext() {
     // Create observer passing in notification method and context
     struct Object {char dummy;};
     struct Object object = {0};
-    struct Object negTestObj = {0};
-    struct IObserver *observer = puremvc_observer_init(&(struct Observer){0}, handleNotification, &object);
+    const struct Object negTestObj = {0};
+    const struct IObserver *observer = puremvc_observer_init(&(struct Observer){0}.base, handleNotification, &object);
 
     // test assertions
     assert(observer->compareNotifyContext(observer, &negTestObj) == false);

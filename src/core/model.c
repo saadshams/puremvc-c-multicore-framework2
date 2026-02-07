@@ -96,20 +96,21 @@ static bool hasProxy(const struct IModel *self, const char *proxyName) {
     return exists;
 }
 
-static struct Proxy removeProxy(struct IModel *self, const char *proxyName) {
+static bool removeProxy(struct IModel *self, struct IProxy *proxy, const char *proxyName) {
     struct Model *this = (struct Model *) self;
+    bool exists = false;
 
     mutex_lock(&this->proxyMapMutex);
-    struct Proxy result = {0};
 
     size_t index = 0, i = 0;
     for (; this->proxyMap != NULL && this->proxyMap[i] != NULL && this->proxyMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->proxyMap[i]->key, proxyName) == 0) { // match
-            struct IProxy *proxy = this->proxyMap[i]->proxy;
-            proxy->onRemove(proxy);
-            memset(&this->proxyMap[i]->key, 0, KEY_SIZE);
+            exists = true;
+            memset(&this->proxyMap[i]->key, 0, KEY_SIZE); // remove
+            this->proxyMap[i]->proxy->onRemove(this->proxyMap[i]->proxy);
 
-            result = *(struct Proxy *)((char *) proxy - offsetof(struct Proxy, base));
+            if (proxy != NULL)
+                *(struct Proxy *) proxy = *(struct Proxy *) this->proxyMap[i]->proxy; // copy concrete struct
         } else {
             if (index != i) { // shift left
                 *this->proxyMap[index] = *this->proxyMap[i];
@@ -120,7 +121,7 @@ static struct Proxy removeProxy(struct IModel *self, const char *proxyName) {
     }
 
     mutex_unlock(&this->proxyMapMutex);
-    return result;
+    return exists;
 }
 
 static void init(struct Model *model, const char *key) {

@@ -4,11 +4,11 @@ project(puremvc VERSION 1.0.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 
 add_library(puremvc STATIC
-#        src/core/controller.c
+        src/core/controller.c
         src/core/model.c
         src/core/view.c
-#        src/patterns/command/simple_command.c
-#        src/patterns/command/macro_command.c
+        src/patterns/command/simple_command.c
+        src/patterns/command/macro_command.c
 #        src/patterns/facade/facade.c
         src/patterns/mediator/mediator.c
         src/patterns/observer/notification.c

@@ -8,8 +8,8 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     vo->result3 = vo->input * vo->input * vo->input;
 }
 
-struct ICommand *macro_command_test_sub3_command(struct SimpleCommand *const command) {
-    puremvc_simple_command(command);
-    command->base.execute = execute;
-    return &command->base;
+struct ICommand *macro_command_test_sub3_command(struct ICommand *const command) {
+    struct ICommand *self = puremvc_simple_command_init(command);
+    self->execute = execute;
+    return self;
 }

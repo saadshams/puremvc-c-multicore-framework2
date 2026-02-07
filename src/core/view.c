@@ -54,7 +54,7 @@ static bool registerObserver(struct IView *self, const char *notificationName, v
             return false;
         }
 
-        puremvc_observer_init((struct Observer *) observers[j], notify, context); // registration (existing key)
+        puremvc_observer_init(observers[j], notify, context); // registration (existing key)
         mutex_unlock(&this->observerMapMutex);
         return false;
     }
@@ -72,7 +72,7 @@ static bool registerObserver(struct IView *self, const char *notificationName, v
     }
 
     snprintf(this->observerMap[i]->key, KEY_SIZE, "%s", notificationName); // registration (new key)
-    puremvc_observer_init((struct Observer *) this->observerMap[i]->observers[0], notify, context);
+    puremvc_observer_init(this->observerMap[i]->observers[0], notify, context);
     mutex_unlock(&this->observerMapMutex);
     return true;
 }
@@ -183,7 +183,9 @@ bool registerMediator(struct IView *self, struct IMediator *(*factory)(struct IM
 
     const char **interests = mediator->listNotificationInterests(mediator);
     for (const char **interest = interests; *interest; interest++) { // register observers (mutex guards context if mediator is removed)
-        self->registerObserver(self, *interest, (void (*)(const void *, const struct INotification *)) this->mediatorMap[i]->mediator->handleNotification, this->mediatorMap[i]->mediator); // pass slot, not the temp
+        // void (*notify)(const void *, const struct INotification *) = (void (*)(const void *, const struct INotification *)) this->mediatorMap[i]->mediator->handleNotification;
+        // void *context = this->mediatorMap[i]->mediator;
+        self->registerObserver(self, *interest, (void (*)(const void *, const struct INotification *)) mediator->handleNotification, mediator);
     }
 
     mutex_unlock(&this->mediatorMapMutex);
@@ -219,7 +221,7 @@ static bool hasMediator(const struct IView *self, const char *mediatorName) {
     return exists;
 }
 
-static bool removeMediator(struct IView *self, struct IMediator *result, const char *mediatorName) {
+static bool removeMediator(struct IView *self, struct IMediator *mediator, const char *mediatorName) {
     struct View *this = (struct View *) self;
     bool exists = false;
 
@@ -228,18 +230,16 @@ static bool removeMediator(struct IView *self, struct IMediator *result, const c
     size_t index = 0, i = 0;
     for (; this->mediatorMap != NULL && this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find mediator
         if (strcmp(this->mediatorMap[i]->key, mediatorName) == 0) { // match
-            struct IMediator *mediator = this->mediatorMap[i]->mediator;
-            const char **interests = mediator->listNotificationInterests(this->mediatorMap[i]->mediator);
-            for (const char **cursor = interests; *cursor != NULL; cursor++) { // remove notification observers
-                this->base.removeObserver(self, *cursor, mediator);
-            }
-            mediator->onRemove(mediator);
-            memset(&this->mediatorMap[i]->key, 0, KEY_SIZE); // remove
-
             exists = true;
-            if (result) {
-                *(struct Mediator *) result = *(struct Mediator *) mediator; // copy concrete struct
+            memset(&this->mediatorMap[i]->key, 0, KEY_SIZE); // remove
+            const char **interests = this->mediatorMap[i]->mediator->listNotificationInterests(this->mediatorMap[i]->mediator);
+            for (const char **cursor = interests; *cursor != NULL; cursor++) { // remove notification observers
+                this->base.removeObserver(self, *cursor, this->mediatorMap[i]->mediator);
             }
+            this->mediatorMap[i]->mediator->onRemove(this->mediatorMap[i]->mediator);
+
+            if (mediator != NULL)
+                *(struct Mediator *) mediator = *(struct Mediator *) this->mediatorMap[i]->mediator; // copy concrete struct
         } else {
             if (index != i) { // shift mediatorMap left
                 const struct IMediator *previous = this->mediatorMap[i]->mediator;
@@ -274,7 +274,7 @@ static bool removeMediator(struct IView *self, struct IMediator *result, const c
     // mark remaining slots as dead
     // for (size_t k = index; this->mediatorMap != NULL && this->mediatorMap[k] != NULL && this->mediatorMap[k]->mediator != NULL; k++) {
     //     this->mediatorMap[k]->mediator = NULL; // questionable code, why setting NULL
-    // also do we need to run the loop as i am reiniting as i shift left
+    // also do we need to run the loop as i am re-initializing as i shift left
     // }
 
     return exists;

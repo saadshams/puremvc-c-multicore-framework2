@@ -24,7 +24,7 @@ static void execute(const struct ICommand *self, struct INotification *notificat
 }
 
 static struct ICommand *command() {
-    struct ICommand *command = puremvc_simple_command(&(struct SimpleCommand){0});
+    struct ICommand *command = puremvc_simple_command_init(&(struct SimpleCommand){0}.base);
     command->execute = execute;
     return command;
 }

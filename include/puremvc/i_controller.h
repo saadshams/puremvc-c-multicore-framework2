@@ -21,13 +21,13 @@
  * is responsible for executing commands in response to notifications.
  */
 struct IController {
-    void (*initializeController)(const struct IController *self);
+    void (*initializeController)(struct IController *self);
 
-    void (*registerCommand)(struct IController *self, const char *notificationName, struct SimpleCommand(*factory)());
+    void (*registerCommand)(struct IController *self, const char *notificationName, struct ICommand *(*factory)());
 
     void (*executeCommand)(const struct IController *self, struct INotification *notification);
 
     bool (*hasCommand)(const struct IController *self, const char *notificationName);
 
-    void (*removeCommand)(struct IController *self, const char *notificationName);
+    bool (*removeCommand)(struct IController *self, struct ICommand *(**factory)(), const char *notificationName);
 };

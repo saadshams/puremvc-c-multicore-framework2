@@ -18,4 +18,4 @@ struct Observer {
     void (*notify)(const void *context, const struct INotification *notification);
 };
 
-struct IObserver *puremvc_observer_init(struct Observer *observer, void (*notify)(const void *context, const struct INotification *notification), void *context);
+struct IObserver *puremvc_observer_init(struct IObserver *observer, void (*notify)(const void *context, const struct INotification *notification), void *context);

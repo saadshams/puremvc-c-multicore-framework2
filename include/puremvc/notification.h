@@ -18,4 +18,4 @@ struct Notification {
     char type[NAME_SIZE];
 };
 
-struct INotification *puremvc_notification_init(struct Notification *notification, const char *name, void *body, const char *type);
+struct INotification *puremvc_notification_init(struct INotification *notification, const char *name, void *body, const char *type);

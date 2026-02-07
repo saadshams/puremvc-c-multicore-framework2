@@ -82,7 +82,7 @@ void testRegisterAndNotifyObserver() {
     struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey2");
 
     // Create observer, passing in notification method and context
-    puremvc_observer_init(&(struct Observer){0}, (void (*)(const void *, const struct INotification *)) handleNotification, &viewComponent);
+    puremvc_observer_init(&(struct Observer){0}.base, (void (*)(const void *, const struct INotification *)) handleNotification, &viewComponent);
 
     // Register Observer's interest in a particular Notification with the View
     view->registerObserver(view, "ViewTestNote1", (void (*)(const void *, const struct INotification *)) handleNotification, &viewComponent);
@@ -96,7 +96,7 @@ void testRegisterAndNotifyObserver() {
     // viewTestVar being set to the value we pass in
     // on the note body.
     struct ViewTestVar vo = {.value = 10};
-    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}, "ViewTestNote1", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, "ViewTestNote1", &vo, NULL);
     view->notifyObservers(view, notification);
 
     // test assertions
@@ -370,11 +370,11 @@ void testRemoveMediatorAndSubsequentNotify() {
     }
 
     // test that notifications work
-    struct INotification *notification1 = puremvc_notification_init(&(struct Notification){0}, NOTE1, NULL, NULL);
+    struct INotification *notification1 = puremvc_notification_init(&(struct Notification){0}.base, NOTE1, NULL, NULL);
     view->notifyObservers(view, notification1);
     assert(strcmp(viewTest.lastNotification, NOTE1) == 0);
 
-    struct INotification *notification2 = puremvc_notification_init(&(struct Notification){0}, NOTE2, NULL, NULL);
+    struct INotification *notification2 = puremvc_notification_init(&(struct Notification){0}.base, NOTE2, NULL, NULL);
     view->notifyObservers(view, notification2);
     assert(strcmp(viewTest.lastNotification, NOTE2) == 0);
 
@@ -442,15 +442,15 @@ void testRemoveOneOfTwoMediatorsAndSubsequentNotify() {
     assert(storage[0]->view.observerMap[2]->observers[0]->getContext(storage[0]->view.observerMap[2]->observers[0]) == storage[0]->view.mediatorMap[1]->mediator);
 
     // test that all notifications work
-    struct INotification *notification1 = puremvc_notification_init(&(struct Notification){0}, NOTE1, NULL, NULL);
+    struct INotification *notification1 = puremvc_notification_init(&(struct Notification){0}.base, NOTE1, NULL, NULL);
     view->notifyObservers(view, notification1);
     assert(strcmp(viewTest.lastNotification, NOTE1) == 0);
 
-    struct INotification *notification2 = puremvc_notification_init(&(struct Notification){0}, NOTE2, NULL, NULL);
+    struct INotification *notification2 = puremvc_notification_init(&(struct Notification){0}.base, NOTE2, NULL, NULL);
     view->notifyObservers(view, notification2);
     assert(strcmp(viewTest.lastNotification, NOTE2) == 0);
 
-    struct INotification *notification3 = puremvc_notification_init(&(struct Notification){0}, NOTE3, NULL, NULL);
+    struct INotification *notification3 = puremvc_notification_init(&(struct Notification){0}.base, NOTE3, NULL, NULL);
     view->notifyObservers(view, notification3);
     assert(strcmp(viewTest.lastNotification, NOTE3) == 0);
 
@@ -525,7 +525,7 @@ void testMediatorReregistration() {
 
     // test that the counter is only incremented once (mediator 5's response)
     viewTest.counter = 0;
-    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}, NOTE5, NULL, NULL);
+    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, NOTE5, NULL, NULL);
     view->notifyObservers(view, notification);
     assert(viewTest.counter == 1);
 
@@ -624,7 +624,7 @@ void testModifyObserverListDuringNotification() {
     // send the notification. each of the above mediators will respond by removing
     // themselves and incrementing the counter by 1. This should leave us with a
     // count of 8, since 8 mediators will respond.
-    struct INotification *notification = puremvc_notification_init(&(struct Notification){}, NOTE6, NULL, NULL);
+    struct INotification *notification = puremvc_notification_init(&(struct Notification){}.base, NOTE6, NULL, NULL);
     view->notifyObservers(view, notification);
 
     // assertions

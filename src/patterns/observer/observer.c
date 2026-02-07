@@ -40,16 +40,18 @@ static bool compareNotifyContext(const struct IObserver *self, const void *conte
     return this->context == context;
 }
 
-struct IObserver *puremvc_observer_init(struct Observer *const observer, void (*notify)(const void *context, const struct INotification *notification), void *context) {
-    observer->base.getContext = getContext;
-    observer->base.setContext = setContext;
-    observer->base.getNotify = getNotify;
-    observer->base.setNotify = setNotify;
-    observer->base.notifyObserver = notifyObserver;
-    observer->base.compareNotifyContext = compareNotifyContext;
+struct IObserver *puremvc_observer_init(struct IObserver *const observer, void (*notify)(const void *context, const struct INotification *notification), void *context) {
+    struct Observer *this = (struct Observer *) observer;
+    
+    observer->getContext = getContext;
+    observer->setContext = setContext;
+    observer->getNotify = getNotify;
+    observer->setNotify = setNotify;
+    observer->notifyObserver = notifyObserver;
+    observer->compareNotifyContext = compareNotifyContext;
 
-    observer->context = context;
-    observer->notify = notify;
+    this->context = context;
+    this->notify = notify;
 
-    return &observer->base;
+    return observer;
 }

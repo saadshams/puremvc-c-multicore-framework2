@@ -18,9 +18,9 @@ int main() {
 void testMacroCommandExecute() {
     struct MacroCommandTestVO vo = { .input = 5, 0, 0, 0};
 
-    struct INotification *notification = puremvc_notification(&(struct Notification){0}, "MacroCommandTest", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, "MacroCommandTest", &vo, NULL);
 
-    const struct ICommand *command = macro_command_test_command(&(struct SimpleCommand){0});
+    const struct ICommand *command = macro_command_test_command(&(struct SimpleCommand){0}.base);
 
     command->getNotifier(command)->initializeNotifier(command->getNotifier(command), "MacroCommandTestkey1");
 

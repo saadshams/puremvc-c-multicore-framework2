@@ -17,13 +17,14 @@
 static Mutex controllerMapMutex;
 static MutexOnce controllerMutexOnce = MUTEX_ONCE_INIT;
 
-static void initializeController(const struct IController *self) {
+static void initializeController(struct IController *self) {
     struct Controller *this = (struct Controller *) self;
     if (this->view != NULL) return;
-    this->view = puremvc_view_getInstance(this->multitonKey);
+    // todo fix later
+    this->view = puremvc_view_getInstance(NULL, this->multitonKey);
 }
 
-static void registerCommand(struct IController *self, const char *notificationName, struct SimpleCommand(*factory)()) {
+static void registerCommand(struct IController *self, const char *notificationName, struct ICommand *(*factory)()) {
     struct Controller *this = (struct Controller *) self;
 
     if (strlen(notificationName) >= KEY_SIZE) { // Key truncation collision
@@ -41,7 +42,7 @@ static void registerCommand(struct IController *self, const char *notificationNa
     size_t i = 0;
     for (; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) { // existing
         if (strcmp(this->commandMap[i]->key, notificationName) == 0) {
-            fprintf(stderr, "\033[0;31m[PureMVC::Controller::registerCommand] Warning: Command '%s' exists; overridden registration\033[0m.\n", proxy.base.getName(&proxy.base));
+            fprintf(stderr, "\033[0;31m[PureMVC::Controller::registerCommand] Warning: Command '%s' exists; overridden registration\033[0m.\n", notificationName);
 
             this->commandMap[i]->factory = factory; // registration
             mutex_unlock(&this->commandMapMutex);
@@ -55,8 +56,11 @@ static void registerCommand(struct IController *self, const char *notificationNa
         return;
     }
 
-    const struct Observer observer = puremvc_observer((void (*)(const void *, struct INotification *)) self->executeCommand, self);
-    this->view->registerObserver(this->view, notificationName, observer);
+    // const struct Observer observer = puremvc_observer((void (*)(const void *, struct INotification *)) self->executeCommand, self);
+    // this->view->registerObserver(this->view, notificationName, observer);
+
+    this->view->registerObserver(this->view, notificationName, (void (*)(const void *, const struct INotification *)) self->executeCommand, self);
+
 
     snprintf(this->commandMap[i]->key, KEY_SIZE, "%s", notificationName); // registration
     this->commandMap[i]->factory = factory;
@@ -69,11 +73,10 @@ static void executeCommand(const struct IController *self, struct INotification 
 
     for (size_t i = 0; this->commandMap != NULL && this->commandMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->commandMap[i]->key, notification->getName(notification)) == 0) {
-            struct SimpleCommand (*factory)() = this->commandMap[i]->factory;
-            struct SimpleCommand command = factory();
-            command.notifier.base.initializeNotifier(&command.notifier.base, this->multitonKey);
-            command.base.execute(&command.base, notification);
-            puremvc_simple_command_deinit(&command);
+            struct ICommand *(*factory)() = this->commandMap[i]->factory;
+            struct ICommand *command = factory();
+            command->getNotifier(command)->initializeNotifier(command->getNotifier(command), this->multitonKey);
+            command->execute(command, notification);
             break;
         }
     }
@@ -95,15 +98,21 @@ static bool hasCommand(const struct IController *self, const char *notificationN
     return exists;
 }
 
-static void removeCommand(struct IController *self, const char *notificationName) {
+static bool removeCommand(struct IController *self, struct ICommand *(**factory)(), const char *notificationName) {
     struct Controller *this = (struct Controller *) self;
+    bool exists = false;
+
     mutex_lock(&this->commandMapMutex);
 
     size_t index = 0; // One-pass removal (Filter pattern)
     for (size_t i = 0; this->commandMap != NULL && this->commandMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->commandMap[i]->key, notificationName) == 0) { // match
-            this->view->removeObserver(this->view, notificationName, self);
+            exists = true;
             memset(&this->commandMap[i], 0, sizeof(struct CommandMap));
+            this->view->removeObserver(this->view, notificationName, self);
+
+            if (factory != NULL)
+                *factory = this->commandMap[i]->factory;
         } else {
             if (index != i) { // shift left
                 this->view->removeObserver(this->view, notificationName, self); // remove observer before the shift
@@ -111,8 +120,10 @@ static void removeCommand(struct IController *self, const char *notificationName
                 snprintf(this->commandMap[index]->key, KEY_SIZE, "%s", this->commandMap[i]->key);
                 this->commandMap[index]->factory = this->commandMap[i]->factory;;
 
-                const struct Observer observer = puremvc_observer((void (*)(const void *, struct INotification *)) executeCommand, self);
-                this->view->registerObserver(this->view, notificationName, observer); // register after the shift
+                // const struct Observer observer = puremvc_observer((void (*)(const void *, struct INotification *)) executeCommand, self);
+                // this->view->registerObserver(this->view, notificationName, observer); // register after the shift
+
+                this->view->registerObserver(this->view, notificationName, (void (*)(const void *, const struct INotification *)) self->executeCommand, self);
 
                 memset(&this->commandMap[i]->key, 0, KEY_SIZE);
             }
@@ -120,6 +131,8 @@ static void removeCommand(struct IController *self, const char *notificationName
         }
     }
     mutex_unlock(&this->commandMapMutex);
+
+    return exists;
 }
 
 static void init(struct Controller *controller, const char *key) {
@@ -133,18 +146,6 @@ static void init(struct Controller *controller, const char *key) {
 
     snprintf(controller->multitonKey, KEY_SIZE, "%s", key);
     mutex_init(&controller->commandMapMutex);
-}
-
-static void deinit(struct Controller *controller) {
-    memset(controller->multitonKey, 0, KEY_SIZE);
-    controller->base = (struct IController){0};
-
-    mutex_destroy(&controller->commandMapMutex);
-
-    for (size_t j = 0; controller->commandMap != NULL && controller->commandMap[j] != NULL; j++) { // clear commandMap
-        memset(controller->commandMap[j]->key, 0, KEY_SIZE);
-        controller->commandMap[j]->factory = NULL;
-    }
 }
 
 static void dispatchOnce(void) {
@@ -214,14 +215,11 @@ void puremvc_controller_removeController(struct ControllerMap **controllerMap, c
     size_t index = 0;
     for (size_t i = 0; controllerMap[i] != NULL && controllerMap[i]->key[0] != '\0'; i++) {
         if (strncmp(controllerMap[i]->key, key, KEY_SIZE) == 0) {
-            memset(controllerMap[i]->key, 0, KEY_SIZE); // clear controller
+            memset(controllerMap[i]->key, 0, KEY_SIZE); // remove
         } else {
-            if (index != i) {
-                snprintf(controllerMap[index]->key, KEY_SIZE, "%s", controllerMap[i]->key); // copy model (destination)
-                controllerMap[index]->controller = controllerMap[i]->controller;
-
-                memset(controllerMap[i]->key, 0, KEY_SIZE); // clear model (source)
-                deinit(&controllerMap[i]->controller);
+            if (index != i) { // shift left
+                *controllerMap[index] = *controllerMap[i];
+                memset(controllerMap[i]->key, 0, KEY_SIZE);
             }
             index++;
         }

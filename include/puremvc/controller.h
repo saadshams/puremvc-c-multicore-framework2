@@ -23,7 +23,7 @@ struct Controller {
     Mutex commandMapMutex;
     struct CommandMap {
         char key[KEY_SIZE];
-        struct SimpleCommand (*factory)();
+        struct ICommand *(*factory)(struct ICommand *);
     } **commandMap;
 };
 
