@@ -33,4 +33,4 @@ struct ControllerMap {
 
 struct IController *puremvc_controller_getInstance(struct ControllerMap **controllerMap, const char *key);
 
-bool puremvc_controller_removeController(const char *key);
+bool puremvc_controller_removeController(const char *key, struct IController **controller);

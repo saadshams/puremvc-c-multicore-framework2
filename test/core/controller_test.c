@@ -41,8 +41,14 @@ void testGetInstance() {
     // test assertions
     assert(controller != NULL);
     assert(controller == puremvc_controller_getInstance(controllerMap, "ControllerTestKey1"));
-    assert(puremvc_controller_removeController("ControllerTestKey1") == true);;
-    assert(puremvc_view_removeView("ControllerTestKey1") == true);
+
+    struct IController *removedController = NULL;
+    assert(puremvc_controller_removeController("ControllerTestKey1", &removedController) == true);;
+    assert(strcmp(((struct Controller *) removedController)->multitonKey, "ControllerTestKey1") == 0);
+
+    struct IView *removedView = NULL;
+    assert(puremvc_view_removeView("ControllerTestKey1", &removedView) == true);
+    assert(strcmp(((struct View *) removedView)->multitonKey, "ControllerTestKey1") == 0);
 }
 
 void testRegisterAndExecuteCommand() {
@@ -80,8 +86,8 @@ void testRegisterAndExecuteCommand() {
 
     struct ICommand *(**factory)() = 0;
     assert(controller->removeCommand(controller, "ControllerTest1", factory) == true);;
-    assert(puremvc_controller_removeController("ControllerTestKey2") == true);;
-    assert(puremvc_view_removeView("ControllerTestKey2") == true);;
+    assert(puremvc_controller_removeController("ControllerTestKey2", NULL) == true);;
+    assert(puremvc_view_removeView("ControllerTestKey2", NULL) == true);;
 }
 
 void testRegisterAndRemoveCommand() {
@@ -131,8 +137,8 @@ void testRegisterAndRemoveCommand() {
 
     // test assertions
     assert(vo.result == 0);
-    assert(puremvc_controller_removeController("ControllerTestKey3") == true);;
-    assert(puremvc_view_removeView("ControllerTestKey3") == true);
+    assert(puremvc_controller_removeController("ControllerTestKey3", NULL) == true);;
+    assert(puremvc_view_removeView("ControllerTestKey3", NULL) == true);
 }
 
 void testHasCommand() {
@@ -165,8 +171,8 @@ void testHasCommand() {
     // test that hasCommand returns false for hasCommandTest notifications
     assert(controller->hasCommand(controller, "hasCommandTest") == false);
 
-    assert(puremvc_controller_removeController("ControllerTestKey4") == true);;
-    assert(puremvc_view_removeView("ControllerTestKey4") == true);;
+    assert(puremvc_controller_removeController("ControllerTestKey4", NULL) == true);;
+    assert(puremvc_view_removeView("ControllerTestKey4", NULL) == true);;
 }
 
 void testReregisterAndExecuteCommand() {
@@ -217,8 +223,8 @@ void testReregisterAndExecuteCommand() {
     assert(vo.result == 48);
 
     assert(controller->removeCommand(controller, "ControllerTest2", NULL) == true);
-    assert(puremvc_controller_removeController("ControllerTestKey5") == true);
-    assert(puremvc_view_removeView("ControllerTestKey5") == true);;
+    assert(puremvc_controller_removeController("ControllerTestKey5", NULL) == true);
+    assert(puremvc_view_removeView("ControllerTestKey5", NULL) == true);;
 }
 
 void testRegisterAndUpdateCommand() {
@@ -254,8 +260,8 @@ void testRegisterAndUpdateCommand() {
     assert(vo.result == 34);
 
     assert(controller->removeCommand(controller, "ControllerTest2", NULL) == true);;
-    assert(puremvc_controller_removeController("ControllerTestKey6") == true);;
-    assert(puremvc_view_removeView("ControllerTestKey6") == true);;
+    assert(puremvc_controller_removeController("ControllerTestKey6", NULL) == true);;
+    assert(puremvc_view_removeView("ControllerTestKey6", NULL) == true);;
 }
 
 void testRemoveController() {
@@ -275,13 +281,13 @@ void testRemoveController() {
     assert(controller->registerCommand(controller, "ControllerTest2", test_controller_command_init) == false);
 
     // remove the controller
-    assert(puremvc_controller_removeController("ControllerTestKey6") == true);
+    assert(puremvc_controller_removeController("ControllerTestKey6", NULL) == true);
 
     // trying removing again will return false
-    assert(puremvc_controller_removeController("ControllerTestKey6") == false);;
+    assert(puremvc_controller_removeController("ControllerTestKey6", NULL) == false);;
 
     // view doesn't exist to begin with
-    assert(puremvc_view_removeView("ControllerTestKey6") == false);;
+    assert(puremvc_view_removeView("ControllerTestKey6", NULL) == false);;
 }
 
 void testRegisterAndRemoveMultipleCommands() {
@@ -366,8 +372,8 @@ void testRegisterAndRemoveMultipleCommands() {
     assert(controller->removeCommand(controller, "command2", NULL) == true);
     assert(concrete->commandMap[0]->key[0] == '\0');
 
-    assert(puremvc_controller_removeController("ControllerTestKey8") == true);
-    assert(puremvc_view_removeView("ControllerTestKey8") == true);
+    assert(puremvc_controller_removeController("ControllerTestKey8", NULL) == true);
+    assert(puremvc_view_removeView("ControllerTestKey8", NULL) == true);
 }
 
 void TestControllerShiftLeft() {
@@ -397,13 +403,35 @@ void TestControllerShiftLeft() {
     assert(puremvc_controller_getInstance(controllerMap, "controller3") != NULL);
     assert(puremvc_controller_getInstance(controllerMap, "controller4") != NULL);
 
-    assert(puremvc_controller_removeController("controller2") == true); // remove middle
-    assert(puremvc_controller_removeController("controller4") == true); // remove last
-    assert(puremvc_controller_removeController("controller1") == true); // remove first
-    assert(puremvc_controller_removeController("controller3") == true); // remove remaining
+    struct IController *controller2 = NULL;
+    assert(puremvc_controller_removeController("controller2", &controller2) == true); // remove middle
+    assert(strcmp(((struct Controller *) controller2)->multitonKey, "controller2") == 0);
 
-    assert(puremvc_view_removeView("controller2") == true); // remove middle
-    assert(puremvc_view_removeView("controller4") == true); // remove last
-    assert(puremvc_view_removeView("controller1") == true); // remove first
-    assert(puremvc_view_removeView("controller3") == true); // remove remaining
+    struct IController *controller4 = NULL;
+    assert(puremvc_controller_removeController("controller4", &controller4) == true); // remove last
+    assert(strcmp(((struct Controller *) controller4)->multitonKey, "controller4") == 0);
+
+    struct IController *controller1 = NULL;
+    assert(puremvc_controller_removeController("controller1", &controller1) == true); // remove first
+    assert(strcmp(((struct Controller *) controller1)->multitonKey, "controller1") == 0);
+
+    struct IController *controller3 = NULL;
+    assert(puremvc_controller_removeController("controller3", &controller3) == true); // remove remaining
+    assert(strcmp(((struct Controller *) controller3)->multitonKey, "controller3") == 0);
+
+    struct IView *view2 = NULL;
+    assert(puremvc_view_removeView("controller2", &view2) == true); // remove middle
+    assert(strcmp(((struct View *) view2)->multitonKey, "controller2") == 0);
+
+    struct IView *view4 = NULL;
+    assert(puremvc_view_removeView("controller4", &view4) == true); // remove last
+    assert(strcmp(((struct View *) view4)->multitonKey, "controller4") == 0);
+
+    struct IView *view1 = NULL;
+    assert(puremvc_view_removeView("controller1", &view1) == true); // remove first
+    assert(strcmp(((struct View *) view1)->multitonKey, "controller1") == 0);
+
+    struct IView *view3 = NULL;
+    assert(puremvc_view_removeView("controller3", &view3) == true); // remove remaining
+    assert(strcmp(((struct View *) view3)->multitonKey, "controller3") == 0);
 }

@@ -223,7 +223,7 @@ static bool hasMediator(const struct IView *self, const char *mediatorName) {
     return exists;
 }
 
-static bool removeMediator(struct IView *self, const char *mediatorName, struct IMediator *mediator) {
+static bool removeMediator(struct IView *self, const char *mediatorName, struct IMediator **mediator) {
     struct View *this = (struct View *) self;
     bool removed = false;
 
@@ -232,16 +232,16 @@ static bool removeMediator(struct IView *self, const char *mediatorName, struct 
     size_t index = 0, i = 0;
     for (; this->mediatorMap != NULL && this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find mediator
         if (strcmp(this->mediatorMap[i]->key, mediatorName) == 0) { // match
-            memset(&this->mediatorMap[i]->key, 0, KEY_SIZE); // remove
+            if (mediator != NULL) // out param
+                *mediator = this->mediatorMap[i]->mediator;
+
             const char **interests = this->mediatorMap[i]->mediator->listNotificationInterests(this->mediatorMap[i]->mediator);
             for (const char **cursor = interests; *cursor != NULL; cursor++) { // remove notification observers
                 self->removeObserver(self, *cursor, this->mediatorMap[i]->mediator);
             }
             this->mediatorMap[i]->mediator->onRemove(this->mediatorMap[i]->mediator);
 
-            if (mediator != NULL) // out param
-                *(struct Mediator *) mediator = *(struct Mediator *) this->mediatorMap[i]->mediator; // copy concrete struct
-
+            memset(&this->mediatorMap[i]->key, 0, KEY_SIZE); // remove
             removed = true;
         } else {
             if (index != i) { // shift mediatorMap left
@@ -348,7 +348,7 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
     return s_viewMap[i]->view;
 }
 
-bool puremvc_view_removeView(const char *key) {
+bool puremvc_view_removeView(const char *key, struct IView **view) {
     if (s_viewMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::removeView] FATAL: Missing ViewMap storage; skipping removal.\033[0m\n");
         return false;
@@ -371,6 +371,8 @@ bool puremvc_view_removeView(const char *key) {
     for (size_t i = 0; s_viewMap[i] != NULL && s_viewMap[i]->key[0] != '\0'; i++) { // find view
         if (strncmp(s_viewMap[i]->key, key, KEY_SIZE) == 0) {
             memset(&s_viewMap[i]->key, 0, KEY_SIZE); // remove
+            if (view != NULL)
+                *view = s_viewMap[i]->view;
         } else {
             if (index != i) { // shift left
                 *s_viewMap[index] = *s_viewMap[i];

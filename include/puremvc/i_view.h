@@ -35,5 +35,5 @@ struct IView {
 
     bool (*hasMediator)(const struct IView *self, const char *mediatorName);
 
-    bool (*removeMediator)(struct IView *self, const char *mediatorName, struct IMediator *mediator);
+    bool (*removeMediator)(struct IView *self, const char *mediatorName, struct IMediator **mediator);
 };

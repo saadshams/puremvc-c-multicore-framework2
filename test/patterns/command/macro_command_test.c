@@ -60,6 +60,6 @@ void testRegisterAndExecuteCommand() {
     assert(vo.result3 == 125);
 
     assert(controller->removeCommand(controller, "MacroCommandTest", NULL) == true);
-    assert(puremvc_controller_removeController("ControllerTestKey1") == true);;
-    assert(puremvc_view_removeView("ControllerTestKey1") == true);
+    assert(puremvc_controller_removeController("ControllerTestKey1", NULL) == true);;
+    assert(puremvc_view_removeView("ControllerTestKey1", NULL) == true);
 }

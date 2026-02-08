@@ -32,5 +32,5 @@ struct IModel {
 
     bool (*hasProxy)(const struct IModel *self, const char *proxyName);
 
-    bool (*removeProxy)(struct IModel *self, const char *proxyName, struct IProxy *proxy);
+    bool (*removeProxy)(struct IModel *self, const char *proxyName, struct IProxy **proxy);
 };

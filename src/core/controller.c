@@ -114,14 +114,13 @@ static bool removeCommand(struct IController *self, const char *notificationName
     size_t index = 0; // One-pass removal (Filter pattern)
     for (size_t i = 0; this->commandMap != NULL && this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->commandMap[i]->key, notificationName) == 0) { // match
-            memset(&this->commandMap[i]->key, 0, sizeof(struct CommandMap)); // remove
+            if (factory != NULL) // out param
+                *factory = this->commandMap[i]->factory;
 
             if (this->view->removeObserver(this->view, notificationName, self) == false) // remove observer
                 fprintf(stderr, "\033[0;31m[PureMVC::Controller::removeCommand] WARNING: Couldn't remove Observer for the notification '%s'; removing Command.\033[0m\n", notificationName);
 
-            if (factory != NULL) // out param
-                *factory = this->commandMap[i]->factory;
-
+            memset(&this->commandMap[i]->key, 0, sizeof(struct CommandMap)); // remove
             removed = true;
         } else {
             if (index != i) { // shift left
@@ -202,8 +201,7 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
     return s_controllerMap[i]->controller;
 }
 
-bool puremvc_controller_removeController(const char *key) {
-    bool removed = false;
+bool puremvc_controller_removeController(const char *key, struct IController **controller) {
     if (s_controllerMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Controller::removeController] FATAL: Missing ControllerMap storage; skipping removal.\033[0m\n");
         return false;
@@ -226,7 +224,8 @@ bool puremvc_controller_removeController(const char *key) {
     for (size_t i = 0; s_controllerMap[i] != NULL && s_controllerMap[i]->key[0] != '\0'; i++) {
         if (strncmp(s_controllerMap[i]->key, key, KEY_SIZE) == 0) {
             memset(s_controllerMap[i]->key, 0, KEY_SIZE); // remove
-            removed = true;
+            if (controller != NULL)
+                *controller = s_controllerMap[i]->controller;
         } else {
             if (index != i) { // shift left
                 *s_controllerMap[index] = *s_controllerMap[i];
@@ -241,5 +240,5 @@ bool puremvc_controller_removeController(const char *key) {
 
     mutex_unlock(&controllerMapMutex);
 
-    return removed;
+    return true;
 }

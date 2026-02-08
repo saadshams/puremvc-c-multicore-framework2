@@ -31,4 +31,4 @@ struct ModelMap {
 
 struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key);
 
-bool puremvc_model_removeModel(const char *key);
+bool puremvc_model_removeModel(const char *key, struct IModel **model);
