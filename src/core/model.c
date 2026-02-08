@@ -7,7 +7,7 @@
 * @copyright BSD 3-Clause License
 */
 #include "puremvc/model.h"
-#include "puremvc/proxy.h"
+#include "puremvc/i_proxy.h"
 
 #include <stddef.h>
 #include <stdio.h>

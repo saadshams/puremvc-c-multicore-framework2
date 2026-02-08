@@ -6,7 +6,7 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include "puremvc/proxy.h"
+#include "proxy.h"
 #include "puremvc/i_notifier.h"
 
 #include <stdio.h>
@@ -40,8 +40,17 @@ static void onRemove(struct IProxy *self) {
     (void)self;
 }
 
-struct IProxy *puremvc_proxy_init(struct IProxy *const proxy, const char *name, void *data) {
-    struct Proxy *this = (struct Proxy *) proxy;
+size_t puremvc_proxy_size(const char *name) {
+    const size_t len = strlen(name ? name : PROXY_NAME) + 1;
+    // Round up to the nearest multiple of a pointer size (e.g., 8 bytes)
+    return (sizeof(struct Proxy) + len + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+}
+
+struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
+    struct Proxy *this = (struct Proxy *) buffer;
+    struct IProxy *proxy = (struct IProxy *) buffer;
+
+    memset(this, 0, sizeof *this);
 
     proxy->getName = getName;
     proxy->getData = getData;

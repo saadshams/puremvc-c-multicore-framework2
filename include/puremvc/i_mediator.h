@@ -29,3 +29,7 @@ struct IMediator {
     void (*onRegister)(struct IMediator *self);
     void (*onRemove)(struct IMediator *self);
 };
+
+size_t puremvc_mediator_size(const char *name);
+
+struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *component);

@@ -8,19 +8,14 @@
 
 #pragma once
 
-#include "constants.h"
-#include "i_proxy.h"
-#include "notifier.h"
-
-#define PROXY_NAME "Proxy"
+#include "puremvc/i_proxy.h"
+#include "puremvc/notifier.h"
 
 struct Proxy {
     struct IProxy base;
 
     struct Notifier notifier;
 
-    char name[NAME_SIZE];
     void *data;
+    char name[];
 };
-
-struct IProxy *puremvc_proxy_init(struct IProxy *proxy, const char *name, void *data);

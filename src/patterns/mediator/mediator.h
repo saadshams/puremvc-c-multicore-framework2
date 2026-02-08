@@ -7,19 +7,14 @@
 */
 #pragma once
 
-#include "constants.h"
-#include "i_mediator.h"
-#include "notifier.h"
-
-#define MEDIATOR_NAME "mediator"
+#include "puremvc/i_mediator.h"
+#include "puremvc/notifier.h"
 
 struct Mediator {
     struct IMediator base;
 
     struct Notifier notifier;
 
-    char name[NAME_SIZE];
     void *component;
+    char name[];
 };
-
-struct IMediator *puremvc_mediator_init(struct IMediator *mediator, const char *name, void *component);

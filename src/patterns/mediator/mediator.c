@@ -6,7 +6,7 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include "puremvc/mediator.h"
+#include "mediator.h"
 #include "puremvc/i_notifier.h"
 
 #include <stdio.h>
@@ -50,8 +50,16 @@ static void onRemove(struct IMediator *self) {
     (void)self;
 }
 
-struct IMediator *puremvc_mediator_init(struct IMediator *const mediator, const char *name, void *component) {
-    struct Mediator *this = (struct Mediator *) mediator;
+size_t puremvc_mediator_size(const char *name) {
+    const size_t len = strlen(name ? name : MEDIATOR_NAME) + 1;
+    return (sizeof(struct Mediator) + len + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+}
+
+struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *component) {
+    struct Mediator *this = (struct Mediator *) buffer;
+    struct IMediator *mediator = (struct IMediator *) buffer;
+
+    memset(this, 0, sizeof *this);
 
     mediator->getName = getName;
     mediator->setComponent = setComponent;
