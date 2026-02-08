@@ -56,14 +56,14 @@ void testRegisterAndExecuteCommand() {
 
     puremvc_view_getInstance(viewMap, "ControllerTestKey2");
 
-    struct ControllerMap *storage[] = { &(struct ControllerMap) {
+    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
         .controller = (struct IController *) &(struct Controller) {
             .commandMap = (struct CommandMap *[]){ &(struct CommandMap){}, NULL }
         },
     }, NULL };
 
     // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
-    struct IController *controller = puremvc_controller_getInstance(storage, "ControllerTestKey2");
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey2");
     assert(controller->registerCommand(controller, "ControllerTest1", test_controller_command_init) == true);
 
     // Create a 'ControllerTest' note
@@ -96,14 +96,14 @@ void testRegisterAndRemoveCommand() {
     // Initialize View before Controller (same multiton key)
     puremvc_view_getInstance(viewMap, "ControllerTestKey3"); // dependency for the controller
 
-    struct ControllerMap *storage[] = { &(struct ControllerMap) {
+    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
         .controller = (struct IController *) &(struct Controller) {
             .commandMap = (struct CommandMap *[]){ &(struct CommandMap){.key = ""}, NULL }
         },
     }, NULL };
 
     // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
-    struct IController *controller = puremvc_controller_getInstance(storage, "ControllerTestKey3");
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey3");
     assert(controller->registerCommand(controller, "ControllerRemoveTest", test_controller_command_init) == true);;
 
     // Create a 'ControllerTest' note
@@ -146,14 +146,14 @@ void testHasCommand() {
 
     puremvc_view_getInstance(viewMap, "ControllerTestKey4"); // dependency for the Controller
 
-    struct ControllerMap *storage[] = { &(struct ControllerMap) {
+    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
         .controller = (struct IController *) &(struct Controller) {
             .commandMap = (struct CommandMap *[]){ &(struct CommandMap){}, NULL }
         },
     }, NULL };
 
     // register the ControllerTestCommand to handle 'hasCommandTest' notes
-    struct IController *controller = puremvc_controller_getInstance(storage, "ControllerTestKey4");
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey4");
 
     // test that hasCommand returns true for hasCommandTest notifications
     assert(controller->registerCommand(controller, "hasCommandTest", test_controller_command_init) == true);;
@@ -232,13 +232,13 @@ void testRegisterAndUpdateCommand() {
 
     puremvc_view_getInstance(viewMap, "ControllerTestKey6");
 
-    struct ControllerMap *storage[] = { &(struct ControllerMap) {
+    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
         .controller = (struct IController *) &(struct Controller) {
             .commandMap = (struct CommandMap *[]){ &(struct CommandMap){}, NULL }
         },
     }, NULL };
 
-    struct IController *controller = puremvc_controller_getInstance(storage, "ControllerTestKey6");
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey6");
 
     // first registration
     assert(controller->registerCommand(controller, "ControllerTest2", test_controller_command_init) == true);

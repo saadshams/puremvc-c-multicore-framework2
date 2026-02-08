@@ -48,30 +48,30 @@ void handleNotification(const void *context, const struct INotification notifica
 }
 
 void testGetInstance() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .key = "",
         .view = (struct IView *) &(struct View) { .multitonKey = "", .observerMap = {}, .mediatorMap = {} },
     }, NULL };
 
     // Test Factory Method
-    const struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey1");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    const struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey1");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     // test assertions
     assert(view != NULL);
-    assert(view == puremvc_view_getInstance(storage, "ViewTestKey1"));
-    assert(strcmp(storage[0]->key, "ViewTestKey1") == 0);
+    assert(view == puremvc_view_getInstance(viewMap, "ViewTestKey1"));
+    assert(strcmp(viewMap[0]->key, "ViewTestKey1") == 0);
     assert(strcmp(concrete->multitonKey, "ViewTestKey1") == 0);
 
     assert(puremvc_view_getInstance(NULL, "ViewTestKey1") == view); // pre-instantiated
 
     puremvc_view_removeView("ViewTestKey1");
-    assert(storage[0]->key[0] == '\0');
+    assert(viewMap[0]->key[0] == '\0');
     view = NULL;
 }
 
 void testRegisterAndNotifyObserver() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) {
             .observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) { .observers = (struct IObserver*[]){ (struct IObserver *) &(struct Observer){0}, NULL } }, NULL },
         }
@@ -80,7 +80,7 @@ void testRegisterAndNotifyObserver() {
     struct ViewComponent viewComponent = {0};
 
     // Get the Multiton View instance
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey2");
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey2");
 
     // Create observer, passing in notification method and context
     puremvc_observer_init((struct IObserver *) &(struct Observer){0}, (void (*)(const void *, const struct INotification *)) handleNotification, &viewComponent);
@@ -114,7 +114,7 @@ void testRegisterAndNotifyObserver() {
 }
 
 void testRegisterAndRetrieveMediator() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) {
             .mediatorMap = (struct MediatorMap *[]) { &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){0} }, NULL },
             .observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) { .observers = (struct IObserver*[]){ (struct IObserver *) &(struct Observer){0}, NULL } }, NULL },
@@ -122,8 +122,8 @@ void testRegisterAndRetrieveMediator() {
     }, NULL };
 
     // Get the Multiton View instance
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey3");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey3");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     // Create and register the test mediator
     struct ViewComponent viewComponent = {0};
@@ -151,13 +151,13 @@ void testRegisterAndRetrieveMediator() {
 }
 
 void testHasMediator() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) { .mediatorMap = (struct MediatorMap *[]) { &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){} }, NULL }, }
     }, NULL };
 
     // Get the Multiton View instance
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey4");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey4");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     // Create and register the test mediator
     struct ViewComponent viewComponent = {0};
@@ -183,13 +183,13 @@ void testHasMediator() {
 }
 
 void testRegisterAndRemoveMediator() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) { .mediatorMap = (struct MediatorMap *[]) { &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){0} }, NULL }, }
     }, NULL };
 
     // Get the Multiton View instance
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey5");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey5");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     struct ViewComponent viewComponent = {0};
 
@@ -215,7 +215,7 @@ void testRegisterAndRemoveMediator() {
 }
 
 void testOnRegisterAndOnRemove() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) {
             .mediatorMap = (struct MediatorMap *[]) { &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){0} }, NULL },
             .observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) { .observers = (struct IObserver *[]) { (struct IObserver *) &(struct Observer){0}, NULL } }, NULL },
@@ -223,8 +223,8 @@ void testOnRegisterAndOnRemove() {
     }, NULL };
 
     // Get the Multiton View instance
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey6");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey6");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     struct ViewTest viewTest = {"", false, false, 0};
 
@@ -261,7 +261,7 @@ void testOnRegisterAndOnRemove() {
 }
 
 void testSuccessiveRegisterAndRemoveMediator() {
-    struct ViewMap *storage[] = { &(struct ViewMap){
+    struct ViewMap *viewMap[] = { &(struct ViewMap){
         .view = (struct IView *) &(struct View) {
             .mediatorMap = (struct MediatorMap*[]){ &(struct MediatorMap) { .mediator = (struct IMediator *) &(struct Mediator){0} }, NULL },
             .observerMap = (struct ObserverMap*[]){
@@ -274,10 +274,10 @@ void testSuccessiveRegisterAndRemoveMediator() {
     }, NULL };
 
     // Get the Multiton View instance
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey7");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey7");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
-    assert(strcmp(storage[0]->key, "ViewTestKey7") == 0);
+    assert(strcmp(viewMap[0]->key, "ViewTestKey7") == 0);
 
     // Create and register the test mediator,
     // but not so we have a reference to it
@@ -339,12 +339,12 @@ void testSuccessiveRegisterAndRemoveMediator() {
     assert(view->retrieveMediator(view, view_test_mediator_NAME) == NULL);
 
     puremvc_view_removeView("ViewTestKey7");
-    assert(storage[0]->key[0] == '\0');
+    assert(viewMap[0]->key[0] == '\0');
     view = NULL;
 }
 
 void testRemoveMediatorAndSubsequentNotify() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) {
             .mediatorMap = (struct MediatorMap *[]) { &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){0} }, NULL },
             .observerMap = (struct ObserverMap *[]) { // for 2 notifications of view_test_mediator2
@@ -356,8 +356,8 @@ void testRemoveMediatorAndSubsequentNotify() {
     }, NULL };
 
     // Get the Multiton View instance
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey8");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey8");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     // Create and register the test mediator to be removed.
     struct ViewTest viewTest = {.lastNotification = NULL };
@@ -406,12 +406,12 @@ void testRemoveMediatorAndSubsequentNotify() {
     assert(strcmp(viewTest.lastNotification, NOTE2) != 0);
 
     puremvc_view_removeView("ViewTestKey8");
-    assert(storage[0]->key[0] == '\0');
+    assert(viewMap[0]->key[0] == '\0');
     view = NULL;
 }
 
 void testRemoveOneOfTwoMediatorsAndSubsequentNotify() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) {
             .mediatorMap = (struct MediatorMap *[]) {
                 &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){0} }, &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){0} },
@@ -427,8 +427,8 @@ void testRemoveOneOfTwoMediatorsAndSubsequentNotify() {
     }, NULL };
 
     // Get the Multiton View instance
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey9");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey9");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
     struct ViewTest viewTest = {};
 
     // Create and register that responds to notifications 1 and 2
@@ -505,7 +505,7 @@ void testRemoveOneOfTwoMediatorsAndSubsequentNotify() {
 }
 
 void testMediatorReregistration() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) {
             .mediatorMap = (struct MediatorMap *[]) { &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){0} }, NULL },
             .observerMap = (struct ObserverMap *[]) {
@@ -516,8 +516,8 @@ void testMediatorReregistration() {
     }, NULL };
 
     // Get the Multiton View instance
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey10");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey10");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     // Create the counter
     struct ViewTest viewTest = { .counter = 0 };
@@ -578,7 +578,7 @@ void testMediatorReregistration() {
  * invalidate the observer list during iteration.
  */
 void testModifyObserverListDuringNotification() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) {
             .mediatorMap = (struct MediatorMap *[]) { // null terminated 8 slots for MediatorMap
                 &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){0} }, &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){0} },
@@ -604,8 +604,8 @@ void testModifyObserverListDuringNotification() {
     }, NULL };
 
     // Get the Multiton View instance
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey11");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey11");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     static char buffer[9][KEY_SIZE]; // Create the actual bytes (9 rows, each KEY_SIZE wide)
     static char *buffers[] = {
@@ -672,35 +672,35 @@ void testModifyObserverListDuringNotification() {
 }
 
 void testRemoveView() {
-    struct ViewMap *storage[] = {
+    struct ViewMap *viewMap[] = {
         &(struct ViewMap) { .view = (struct IView *) &(struct View) {} },
         NULL
     };
 
     // Get a Multiton View instance
-    puremvc_view_getInstance(storage, "ViewTestKey12");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    puremvc_view_getInstance(viewMap, "ViewTestKey12");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
-    assert(strcmp(storage[0]->key, "ViewTestKey12") == 0);
+    assert(strcmp(viewMap[0]->key, "ViewTestKey12") == 0);
     assert(strcmp(concrete->multitonKey, "ViewTestKey12") == 0);
 
     // remove the View
     puremvc_view_removeView("ViewTestKey12");
-    assert(storage[0]->key[0] == '\0');
+    assert(viewMap[0]->key[0] == '\0');
 
     // re-create the view without throwing an exception
-    puremvc_view_getInstance(storage, "ViewTestKey12");
-    assert(strcmp(storage[0]->key, "ViewTestKey12") == 0);
+    puremvc_view_getInstance(viewMap, "ViewTestKey12");
+    assert(strcmp(viewMap[0]->key, "ViewTestKey12") == 0);
     assert(strcmp(concrete->multitonKey, "ViewTestKey12") == 0);
 
     // try removing again
     puremvc_view_removeView("ViewTestKey12");
-    assert(storage[0]->key[0] == '\0');
+    assert(viewMap[0]->key[0] == '\0');
 }
 
 void testGarbageStorageForView() {
-    struct ViewMap *storage1[] = { NULL }; // empty view
-    const struct IView *view1 = puremvc_view_getInstance(storage1, "ViewTestKey13"); // crash test
+    struct ViewMap *viewMap1[] = { NULL }; // empty view
+    const struct IView *view1 = puremvc_view_getInstance(viewMap1, "ViewTestKey13"); // crash test
     assert(view1 == NULL);
     puremvc_view_removeView("ViewTestKey13");
 }
@@ -708,11 +708,11 @@ void testGarbageStorageForView() {
 void testGarbageStorageForObserver() {
     struct ViewComponent component = {0};
 
-    struct ViewMap *storage1[] = { &(struct ViewMap) { // missing observerMap field
+    struct ViewMap *viewMap1[] = { &(struct ViewMap) { // missing observerMap field
         .view = (struct IView *) &(struct View) {}
     }, NULL };
-    struct IView *view1 = puremvc_view_getInstance(storage1, "ViewTestKey14");
-    const struct View *concrete1 = (struct View *) storage1[0]->view;
+    struct IView *view1 = puremvc_view_getInstance(viewMap1, "ViewTestKey14");
+    const struct View *concrete1 = (struct View *) viewMap1[0]->view;
 
     view1->notifyObservers(view1, NULL); // crash test
     view1->removeObserver(view1, "ViewTestKey14_testing1", &component);
@@ -720,26 +720,26 @@ void testGarbageStorageForObserver() {
     assert(concrete1->observerMap == NULL);
     puremvc_view_removeView("ViewTestKey14");
 
-    struct ViewMap *storage2[] = { &(struct ViewMap) { // empty observerMap
+    struct ViewMap *viewMap2[] = { &(struct ViewMap) { // empty observerMap
         .view = (struct IView *) &(struct View) {
             .observerMap = (struct ObserverMap *[]) { NULL },
         }
     }, NULL };
-    struct IView *view2 = puremvc_view_getInstance(storage2, "ViewTestKey14");
-    const struct View *concrete2 = (struct View *) storage2[0]->view;
+    struct IView *view2 = puremvc_view_getInstance(viewMap2, "ViewTestKey14");
+    const struct View *concrete2 = (struct View *) viewMap2[0]->view;
     view2->notifyObservers(view2, NULL);
     view2->removeObserver(view2, "ViewTestKey14_testing2", &component);
     view2->registerObserver(view2, "ViewTestKey14_testing2", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
     assert(concrete2->observerMap[0] == NULL);
     puremvc_view_removeView("ViewTestKey14");
 
-    struct ViewMap *storage3[] = { &(struct ViewMap) { // missing observers field
+    struct ViewMap *viewMap3[] = { &(struct ViewMap) { // missing observers field
         .view = (struct IView *) &(struct View) {
             .observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) {}, NULL },
         }
     }, NULL };
-    struct IView *view3 = puremvc_view_getInstance(storage3, "ViewTestKey14");
-    const struct View *concrete3 = (struct View *) storage3[0]->view;
+    struct IView *view3 = puremvc_view_getInstance(viewMap3, "ViewTestKey14");
+    const struct View *concrete3 = (struct View *) viewMap3[0]->view;
     view3->notifyObservers(view3, NULL);
     view3->removeObserver(view3, "ViewTestKey14_testing3", &component);
     view3->registerObserver(view3, "ViewTestKey14_testing3", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
@@ -747,15 +747,15 @@ void testGarbageStorageForObserver() {
     assert(concrete3->observerMap[0]->key[0] == '\0');
     puremvc_view_removeView("ViewTestKey14");
 
-    struct ViewMap *storage4[] = { &(struct ViewMap) { // empty observers
+    struct ViewMap *viewMap4[] = { &(struct ViewMap) { // empty observers
         .view = (struct IView *) &(struct View) {
             .observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) {
                 .observers = (struct IObserver*[]) { NULL }
             }, NULL },
         }
     }, NULL };
-    struct IView *view4 = puremvc_view_getInstance(storage4, "ViewTestKey14");
-    const struct View *concrete4 = (struct View *) storage4[0]->view;
+    struct IView *view4 = puremvc_view_getInstance(viewMap4, "ViewTestKey14");
+    const struct View *concrete4 = (struct View *) viewMap4[0]->view;
     view4->notifyObservers(view4, NULL);
     view4->removeObserver(view4, "ViewTestKey14_testing4", &component);
     view4->registerObserver(view4, "ViewTestKey14_testing4", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
@@ -767,13 +767,13 @@ void testGarbageStorageForObserver() {
 }
 
 void testGarbageStorageForMediator() {
-    struct ViewMap *storage1[] = { &(struct ViewMap) { // missing mediatorMap
+    struct ViewMap *viewMap1[] = { &(struct ViewMap) { // missing mediatorMap
         .view = (struct IView *) &(struct View) { },
     }, NULL };
 
-    struct IView *view1 = puremvc_view_getInstance(storage1, "ViewTestKey15");
+    struct IView *view1 = puremvc_view_getInstance(viewMap1, "ViewTestKey15");
     assert(view1 != NULL);
-    const struct View *concrete1 = (struct View *) storage1[0]->view;
+    const struct View *concrete1 = (struct View *) viewMap1[0]->view;
     assert(view1->registerMediator(view1, puremvc_mediator_init, MEDIATOR_NAME, NULL) == false);
     assert(view1->hasMediator(view1, MEDIATOR_NAME) == false);;
     assert(view1->retrieveMediator(view1, MEDIATOR_NAME) == NULL);;
@@ -782,11 +782,11 @@ void testGarbageStorageForMediator() {
     assert(concrete1->mediatorMap == NULL);
     puremvc_view_removeView("ViewTestKey15");
 
-    struct ViewMap *storage2[] = { &(struct ViewMap) { // empty mediatorMap
+    struct ViewMap *viewMap2[] = { &(struct ViewMap) { // empty mediatorMap
         .view = (struct IView *) &(struct View) { .mediatorMap = (struct MediatorMap*[]){ NULL} },
     }, NULL };
-    struct IView *view2 = puremvc_view_getInstance(storage2, "ViewTestKey15");
-    const struct View *concrete2 = (struct View *) storage2[0]->view;
+    struct IView *view2 = puremvc_view_getInstance(viewMap2, "ViewTestKey15");
+    const struct View *concrete2 = (struct View *) viewMap2[0]->view;
     assert(view2->registerMediator(view2, puremvc_mediator_init, MEDIATOR_NAME, NULL) == false);;
     assert(view2->hasMediator(view2, MEDIATOR_NAME) == false);
     assert(view2->retrieveMediator(view2, MEDIATOR_NAME) == NULL);;
@@ -797,7 +797,7 @@ void testGarbageStorageForMediator() {
 }
 
 void testObserverMapShiftLeft() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) {
             .observerMap = (struct ObserverMap*[]) { // 4 ObserverMaps each with a single Observer
                 &(struct ObserverMap) { .observers = (struct IObserver*[]){ (struct IObserver *) &(struct Observer){0}, NULL } },
@@ -809,8 +809,8 @@ void testObserverMapShiftLeft() {
         }
     }, NULL };
 
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey16");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey16");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     // register four observers, check association and remove them
     view->registerObserver(view, "observer0", (void (*)(const void *, const struct INotification *)) handleNotification, (void *) view);
@@ -883,7 +883,7 @@ void testObserverMapShiftLeft() {
 
 // another test for observers shift left in a single ObserverMap
 void testObserverShiftLeft() {
-    struct ViewMap *storage[] = { &(struct ViewMap) {
+    struct ViewMap *viewMap[] = { &(struct ViewMap) {
         .view = (struct IView *) &(struct View) {
             .observerMap = (struct ObserverMap*[]) { // An ObserverMaps with 4 Observers
                 &(struct ObserverMap) {
@@ -898,8 +898,8 @@ void testObserverShiftLeft() {
         }
     }, NULL };
 
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey17");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey17");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     struct ViewComponent context0 = {0}, context1 = {0}, context2 = {0}, context3 = {0};
 
@@ -967,7 +967,7 @@ void testObserverShiftLeft() {
 }
 
 void testMediatorMapShiftLeft() {
-    struct ViewMap *storage[] = { &(struct ViewMap) { // storage for 4 mediators sharing one notification, one observer per notification
+    struct ViewMap *viewMap[] = { &(struct ViewMap) { // viewMap for 4 mediators sharing one notification, one observer per notification
         .view = (struct IView *) &(struct View) {
             .mediatorMap = (struct MediatorMap *[]) {
                 &(struct MediatorMap){ .mediator = (struct IMediator *) &(struct Mediator){0} },
@@ -988,8 +988,8 @@ void testMediatorMapShiftLeft() {
         },
     }, NULL };
 
-    struct IView *view = puremvc_view_getInstance(storage, "ViewTestKey17");
-    const struct View *concrete = (struct View *) storage[0]->view;
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey17");
+    const struct View *concrete = (struct View *) viewMap[0]->view;
 
     // Register four mediators and verify that each is correctly associated to their observers
     view->registerMediator(view, view_test_mediator7, "mediator0", NULL);
@@ -1067,7 +1067,7 @@ void testMediatorMapShiftLeft() {
 }
 
 void testViewShiftLeft() {
-    struct ViewMap *storage[] = { // 4 slots
+    struct ViewMap *viewMap[] = { // 4 slots
         &(struct ViewMap) { .view = (struct IView *) &(struct View) {} },
         &(struct ViewMap) { .view = (struct IView *) &(struct View) {} },
         &(struct ViewMap) { .view = (struct IView *) &(struct View) {} },
@@ -1076,54 +1076,54 @@ void testViewShiftLeft() {
     };
 
     // create 4 instances
-    puremvc_view_getInstance(storage, "view0");
-    const struct View *concrete0 = (struct View *) storage[0]->view;
-    assert(strcmp(storage[0]->key, "view0") == 0);
+    puremvc_view_getInstance(viewMap, "view0");
+    const struct View *concrete0 = (struct View *) viewMap[0]->view;
+    assert(strcmp(viewMap[0]->key, "view0") == 0);
     assert(strcmp(concrete0->multitonKey, "view0") == 0);
 
-    puremvc_view_getInstance(storage, "view1");
-    const struct View *concrete1 = (struct View *) storage[1]->view;
-    assert(strcmp(storage[1]->key, "view1") == 0);
+    puremvc_view_getInstance(viewMap, "view1");
+    const struct View *concrete1 = (struct View *) viewMap[1]->view;
+    assert(strcmp(viewMap[1]->key, "view1") == 0);
     assert(strcmp(concrete1->multitonKey, "view1") == 0);
 
-    puremvc_view_getInstance(storage, "view2");
-    const struct View *concrete2 = (struct View *) storage[2]->view;
-    assert(strcmp(storage[2]->key, "view2") == 0);
+    puremvc_view_getInstance(viewMap, "view2");
+    const struct View *concrete2 = (struct View *) viewMap[2]->view;
+    assert(strcmp(viewMap[2]->key, "view2") == 0);
     assert(strcmp(concrete2->multitonKey, "view2") == 0);
 
-    puremvc_view_getInstance(storage, "view3");
-    const struct View *concrete3 = (struct View *) storage[3]->view;
-    assert(strcmp(storage[3]->key, "view3") == 0);
+    puremvc_view_getInstance(viewMap, "view3");
+    const struct View *concrete3 = (struct View *) viewMap[3]->view;
+    assert(strcmp(viewMap[3]->key, "view3") == 0);
     assert(strcmp(concrete3->multitonKey, "view3") == 0);
 
     // remove
     puremvc_view_removeView("view1"); // remove middle, remaining 0, 2, 3
-    assert(strcmp(storage[0]->key, "view0") == 0);
+    assert(strcmp(viewMap[0]->key, "view0") == 0);
     assert(strcmp(concrete0->multitonKey, "view0") == 0);
-    assert(strcmp(storage[1]->key, "view2") == 0);
+    assert(strcmp(viewMap[1]->key, "view2") == 0);
     assert(strcmp(concrete2->multitonKey, "view2") == 0);
-    assert(strcmp(storage[2]->key, "view3") == 0);
+    assert(strcmp(viewMap[2]->key, "view3") == 0);
     assert(strcmp(concrete3->multitonKey, "view3") == 0);
-    assert(storage[3]->key[0] == '\0');
+    assert(viewMap[3]->key[0] == '\0');
 
     puremvc_view_removeView("view3"); // remove last, remaining 0, 2
-    assert(strcmp(storage[0]->key, "view0") == 0);
+    assert(strcmp(viewMap[0]->key, "view0") == 0);
     assert(strcmp(concrete0->multitonKey, "view0") == 0);
-    assert(strcmp(storage[1]->key, "view2") == 0);
+    assert(strcmp(viewMap[1]->key, "view2") == 0);
     assert(strcmp(concrete2->multitonKey, "view2") == 0);
-    assert(storage[2]->key[0] == '\0');
-    assert(storage[3]->key[0] == '\0');
+    assert(viewMap[2]->key[0] == '\0');
+    assert(viewMap[3]->key[0] == '\0');
 
     puremvc_view_removeView("view0"); // remove first, remaining 2
-    assert(strcmp(storage[0]->key, "view2") == 0);
+    assert(strcmp(viewMap[0]->key, "view2") == 0);
     assert(strcmp(concrete2->multitonKey, "view2") == 0);
-    assert(storage[1]->key[0] == '\0');
-    assert(storage[2]->key[0] == '\0');
-    assert(storage[3]->key[0] == '\0');
+    assert(viewMap[1]->key[0] == '\0');
+    assert(viewMap[2]->key[0] == '\0');
+    assert(viewMap[3]->key[0] == '\0');
 
     puremvc_view_removeView("view2"); // remove remaining
-    assert(storage[0]->key[0] == '\0');
-    assert(storage[1]->key[0] == '\0');
-    assert(storage[2]->key[0] == '\0');
-    assert(storage[3]->key[0] == '\0');
+    assert(viewMap[0]->key[0] == '\0');
+    assert(viewMap[1]->key[0] == '\0');
+    assert(viewMap[2]->key[0] == '\0');
+    assert(viewMap[3]->key[0] == '\0');
 }
