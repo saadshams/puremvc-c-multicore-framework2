@@ -25,12 +25,3 @@ struct Controller {
         struct ICommand *(*factory)(struct ICommand *);
     } **commandMap;
 };
-
-struct ControllerMap {
-    char key[KEY_SIZE];
-    struct IController *controller;
-};
-
-struct IController *puremvc_controller_getInstance(struct ControllerMap **controllerMap, const char *key);
-
-bool puremvc_controller_removeController(const char *key, struct IController **controller);

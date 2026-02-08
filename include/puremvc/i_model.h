@@ -8,9 +8,15 @@
  */
 #pragma once
 
+#include "constants.h"
 #include "i_proxy.h"
 
 #include <stdbool.h>
+
+struct ModelMap {
+    char key[KEY_SIZE];
+    struct IModel *model;
+};
 
 /**
  * @struct IModel
@@ -34,3 +40,7 @@ struct IModel {
 
     bool (*removeProxy)(struct IModel *self, const char *proxyName, struct IProxy **proxy);
 };
+
+struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key);
+
+bool puremvc_model_removeModel(const char *key, struct IModel **model);

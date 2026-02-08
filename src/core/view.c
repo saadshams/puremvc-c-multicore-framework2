@@ -370,7 +370,7 @@ bool puremvc_view_removeView(const char *key, struct IView **view) {
     size_t index = 0;
     for (size_t i = 0; s_viewMap[i] != NULL && s_viewMap[i]->key[0] != '\0'; i++) { // find view
         if (strncmp(s_viewMap[i]->key, key, KEY_SIZE) == 0) {
-            memset(&s_viewMap[i]->key, 0, KEY_SIZE); // remove
+            memset(s_viewMap[i]->key, 0, KEY_SIZE); // remove
             if (view != NULL)
                 *view = s_viewMap[i]->view;
         } else {

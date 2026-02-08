@@ -9,8 +9,14 @@
 
 #include <stdbool.h>
 
+#include "constants.h"
 #include "i_command.h"
 #include "i_notification.h"
+
+struct ControllerMap {
+    char key[KEY_SIZE];
+    struct IController *controller;
+};
 
 /**
  * @struct IController
@@ -23,11 +29,15 @@
 struct IController {
     void (*initializeController)(struct IController *self);
 
-    bool (*registerCommand)(struct IController *self, const char *notificationName, struct ICommand *(*factory)());
+    bool (*registerCommand)(struct IController *self, const char *notificationName, struct ICommand *(*factory)(struct ICommand *));
 
     void (*executeCommand)(const struct IController *self, struct INotification *notification);
 
     bool (*hasCommand)(const struct IController *self, const char *notificationName);
 
-    bool (*removeCommand)(struct IController *self, const char *notificationName, struct ICommand *(**factory)());
+    bool (*removeCommand)(struct IController *self, const char *notificationName, struct ICommand *(**factory)(struct ICommand *));
 };
+
+struct IController *puremvc_controller_getInstance(struct ControllerMap **controllerMap, const char *key);
+
+bool puremvc_controller_removeController(const char *key, struct IController **controller);

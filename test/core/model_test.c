@@ -21,7 +21,7 @@ int main() {
 
 void testGetInstance() {
     struct ModelMap *modelMap[] = { &(struct ModelMap) { // supply empty key modelMap
-        .model = (struct IModel *) &(struct Model){ .multitonKey = "", .proxyMap = (struct ProxyMap *[]) {}, }
+        .model = (struct IModel *) &(struct Model){ .multitonKey = "", .proxyMap = (struct ProxyMap *[]) { NULL }, }
     }, NULL };
 
     // Test Factory Method

@@ -8,10 +8,16 @@
  */
 #pragma once
 
+#include "constants.h"
 #include "i_mediator.h"
 #include "i_notification.h"
 
 #include <stdbool.h>
+
+struct ViewMap {
+    char key[KEY_SIZE];
+    struct IView *view;
+};
 
 /**
  * @struct IView
@@ -37,3 +43,7 @@ struct IView {
 
     bool (*removeMediator)(struct IView *self, const char *mediatorName, struct IMediator **mediator);
 };
+
+struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key);
+
+bool puremvc_view_removeView(const char *key, struct IView **view);

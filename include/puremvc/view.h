@@ -30,12 +30,3 @@ struct View {
         struct IObserver **observers;
     } **observerMap;
 };
-
-struct ViewMap {
-    char key[KEY_SIZE];
-    struct IView *view;
-};
-
-struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key);
-
-bool puremvc_view_removeView(const char *key, struct IView **view);

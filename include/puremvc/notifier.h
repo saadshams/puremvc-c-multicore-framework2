@@ -11,6 +11,7 @@
 #include "i_notifier.h"
 
 struct Facade; // forward declaration
+struct IFacade;
 
 struct Notifier {
     struct INotifier base;

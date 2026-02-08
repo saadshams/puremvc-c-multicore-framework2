@@ -23,12 +23,3 @@ struct Model {
         struct IProxy *proxy;
     } **proxyMap;
 };
-
-struct ModelMap {
-    char key[KEY_SIZE];
-    struct IModel *model;
-};
-
-struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key);
-
-bool puremvc_model_removeModel(const char *key, struct IModel **model);

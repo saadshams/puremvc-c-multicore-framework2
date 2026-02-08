@@ -24,17 +24,3 @@ struct Facade {
     struct IView *view;
 };
 
-struct FacadeMap {
-    char key[KEY_SIZE];
-    struct Facade facade;
-
-    struct ModelMap **modelMap;
-    struct ViewMap **viewMap;
-    struct ControllerMap **controllerMap;
-};
-
-struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const char *key);
-
-void puremvc_facade_removeFacade(struct FacadeMap **facadeMap, const char *key);
-
-bool puremvc_facade_hasCore(struct FacadeMap **facadeMap, const char *key);

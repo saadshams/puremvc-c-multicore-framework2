@@ -10,10 +10,13 @@
 
 #include <stdbool.h>
 
-#include "simple_command.h"
-#include "mediator.h"
-#include "proxy.h"
+#include "i_controller.h"
+#include "i_model.h"
+#include "i_view.h"
+#include "i_command.h"
+#include "i_mediator.h"
 #include "i_notification.h"
+#include "i_proxy.h"
 
 /**
  * @struct IFacade
@@ -23,38 +26,54 @@
  * and Controller layers. It manages commands, proxies, mediators,
  * and notification dispatching for a given multiton key.
  */
+
+struct FacadeMap {
+    char key[KEY_SIZE];
+    struct IFacade *facade;
+
+    struct ModelMap **modelMap;
+    struct ViewMap **viewMap;
+    struct ControllerMap **controllerMap;
+};
+
 struct IFacade {
-    void (*initializeFacade)(struct IFacade *self);
+    void (*initializeFacade)(struct IFacade *self, struct FacadeMap **facadeMap);
     
-    void (*initializeController)(struct IFacade *self);
+    void (*initializeController)(struct IFacade *self, struct ControllerMap **controllerMap);
 
-    void (*initializeModel)(struct IFacade *self);
+    void (*initializeModel)(struct IFacade *self, struct ModelMap **modelMap);
     
-    void (*initializeView)(struct IFacade *self);
+    void (*initializeView)(struct IFacade *self, struct ViewMap **viewMap);
 
-    void (*registerCommand)(const struct IFacade *self, const char *notificationName, struct SimpleCommand(*factory)());
+    bool (*registerCommand)(const struct IFacade *self, const char *notificationName, struct ICommand *(*factory)());
     
     bool (*hasCommand)(const struct IFacade *self, const char *notificationName);
 
-    void (*removeCommand)(const struct IFacade *self, const char *notificationName);
+    bool (*removeCommand)(const struct IFacade *self, const char *notificationName, struct ICommand *(**factory)());
 
-    void (*registerProxy)(const struct IFacade *self, struct Proxy proxy);
+    bool (*registerProxy)(const struct IFacade *self, struct IProxy *(*factory)(struct IProxy *proxy, const char *name, void *data), const char *name, void *data);
 
     struct IProxy *(*retrieveProxy)(const struct IFacade *self, const char *proxyName);
 
     bool (*hasProxy)(const struct IFacade *self, const char *proxyName);
 
-    struct Proxy(*removeProxy)(const struct IFacade *self, const char *proxyName);
+    bool (*removeProxy)(const struct IFacade *self, const char *proxyName, struct IProxy **proxy);
 
-    void (*registerMediator)(const struct IFacade *self, struct Mediator mediator);
+    bool (*registerMediator)(const struct IFacade *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component);
 
     struct IMediator *(*retrieveMediator)(const struct IFacade *self, const char *mediatorName);
 
     bool (*hasMediator)(const struct IFacade *self, const char *mediatorName);
     
-    struct Mediator(*removeMediator)(const struct IFacade *self, const char *mediatorName);
+    bool (*removeMediator)(const struct IFacade *self, const char *mediatorName, struct IMediator **mediator);
     
     void (*notifyObservers)(const struct IFacade *self, struct INotification *notification);
 
     void (*sendNotification)(const struct IFacade *self, const char *notificationName, void *body, const char *type);
 };
+
+struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const char *key);
+
+bool puremvc_facade_hasCore(struct FacadeMap **facadeMap, const char *key);
+
+bool puremvc_facade_removeFacade(const char *key, struct IFacade **facade);

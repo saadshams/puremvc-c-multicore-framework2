@@ -216,7 +216,7 @@ bool puremvc_model_removeModel(const char *key, struct IModel **model) {
     size_t index = 0;
     for (size_t i = 0; s_modelMap[i] != NULL && s_modelMap[i]->key[0] != '\0'; i++) { // find model
         if (strncmp(s_modelMap[i]->key, key, KEY_SIZE) == 0) {
-            memset(&s_modelMap[i]->key, 0, KEY_SIZE); // remove
+            memset(s_modelMap[i]->key, 0, KEY_SIZE); // remove
             if (model != NULL)
                 *model = s_modelMap[i]->model;
         } else {
