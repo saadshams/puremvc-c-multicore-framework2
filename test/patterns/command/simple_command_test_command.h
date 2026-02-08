@@ -1,5 +1,5 @@
 #pragma once
 
-#include "puremvc/simple_command.h"
+#include "puremvc/i_command.h"
 
-struct ICommand *test_simple_command(struct ICommand *command);
+struct ICommand *test_simple_command_init(void *buffer);

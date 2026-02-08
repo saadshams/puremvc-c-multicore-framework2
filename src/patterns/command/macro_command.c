@@ -6,12 +6,11 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include "puremvc/macro_command.h"
-#include "puremvc/simple_command.h"
+#include "macro_command.h"
+#include "puremvc/i_command.h"
+#include "puremvc/i_notifier.h"
 
 #include <stddef.h>
-
-#include "puremvc/i_notifier.h"
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
     struct ICommand *(*subCommands[1])() = { NULL };
@@ -27,8 +26,12 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     }
 }
 
-struct ICommand *puremvc_macro_command_init(struct ICommand *const command) {
-    struct ICommand *self = puremvc_simple_command_init(command);
+size_t puremvc_macro_command_size() {
+    return puremvc_simple_command_size();
+}
+
+struct ICommand *puremvc_macro_command_init(void *buffer) {
+    struct ICommand *self = puremvc_simple_command_init(buffer);
     self->execute = execute;
     return self;
 }

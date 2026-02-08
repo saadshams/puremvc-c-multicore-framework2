@@ -6,7 +6,7 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include "puremvc/simple_command.h"
+#include "simple_command.h"
 #include "puremvc/i_notifier.h"
 
 static struct INotifier *getNotifier(const struct ICommand *self) {
@@ -18,10 +18,18 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     (void)self; (void)notification;
 }
 
-struct ICommand *puremvc_simple_command_init(struct ICommand *const command) {
-    struct SimpleCommand *this = (struct SimpleCommand *) command;
+size_t puremvc_simple_command_size() {
+    return (sizeof(struct SimpleCommand) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+}
+
+struct ICommand *puremvc_simple_command_init(void *buffer) {
+    struct SimpleCommand *this = (struct SimpleCommand *) buffer;
+    struct ICommand *command = (struct ICommand *) buffer;
+
     command->getNotifier = getNotifier;
     command->execute = execute;
+
     puremvc_notifier_init((struct INotifier *) &this->notifier);
+
     return command;
 }

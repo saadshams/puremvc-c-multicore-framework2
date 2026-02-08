@@ -6,7 +6,3 @@
 * @copyright BSD 3-Clause License
 */
 #pragma once
-
-#include "i_command.h"
-
-struct ICommand *puremvc_macro_command_init(struct ICommand *command);

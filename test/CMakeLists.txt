@@ -16,11 +16,11 @@
 #target_link_libraries(ViewTest PRIVATE puremvc)
 #add_test(NAME PureMVC.ViewTest COMMAND ViewTest)
 #
-#add_executable(SimpleCommandTest
-#        patterns/command/simple_command_test.c
-#        patterns/command/simple_command_test_command.c)
-#target_link_libraries(SimpleCommandTest PRIVATE puremvc)
-#add_test(NAME PureMVC.SimpleCommandTest COMMAND SimpleCommandTest)
+add_executable(SimpleCommandTest
+        patterns/command/simple_command_test.c
+        patterns/command/simple_command_test_command.c)
+target_link_libraries(SimpleCommandTest PRIVATE puremvc)
+add_test(NAME PureMVC.SimpleCommandTest COMMAND SimpleCommandTest)
 #
 #add_executable(MacroCommandTest patterns/command/macro_command_test.c
 #        patterns/command/macro_command_test_command.c

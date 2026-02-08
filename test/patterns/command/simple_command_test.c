@@ -1,3 +1,4 @@
+#include <alloca.h>
 #include <assert.h>
 
 #include "simple_command_test.h"
@@ -31,7 +32,7 @@ void testSimpleCommandExecute() {
     struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "SimpleCommandTestNote", &vo, NULL);
 
     // Create the SimpleCommand
-    const struct ICommand *command = test_simple_command((struct ICommand *) &(struct SimpleCommand){0});
+    const struct ICommand *command = test_simple_command_init(alloca(puremvc_simple_command_size()));
 
     // initializer notifier
     command->getNotifier(command)->initializeNotifier(command->getNotifier(command), "testing");

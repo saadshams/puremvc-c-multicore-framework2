@@ -1,5 +1,4 @@
 #include "simple_command_test_command.h"
-#include "puremvc/simple_command.h"
 #include "simple_command_test_vo.h"
 
 /**
@@ -15,8 +14,8 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     vo->result = 2 * vo->input;
 }
 
-struct ICommand *test_simple_command(struct ICommand *const command) {
-    struct ICommand *self = puremvc_simple_command_init(command);
+struct ICommand *test_simple_command_init(void *buffer) {
+    struct ICommand *self = puremvc_simple_command_init(buffer);
     self->execute = execute;
     return self;
 }

@@ -7,14 +7,11 @@
 */
 #pragma once
 
-#include "i_command.h"
-#include "notifier.h"
+#include "puremvc/i_command.h"
+#include "puremvc/notifier.h"
 
 struct SimpleCommand {
     struct ICommand base;
 
     struct Notifier notifier;
 };
-
-struct ICommand *puremvc_simple_command_init(struct ICommand *command);
-
