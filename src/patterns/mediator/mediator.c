@@ -29,7 +29,7 @@ static void *getComponent(const struct IMediator *self) {
 
 static struct INotifier *getNotifier(const struct IMediator *self) {
     struct Mediator *this = (struct Mediator *) self;
-    return &this->notifier.base;
+    return (struct INotifier *) &this->notifier;
 }
 
 static const char **listNotificationInterests(const struct IMediator *self) {
@@ -69,13 +69,7 @@ struct IMediator *puremvc_mediator_init(struct IMediator *const mediator, const 
 
     this->component = component;
 
-    puremvc_notifier_init(&this->notifier);
+    puremvc_notifier_init((struct INotifier *) &this->notifier);
 
     return mediator;
-}
-
-void puremvc_mediator_deinit(struct Mediator *mediator) {
-    mediator->base = (struct IMediator){0};
-    memset(&mediator->name, 0, KEY_SIZE);
-    mediator->component = NULL;
 }

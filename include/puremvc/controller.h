@@ -11,7 +11,6 @@
 #include "mutex.h"
 #include "constants.h"
 #include "i_controller.h"
-#include "simple_command.h"
 #include "i_view.h"
 
 struct Controller {
@@ -29,9 +28,9 @@ struct Controller {
 
 struct ControllerMap {
     char key[KEY_SIZE];
-    struct Controller controller;
+    struct IController *controller;
 };
 
 struct IController *puremvc_controller_getInstance(struct ControllerMap **controllerMap, const char *key);
 
-void puremvc_controller_removeController(struct ControllerMap **controllerMap, const char *key);
+bool puremvc_controller_removeController(const char *key);

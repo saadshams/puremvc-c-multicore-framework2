@@ -9,7 +9,7 @@
 
 #include <stdbool.h>
 
-#include "simple_command.h"
+#include "i_command.h"
 #include "i_notification.h"
 
 /**
@@ -23,11 +23,11 @@
 struct IController {
     void (*initializeController)(struct IController *self);
 
-    void (*registerCommand)(struct IController *self, const char *notificationName, struct ICommand *(*factory)());
+    bool (*registerCommand)(struct IController *self, const char *notificationName, struct ICommand *(*factory)());
 
     void (*executeCommand)(const struct IController *self, struct INotification *notification);
 
     bool (*hasCommand)(const struct IController *self, const char *notificationName);
 
-    bool (*removeCommand)(struct IController *self, struct ICommand *(**factory)(), const char *notificationName);
+    bool (*removeCommand)(struct IController *self, const char *notificationName, struct ICommand *(**factory)());
 };

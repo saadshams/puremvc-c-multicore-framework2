@@ -8,8 +8,8 @@
  */
 #pragma once
 
-#include "i_notification.h"
 #include "i_mediator.h"
+#include "i_notification.h"
 
 #include <stdbool.h>
 
@@ -35,5 +35,5 @@ struct IView {
 
     bool (*hasMediator)(const struct IView *self, const char *mediatorName);
 
-    bool (*removeMediator)(struct IView *self, struct IMediator *mediator, const char *mediatorName);
+    bool (*removeMediator)(struct IView *self, const char *mediatorName, struct IMediator *mediator);
 };

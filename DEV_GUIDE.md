@@ -108,3 +108,65 @@ static struct Controller controllerStorage[] = {
 static struct Controller *storage[] = { &controllerStorage[0], NULL };
 
 ```
+
+Now this array lives in BSS (like your global) and will exist for the entire program.
+```c++
+void testGetInstance() {
+    static struct ViewMap *viewMap[] = {  // <-- NOTE: static
+        &(struct ViewMap) {
+            .view = { .multitonKey = "", .observerMap = {}, .mediatorMap = {} },
+        }, 
+        NULL 
+    };
+
+    puremvc_view_getInstance(viewMap, "ControllerTestKey1");
+}
+```
+
+Allocate on the heap
+```c++
+void testGetInstance() {
+    struct ViewMap **viewMap = calloc(2, sizeof(struct ViewMap*));
+    viewMap[0] = malloc(sizeof(struct ViewMap));
+    *viewMap[0] = (struct ViewMap){ .view = { .multitonKey = "", .observerMap = {}, .mediatorMap = {} } };
+
+    puremvc_view_getInstance(viewMap, "ControllerTestKey1");
+}
+```
+
+FATAL   ->  \033[1;31mFATAL\033[0m
+ERROR   ->  \033[0;31mERROR\033[0m
+WARN    ->  \033[0;33mWARN\033[0m
+INFO    ->  \033[0;37mINFO\033[0m
+DEBUG   ->  \033[0;32mDEBUG\033[0m
+TRACE   ->  \033[0;90mTRACE\033[0m
+
+Comments
+
+```c++
+struct ControllerMap *storage[] = { &(struct ControllerMap) {
+    .controller = (struct IController *) &(struct Controller) {
+        /* Define command dispatch table (Capacity: 4 Commands) */
+        .commandMap = (struct CommandMap *[]) { 
+            &(struct CommandMap){}, &(struct CommandMap){}, 
+            &(struct CommandMap){}, &(struct CommandMap){},
+            NULL 
+        }
+    },
+}, NULL };
+
+struct ControllerMap *storage[] = { 
+    &(struct ControllerMap) {
+        .controller = (struct IController *) &(struct Controller) {
+            .commandMap = (struct CommandMap *[]) { 
+                &(struct CommandMap){}, // Command 1
+                &(struct CommandMap){}, // Command 2
+                &(struct CommandMap){}, // Command 3
+                &(struct CommandMap){}, // Command 4
+                NULL                    // End of Map
+            } // end commandMap
+        } // end Controller
+    }, // end ControllerMap
+    NULL // End of storage
+};
+```

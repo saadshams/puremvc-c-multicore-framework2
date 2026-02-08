@@ -24,5 +24,3 @@ struct Proxy {
 };
 
 struct IProxy *puremvc_proxy_init(struct IProxy *proxy, const char *name, void *data);
-
-void puremvc_proxy_deinit(struct Proxy *proxy);

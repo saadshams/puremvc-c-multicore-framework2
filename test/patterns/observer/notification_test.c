@@ -19,7 +19,7 @@ int main() {
  */
 void testConstructor() {
     // Create a new Notification using the Constructor to set the note name and body
-    const struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, "TestNote", NULL, NULL);
+    const struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "TestNote", NULL, NULL);
 
     // test assertions
     assert(strcmp(notification->getName(notification), "TestNote") == 0);
@@ -32,7 +32,7 @@ void testConstructor() {
  */
 void testNameAccessors() {
     // Create a new Notification and use accessors to set the note name
-    const struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, "TestNote", NULL, NULL);
+    const struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "TestNote", NULL, NULL);
 
     // test assertions
     assert(strcmp(notification->getName(notification), "TestNote") == 0);
@@ -46,7 +46,7 @@ void testBodyAccessors() {
     struct { int value; } vo = {.value = 5};
 
     // Create a new Notification and use accessors to set the body
-    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, "TestNote", NULL, NULL);
+    struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "TestNote", NULL, NULL);
     notification->setBody(notification, &vo);
 
     // test assertions
@@ -57,7 +57,7 @@ void testBodyAccessors() {
  * Tests setting and getting the type using Notification class accessor methods.
  */
 void testTypeAccessors() {
-    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, "TestNote", NULL, "TestNoteType");
+    struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "TestNote", NULL, "TestNoteType");
 
     // test assertions
     assert(strcmp(notification->getType(notification), "TestNoteType") == 0);
@@ -69,7 +69,7 @@ void testTypeAccessors() {
 void testToString() {
     struct { int value; } test = {.value = 5};
 
-    const struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, "TestNote", NULL, "TestNoteType");
+    const struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "TestNote", NULL, "TestNoteType");
 
     char buffer[256];
     notification->toString(notification, buffer, sizeof(buffer));

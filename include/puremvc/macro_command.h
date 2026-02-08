@@ -7,6 +7,6 @@
 */
 #pragma once
 
-#include "simple_command.h"
+#include "i_command.h"
 
 struct ICommand *puremvc_macro_command_init(struct ICommand *command);

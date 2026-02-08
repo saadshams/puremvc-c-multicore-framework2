@@ -6,12 +6,15 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include "puremvc/mutex.h"
 #include "puremvc/model.h"
+#include "puremvc/proxy.h"
 
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+
+// modelMap
+static struct ModelMap **s_modelMap = NULL;
 
 // mutex for modelMap
 static Mutex modelMapMutex;
@@ -96,7 +99,7 @@ static bool hasProxy(const struct IModel *self, const char *proxyName) {
     return exists;
 }
 
-static bool removeProxy(struct IModel *self, struct IProxy *proxy, const char *proxyName) {
+static bool removeProxy(struct IModel *self, const char *proxyName, struct IProxy *proxy) {
     struct Model *this = (struct Model *) self;
     bool exists = false;
 
@@ -124,17 +127,17 @@ static bool removeProxy(struct IModel *self, struct IProxy *proxy, const char *p
     return exists;
 }
 
-static void init(struct Model *model, const char *key) {
-    model->base = (struct IModel) {
-        .initializeModel = initializeModel,
-        .registerProxy = registerProxy,
-        .retrieveProxy = retrieveProxy,
-        .hasProxy = hasProxy,
-        .removeProxy = removeProxy
-    };
+static void puremvc_model_init(struct IModel *model, const char *key) {
+    struct Model *this = (struct Model *) model;
 
-    snprintf(model->multitonKey, KEY_SIZE, "%s", key);
-    mutex_init(&model->proxyMapMutex);
+    model->initializeModel = initializeModel;
+    model->registerProxy = registerProxy;
+    model->retrieveProxy = retrieveProxy;
+    model->hasProxy = hasProxy;
+    model->removeProxy = removeProxy;
+
+    snprintf(this->multitonKey, KEY_SIZE, "%s", key);
+    mutex_init(&this->proxyMapMutex);
 }
 
 static void dispatchOnce(void) {
@@ -142,7 +145,7 @@ static void dispatchOnce(void) {
 }
 
 struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key) {
-    if (modelMap == NULL) {
+    if (modelMap == NULL && s_modelMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] FATAL: Missing ModelMap storage; skipping registration.\033[0m\n");
         return NULL;
     }
@@ -157,61 +160,75 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
         return NULL;
     }
 
+    if (s_modelMap == NULL)
+        s_modelMap = modelMap;
+
     mutex_once(&modelMutexOnce, dispatchOnce);
     mutex_lock(&modelMapMutex);
 
     size_t i = 0;
-    for (; modelMap[i] != NULL && modelMap[i]->key[0] != '\0'; i++) { // find model
-        if (strncmp(modelMap[i]->key, key, KEY_SIZE) == 0) {
+    for (; s_modelMap[i] != NULL && s_modelMap[i]->key[0] != '\0'; i++) { // find model
+        if (strncmp(s_modelMap[i]->key, key, KEY_SIZE) == 0) {
             mutex_unlock(&modelMapMutex);
-            return &modelMap[i]->model.base;
+            return s_modelMap[i]->model;
         }
     }
 
-    if (modelMap[i] == NULL) { // overflow
+    if (s_modelMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] FATAL: ModelMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&modelMapMutex);
         return NULL;
     }
 
-    snprintf(modelMap[i]->key, KEY_SIZE, "%s", key); // init
-    init(&modelMap[i]->model, key);
-    modelMap[i]->model.base.initializeModel(&modelMap[i]->model.base);
+    if (s_modelMap[i]->model == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] FATAL: Missing Model storage; skipping registration.\033[0m\n");
+        return NULL;
+    }
+
+    snprintf(s_modelMap[i]->key, KEY_SIZE, "%s", key); // init
+    puremvc_model_init(s_modelMap[i]->model, key);
+    s_modelMap[i]->model->initializeModel(s_modelMap[i]->model);
 
     mutex_unlock(&modelMapMutex);
-    return &modelMap[i]->model.base;
+    return s_modelMap[i]->model;
 }
 
-void puremvc_model_removeModel(struct ModelMap **modelMap, const char *key) {
-    if (modelMap == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] FATAL: Missing ModelMap storage; skipping registration.\033[0m\n");
-        return;
+bool puremvc_model_removeModel(const char *key) {
+    if (s_modelMap == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] FATAL: Missing ModelMap storage; skipping removal.\033[0m\n");
+        return false;
     }
 
     if (key == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] FATAL: Key is NULL; skipping registration.\033[0m\n");
-        return;
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] FATAL: Key is NULL; skipping removal.\033[0m\n");
+        return false;
     }
 
     if (strlen(key) >= KEY_SIZE) { // Key truncation collision
-        fprintf(stderr, "[PureMVC::Model::removeModel] Error: Key '%s' too long (max %d) — skipping registration.\n", key, KEY_SIZE);
-        return;
+        fprintf(stderr, "[PureMVC::Model::removeModel] Error: Key '%s' too long (max %d) — skipping removal.\n", key, KEY_SIZE);
+        return false;
     }
 
     mutex_once(&modelMutexOnce, dispatchOnce);
     mutex_lock(&modelMapMutex);
 
     size_t index = 0;
-    for (size_t i = 0; modelMap[i] != NULL && modelMap[i]->key[0] != '\0'; i++) { // find model
-        if (strncmp(modelMap[i]->key, key, KEY_SIZE) == 0) {
-            memset(&modelMap[i]->key, 0, KEY_SIZE); // remove
+    for (size_t i = 0; s_modelMap[i] != NULL && s_modelMap[i]->key[0] != '\0'; i++) { // find model
+        if (strncmp(s_modelMap[i]->key, key, KEY_SIZE) == 0) {
+            memset(&s_modelMap[i]->key, 0, KEY_SIZE); // remove
         } else {
             if (index != i) { // shift left
-                *modelMap[index] = *modelMap[i];
-                memset(modelMap[i]->key, 0, KEY_SIZE);
+                *s_modelMap[index] = *s_modelMap[i];
+                memset(s_modelMap[i]->key, 0, KEY_SIZE);
             }
             index++;
         }
     }
+
+    if (index == 0) // all keys were removed; reset
+        s_modelMap = NULL;
+
     mutex_unlock(&modelMapMutex);
+
+    return true;
 }

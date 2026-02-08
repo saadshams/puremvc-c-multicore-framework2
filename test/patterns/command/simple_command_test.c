@@ -28,10 +28,10 @@ void testSimpleCommandExecute() {
     struct SimpleCommandTestVO vo = {.input = 5};
 
     // Create the Notification (note)
-    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}, "SimpleCommandTestNote", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "SimpleCommandTestNote", &vo, NULL);
 
     // Create the SimpleCommand
-    const struct ICommand *command = test_simple_command(&(struct SimpleCommand){0}.base);
+    const struct ICommand *command = test_simple_command((struct ICommand *) &(struct SimpleCommand){0});
 
     // initializer notifier
     command->getNotifier(command)->initializeNotifier(command->getNotifier(command), "testing");

@@ -10,9 +10,11 @@
 #include "puremvc/mediator.h"
 #include "puremvc/observer.h"
 
-#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+
+// viewMap
+static struct ViewMap **s_viewMap = NULL;
 
 // mutex for viewMap
 static Mutex viewMapMutex;
@@ -40,7 +42,7 @@ static bool registerObserver(struct IView *self, const char *notificationName, v
 
     size_t i = 0;
     for (; this->observerMap[i] != NULL && this->observerMap[i]->key[0] != '\0'; i++) { // find existing
-        if (strcmp(this->observerMap[i]->key, notificationName) != 0) // mismatch
+        if (strcmp(this->observerMap[i]->key, notificationName) != 0) // mismatch // todo nest
             continue;
 
         struct IObserver **observers = this->observerMap[i]->observers;
@@ -98,7 +100,7 @@ static void notifyObservers(const struct IView *self, const struct INotification
 
 bool removeObserver(struct IView *self, const char *notificationName, const void *notifyContext) {
     struct View *this = (struct View *) self;
-    bool exists = false;
+    bool removed = false;
 
     mutex_lock(&this->observerMapMutex);
 
@@ -112,7 +114,7 @@ bool removeObserver(struct IView *self, const char *notificationName, const void
             for (; observers != NULL && observers[j] != NULL && observers[j]->getContext(observers[j]) != NULL; j++) {
                 const struct IObserver *observer = observers[j];
                 if (observer->compareNotifyContext(observer, notifyContext) == true) { // match
-                    exists = true;
+                    removed = true;
                     observers[j]->setContext(observers[j], NULL);
                 } else {
                     if (index != j) { // shift observers left
@@ -142,7 +144,7 @@ bool removeObserver(struct IView *self, const char *notificationName, const void
     }
 
     mutex_unlock(&this->observerMapMutex);
-    return exists;
+    return removed;
 }
 
 bool registerMediator(struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component) {
@@ -221,30 +223,31 @@ static bool hasMediator(const struct IView *self, const char *mediatorName) {
     return exists;
 }
 
-static bool removeMediator(struct IView *self, struct IMediator *mediator, const char *mediatorName) {
+static bool removeMediator(struct IView *self, const char *mediatorName, struct IMediator *mediator) {
     struct View *this = (struct View *) self;
-    bool exists = false;
+    bool removed = false;
 
     mutex_lock(&this->mediatorMapMutex);
 
     size_t index = 0, i = 0;
     for (; this->mediatorMap != NULL && this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find mediator
         if (strcmp(this->mediatorMap[i]->key, mediatorName) == 0) { // match
-            exists = true;
             memset(&this->mediatorMap[i]->key, 0, KEY_SIZE); // remove
             const char **interests = this->mediatorMap[i]->mediator->listNotificationInterests(this->mediatorMap[i]->mediator);
             for (const char **cursor = interests; *cursor != NULL; cursor++) { // remove notification observers
-                this->base.removeObserver(self, *cursor, this->mediatorMap[i]->mediator);
+                self->removeObserver(self, *cursor, this->mediatorMap[i]->mediator);
             }
             this->mediatorMap[i]->mediator->onRemove(this->mediatorMap[i]->mediator);
 
-            if (mediator != NULL)
+            if (mediator != NULL) // out param
                 *(struct Mediator *) mediator = *(struct Mediator *) this->mediatorMap[i]->mediator; // copy concrete struct
+
+            removed = true;
         } else {
             if (index != i) { // shift mediatorMap left
                 const struct IMediator *previous = this->mediatorMap[i]->mediator;
 
-                *this->mediatorMap[index] = *this->mediatorMap[i];
+                *this->mediatorMap[index] = *this->mediatorMap[i]; // shift left first
                 memset(&this->mediatorMap[i]->key, 0, KEY_SIZE); // remove
 
                 const char **interests = this->mediatorMap[index]->mediator->listNotificationInterests(this->mediatorMap[index]->mediator);
@@ -265,36 +268,31 @@ static bool removeMediator(struct IView *self, struct IMediator *mediator, const
             index++;
         }
     }
-
-    // phase 2: reinit mediators following mediatorMap remove and/or shift left
-    // for (size_t k = 0; this->mediatorMap != NULL && this->mediatorMap[k] != NULL && this->mediatorMap[k]->key[0] == '\0'; k++) {
-    //     puremvc_mediator_init(this->mediatorMap[k]->mediator, NULL, NULL);
-    // }
+    mutex_unlock(&this->mediatorMapMutex);
+    return removed;
 
     // mark remaining slots as dead
     // for (size_t k = index; this->mediatorMap != NULL && this->mediatorMap[k] != NULL && this->mediatorMap[k]->mediator != NULL; k++) {
     //     this->mediatorMap[k]->mediator = NULL; // questionable code, why setting NULL
     // also do we need to run the loop as i am re-initializing as i shift left
     // }
-
-    return exists;
 }
 
-static void init(struct View *view, const char *key) {
-    view->base = (struct IView) {
-        .initializeView = initializeView,
-        .registerObserver = registerObserver,
-        .notifyObservers = notifyObservers,
-        .removeObserver = removeObserver,
-        .registerMediator = registerMediator,
-        .retrieveMediator = retrieveMediator,
-        .hasMediator = hasMediator,
-        .removeMediator = removeMediator
-    };
+static void puremvc_view_init(struct IView *view, const char *key) {
+    struct View *this = (struct View *) view;
 
-    snprintf(view->multitonKey, KEY_SIZE, "%s", key);
-    mutex_init(&view->observerMapMutex);
-    mutex_init(&view->mediatorMapMutex);
+    view->initializeView = initializeView;
+    view->registerObserver = registerObserver;
+    view->notifyObservers = notifyObservers;
+    view->removeObserver = removeObserver;
+    view->registerMediator = registerMediator;
+    view->retrieveMediator = retrieveMediator;
+    view->hasMediator = hasMediator;
+    view->removeMediator = removeMediator;
+
+    snprintf(this->multitonKey, KEY_SIZE, "%s", key);
+    mutex_init(&this->observerMapMutex);
+    mutex_init(&this->mediatorMapMutex);
 }
 
 static void dispatchOnce(void) {
@@ -302,7 +300,7 @@ static void dispatchOnce(void) {
 }
 
 struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key) {
-    if (viewMap == NULL) {
+    if (viewMap == NULL && s_viewMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: Missing ViewMap storage; skipping registration.\033[0m\n");
         return NULL;
     }
@@ -317,61 +315,75 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
         return NULL;
     }
 
+    if (s_viewMap == NULL)
+        s_viewMap = viewMap;
+
     mutex_once(&viewMutexOnce, dispatchOnce);
     mutex_lock(&viewMapMutex);
 
     size_t i = 0;
-    for (; viewMap[i] != NULL && viewMap[i]->key[0] != '\0'; i++) { // find view
-        if (strncmp(viewMap[i]->key, key, KEY_SIZE) == 0) {
+    for (; s_viewMap[i] != NULL && s_viewMap[i]->key[0] != '\0'; i++) { // find view
+        if (strncmp(s_viewMap[i]->key, key, KEY_SIZE) == 0) {
             mutex_unlock(&viewMapMutex);
-            return &viewMap[i]->view.base;
+            return s_viewMap[i]->view;
         }
     }
 
-    if (viewMap[i] == NULL) { // overflow
+    if (s_viewMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: ViewMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&viewMapMutex);
         return NULL;
     }
 
-    snprintf(viewMap[i]->key, KEY_SIZE, "%s", key); // init
-    init(&viewMap[i]->view, key);
-    viewMap[i]->view.base.initializeView(&viewMap[i]->view.base);
+    if (s_viewMap[i]->view == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: Missing View storage; skipping registration.\033[0m\n");
+        return NULL;
+    }
+
+    snprintf(s_viewMap[i]->key, KEY_SIZE, "%s", key); // init
+    puremvc_view_init(s_viewMap[i]->view, key);
+    s_viewMap[i]->view->initializeView(s_viewMap[i]->view);
 
     mutex_unlock(&viewMapMutex);
-    return &viewMap[i]->view.base;
+    return s_viewMap[i]->view;
 }
 
-void puremvc_view_removeView(struct ViewMap **viewMap, const char *key) {
-    if (viewMap == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::View::removeView] FATAL: Missing ViewMap storage; skipping registration.\033[0m\n");
-        return;
+bool puremvc_view_removeView(const char *key) {
+    if (s_viewMap == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::View::removeView] FATAL: Missing ViewMap storage; skipping removal.\033[0m\n");
+        return false;
     }
 
     if (key == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::View::removeView] FATAL: Key is NULL; skipping registration.\033[0m\n");
-        return;
+        fprintf(stderr, "\033[0;31m[PureMVC::View::removeView] FATAL: Key is NULL; skipping removal.\033[0m\n");
+        return false;
     }
 
     if (strlen(key) >= KEY_SIZE) { // Key truncation collision
-        fprintf(stderr, "[PureMVC::View::removeView] Error: Key '%s' too long (max %d) — skipping registration.\n", key, KEY_SIZE);
-        return;
+        fprintf(stderr, "[PureMVC::View::removeView] Error: Key '%s' too long (max %d) — skipping removal.\n", key, KEY_SIZE);
+        return false;
     }
 
     mutex_once(&viewMutexOnce, dispatchOnce);
     mutex_lock(&viewMapMutex);
 
     size_t index = 0;
-    for (size_t i = 0; viewMap[i] != NULL && viewMap[i]->key[0] != '\0'; i++) { // find view
-        if (strncmp(viewMap[i]->key, key, KEY_SIZE) == 0) {
-            memset(&viewMap[i]->key, 0, KEY_SIZE); // remove
+    for (size_t i = 0; s_viewMap[i] != NULL && s_viewMap[i]->key[0] != '\0'; i++) { // find view
+        if (strncmp(s_viewMap[i]->key, key, KEY_SIZE) == 0) {
+            memset(&s_viewMap[i]->key, 0, KEY_SIZE); // remove
         } else {
             if (index != i) { // shift left
-                *viewMap[index] = *viewMap[i];
-                memset(viewMap[i]->key, 0, KEY_SIZE);
+                *s_viewMap[index] = *s_viewMap[i];
+                memset(s_viewMap[i]->key, 0, KEY_SIZE);
             }
             index++;
         }
     }
+
+    if (index == 0) // all keys were removed; reset
+        s_viewMap = NULL;
+
     mutex_unlock(&viewMapMutex);
+
+    return true;
 }

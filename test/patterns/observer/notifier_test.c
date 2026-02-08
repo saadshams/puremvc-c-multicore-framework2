@@ -24,7 +24,7 @@ static void execute(const struct ICommand *self, struct INotification *notificat
 }
 
 static struct ICommand *command() {
-    struct ICommand *command = puremvc_simple_command_init(&(struct SimpleCommand){0}.base);
+    struct ICommand *command = puremvc_simple_command_init((struct ICommand *) &(struct SimpleCommand){0});
     command->execute = execute;
     return command;
 }
@@ -32,7 +32,7 @@ static struct ICommand *command() {
 // void testInstance() {
 //     // create notifier instance
 //     struct Notifier n = puremvc_notifier();
-//     struct INotifier *notifier = &n.base;
+//     struct INotifier *notifier = n;
 //
 //     // initialize facade
 //     notifier->initializeNotifier(notifier, "NotifierTest1");
@@ -48,16 +48,16 @@ static struct ICommand *command() {
 //     struct Notifier notifier = puremvc_notifier();
 //
 //     // initialize facade
-//     notifier.base.initializeNotifier(&notifier.base, "NotifierTest2");
+//     notifier.initializeNotifier(&notifier, "NotifierTest2");
 //
 //     struct Object temp = {4};
 //
 //     // get facade instance
-//     struct IFacade *facade = notifier.base.getFacade(&notifier.base);
+//     struct IFacade *facade = notifier.getFacade(&notifier);
 //
 //     // register a command and send notification
 //     facade->registerCommand(facade, "TestNote", command);
-//     notifier.base.sendNotification(&notifier.base, "TestNote", &temp, NULL);
+//     notifier.sendNotification(&notifier, "TestNote", &temp, NULL);
 //
 //     // assert result
 //     assert(temp.result == 16);

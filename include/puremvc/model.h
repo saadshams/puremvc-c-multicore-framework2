@@ -26,9 +26,9 @@ struct Model {
 
 struct ModelMap {
     char key[KEY_SIZE];
-    struct Model model;
+    struct IModel *model;
 };
 
 struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key);
 
-void puremvc_model_removeModel(struct ModelMap **modelMap, const char *key);
+bool puremvc_model_removeModel(const char *key);

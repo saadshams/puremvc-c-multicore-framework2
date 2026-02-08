@@ -8,4 +8,4 @@ void testReregisterAndExecuteCommand();
 void testRegisterAndUpdateCommand();
 void testRemoveController();
 void testRegisterAndRemoveMultipleCommands();
-void TestViewShiftLeft();
+void TestControllerShiftLeft();

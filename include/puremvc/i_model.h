@@ -8,7 +8,7 @@
  */
 #pragma once
 
-#include "proxy.h"
+#include "i_proxy.h"
 
 #include <stdbool.h>
 
@@ -32,5 +32,5 @@ struct IModel {
 
     bool (*hasProxy)(const struct IModel *self, const char *proxyName);
 
-    bool (*removeProxy)(struct IModel *self, struct IProxy *proxy, const char *proxyName);
+    bool (*removeProxy)(struct IModel *self, const char *proxyName, struct IProxy *proxy);
 };

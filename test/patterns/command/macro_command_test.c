@@ -18,9 +18,9 @@ int main() {
 void testMacroCommandExecute() {
     struct MacroCommandTestVO vo = { .input = 5, 0, 0, 0};
 
-    struct INotification *notification = puremvc_notification_init(&(struct Notification){0}.base, "MacroCommandTest", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "MacroCommandTest", &vo, NULL);
 
-    const struct ICommand *command = macro_command_test_command(&(struct SimpleCommand){0}.base);
+    const struct ICommand *command = macro_command_test_command((struct ICommand *) &(struct SimpleCommand){0});
 
     command->getNotifier(command)->initializeNotifier(command->getNotifier(command), "MacroCommandTestkey1");
 
@@ -41,7 +41,7 @@ void testMacroCommandExecute() {
 //     struct MacroCommandTestVO vo = {.input = 5, 0, 0, 0};
 //     struct Notification notification = puremvc_notification("MacroCommandTest", &vo, NULL);
 //
-//     view->notifyObservers(view, &notification.base);
+//     view->notifyObservers(view, notification);
 //
 //     // test assertions
 //     assert(vo.result1 == 10);

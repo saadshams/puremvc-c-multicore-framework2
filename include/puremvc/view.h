@@ -33,9 +33,9 @@ struct View {
 
 struct ViewMap {
     char key[KEY_SIZE];
-    struct View view;
+    struct IView *view;
 };
 
 struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key);
 
-void puremvc_view_removeView(struct ViewMap **viewMap, const char *key);
+bool puremvc_view_removeView(const char *key);

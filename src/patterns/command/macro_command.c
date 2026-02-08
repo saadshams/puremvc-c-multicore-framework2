@@ -7,6 +7,7 @@
 * @copyright BSD 3-Clause License
 */
 #include "puremvc/macro_command.h"
+#include "puremvc/simple_command.h"
 
 #include <stddef.h>
 

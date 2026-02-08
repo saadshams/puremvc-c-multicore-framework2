@@ -7,7 +7,7 @@
 * @copyright BSD 3-Clause License
 */
 #include "puremvc/proxy.h"
-#include "puremvc/notifier.h"
+#include "puremvc/i_notifier.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -29,7 +29,7 @@ static void setData(struct IProxy *self, void *data) {
 
 static struct INotifier *getNotifier(const struct IProxy *self) {
     struct Proxy *this = (struct Proxy *) self;
-    return &this->notifier.base;
+    return (struct INotifier *) &this->notifier;
 }
 
 static void onRegister(struct IProxy *self) {
@@ -57,13 +57,7 @@ struct IProxy *puremvc_proxy_init(struct IProxy *const proxy, const char *name, 
 
     this->data = data;
 
-    puremvc_notifier_init(&this->notifier);
+    puremvc_notifier_init((struct INotifier *) &this->notifier);
 
     return proxy;
-}
-
-void puremvc_proxy_deinit(struct Proxy *proxy) {
-    proxy->base = (struct IProxy){0};
-    memset(&proxy->name, 0, KEY_SIZE);
-    proxy->data = NULL;
 }
