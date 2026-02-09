@@ -24,12 +24,11 @@ size_t puremvc_simple_command_size() {
 
 struct ICommand *puremvc_simple_command_init(void *buffer) {
     struct SimpleCommand *this = (struct SimpleCommand *) buffer;
-    struct ICommand *command = (struct ICommand *) buffer;
 
-    command->getNotifier = getNotifier;
-    command->execute = execute;
+    this->base.getNotifier = getNotifier;
+    this->base.execute = execute;
 
     puremvc_notifier_init((struct INotifier *) &this->notifier);
 
-    return command;
+    return (struct ICommand *) this;
 }

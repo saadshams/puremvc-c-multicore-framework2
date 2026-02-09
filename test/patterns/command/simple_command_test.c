@@ -3,7 +3,7 @@
 
 #include "simple_command_test.h"
 #include "puremvc/i_notifier.h"
-#include "puremvc/notification.h"
+#include "puremvc/i_notification.h"
 #include "simple_command_test_command.h"
 #include "simple_command_test_vo.h"
 
@@ -29,7 +29,7 @@ void testSimpleCommandExecute() {
     struct SimpleCommandTestVO vo = {.input = 5};
 
     // Create the Notification (note)
-    struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "SimpleCommandTestNote", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size("SimpleCommandTestNote", NULL)), "SimpleCommandTestNote", &vo, NULL);
 
     // Create the SimpleCommand
     const struct ICommand *command = test_simple_command_init(alloca(puremvc_simple_command_size()));

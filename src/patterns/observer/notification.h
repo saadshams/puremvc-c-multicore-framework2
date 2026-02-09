@@ -7,13 +7,14 @@
 */
 #pragma once
 
-#include "constants.h"
-#include "i_notification.h"
+#include "puremvc/i_notification.h"
 
 struct Notification {
     struct INotification base;
 
-    char name[NAME_SIZE];
     void *body;
-    char type[NAME_SIZE];
+
+    size_t name_len;
+    size_t type_len;
+    char data[]; // Double-Buffer FAM Pattern: data = [name][\0][type][\0]
 };

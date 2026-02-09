@@ -42,31 +42,27 @@ static void onRemove(struct IProxy *self) {
 
 size_t puremvc_proxy_size(const char *name) {
     const size_t len = strlen(name ? name : PROXY_NAME) + 1;
-    // Round up to the nearest multiple of a pointer size (e.g., 8 bytes)
-    return (sizeof(struct Proxy) + len + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+    return (sizeof(struct Proxy) + len + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1); // align to pointer size
 }
 
 struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
     struct Proxy *this = (struct Proxy *) buffer;
-    struct IProxy *proxy = (struct IProxy *) buffer;
 
     memset(this, 0, sizeof *this);
 
-    proxy->getName = getName;
-    proxy->getData = getData;
-    proxy->setData = setData;
-    proxy->getNotifier = getNotifier;
-    proxy->onRegister = onRegister;
-    proxy->onRemove = onRemove;
-
-    memset(&this->name, 0, NAME_SIZE);
-    int len = snprintf(this->name, NAME_SIZE, "%s", name ? name : PROXY_NAME);
-    if (len >= NAME_SIZE)
-        fprintf(stderr, "[PureMVC::Proxy] Warning: Name Truncated: '%s' (Original length: %d, Buffer size: %d)\n", name ? name : PROXY_NAME, len, NAME_SIZE);
+    this->base.getName = getName;
+    this->base.getData = getData;
+    this->base.setData = setData;
+    this->base.getNotifier = getNotifier;
+    this->base.onRegister = onRegister;
+    this->base.onRemove = onRemove;
 
     this->data = data;
 
+    this->name_len = name != NULL ? strlen(name) + 1 : strlen(PROXY_NAME) + 1;
+    snprintf(this->name, this->name_len, "%s", name != NULL ? name : PROXY_NAME);
+
     puremvc_notifier_init((struct INotifier *) &this->notifier);
 
-    return proxy;
+    return (struct IProxy *) this;
 }

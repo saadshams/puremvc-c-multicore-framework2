@@ -17,5 +17,7 @@ struct Proxy {
     struct Notifier notifier;
 
     void *data;
+
+    size_t name_len;
     char name[];
 };

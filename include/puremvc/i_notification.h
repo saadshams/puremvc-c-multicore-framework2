@@ -27,3 +27,7 @@ struct INotification {
 
     void (*toString)(const struct INotification *self, char *buffer, size_t buffer_size);
 };
+
+size_t puremvc_notification_size(const char *name, const char *type);
+
+struct INotification *puremvc_notification_init(void *buffer, const char *name, void *body, const char *type);

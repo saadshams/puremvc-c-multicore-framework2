@@ -16,5 +16,7 @@ struct Mediator {
     struct Notifier notifier;
 
     void *component;
+
+    size_t name_len;
     char name[];
 };
