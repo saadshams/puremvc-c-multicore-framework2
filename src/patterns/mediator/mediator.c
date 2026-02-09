@@ -71,7 +71,7 @@ struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *co
 
     this->component = component;
 
-    this->name_len = name != NULL ? strlen(name) + 1 : strlen(MEDIATOR_NAME) + 1;
+    this->name_len = strlen(name != NULL ? name : MEDIATOR_NAME) + 1;
     snprintf(this->name, this->name_len, "%s", name != NULL ? name : MEDIATOR_NAME);
 
     puremvc_notifier_init((struct INotifier *) &this->notifier);

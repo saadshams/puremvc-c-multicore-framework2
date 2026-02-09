@@ -59,7 +59,7 @@ struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
 
     this->data = data;
 
-    this->name_len = name != NULL ? strlen(name) + 1 : strlen(PROXY_NAME) + 1;
+    this->name_len = strlen(name != NULL ? name : PROXY_NAME) + 1;
     snprintf(this->name, this->name_len, "%s", name != NULL ? name : PROXY_NAME);
 
     puremvc_notifier_init((struct INotifier *) &this->notifier);

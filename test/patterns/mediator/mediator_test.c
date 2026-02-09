@@ -3,7 +3,6 @@
 
 #include <alloca.h>
 #include <assert.h>
-// #include <stdio.h>
 #include <string.h>
 
 int main() {
@@ -28,7 +27,8 @@ void testConstructor() {
  * Tests getting the name using Mediator class accessor method.
  */
 void testNameAccessor() {
-    const struct IMediator *mediator = puremvc_mediator_init(alloca(puremvc_mediator_size("TestMediator")), "TestMediator", NULL);
+    const char *name = "TestMediator";
+    const struct IMediator *mediator = puremvc_mediator_init(alloca(puremvc_mediator_size(name)), name, NULL);
 
     // test assertions
     assert(strcmp(mediator->getName(mediator), "TestMediator") == 0);
