@@ -8,15 +8,13 @@
 #pragma once
 
 #include "puremvc/i_mediator.h"
-#include "puremvc/notifier.h"
+#include "../observer/notifier.h"
 
 struct Mediator {
     struct IMediator base;
 
     struct Notifier notifier;
 
+    const char *name;
     void *component;
-
-    size_t name_len;
-    char name[];
 };

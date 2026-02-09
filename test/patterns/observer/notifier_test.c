@@ -1,8 +1,9 @@
 #include "notifier_test.h"
 #include "puremvc/facade.h"
-#include "puremvc/notifier.h"
-#include "puremvc/simple_command.h"
+#include "puremvc/i_notifier.h"
+#include "puremvc/i_command.h"
 
+#include <alloca.h>
 #include <assert.h>
 
 int main() {
@@ -24,24 +25,23 @@ static void execute(const struct ICommand *self, struct INotification *notificat
 }
 
 static struct ICommand *command() {
-    struct ICommand *command = puremvc_simple_command_init((struct ICommand *) &(struct SimpleCommand){0});
+    struct ICommand *command = puremvc_simple_command_init(alloca(puremvc_simple_command_size()));
     command->execute = execute;
     return command;
 }
 
-// void testInstance() {
-//     // create notifier instance
-//     struct Notifier n = puremvc_notifier();
-//     struct INotifier *notifier = n;
-//
-//     // initialize facade
-//     notifier->initializeNotifier(notifier, "NotifierTest1");
-//     notifier->getFacade(notifier);
-//
-//     assert(notifier->getFacade(notifier) != NULL);
-//
-//     puremvc_facade_removeFacade("NotifierTest1");
-// }
+void testInstance() {
+    // create notifier instance
+    struct INotifier *notifier = puremvc_notifier_init(alloca(puremvc_notifier_size()));
+
+    // initialize facade
+    notifier->initializeNotifier(notifier, "NotifierTest1");
+    // notifier->getFacade(notifier);
+
+    // assert(notifier->getFacade(notifier) != NULL);
+
+    // puremvc_facade_removeFacade("NotifierTest1");
+}
 
 // void testRegisterCommandAndSendNotification() {
 //     // create a notifier

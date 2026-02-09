@@ -28,6 +28,6 @@ struct IProxy {
     void (*onRemove)(struct IProxy* self);
 };
 
-size_t puremvc_proxy_size(const char *name);
+size_t puremvc_proxy_size();
 
 struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data);

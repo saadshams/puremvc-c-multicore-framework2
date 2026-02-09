@@ -7,8 +7,7 @@
 */
 #pragma once
 
-#include "constants.h"
-#include "i_notifier.h"
+#include "puremvc/i_notifier.h"
 
 struct Facade; // forward declaration
 struct IFacade;
@@ -16,7 +15,5 @@ struct IFacade;
 struct Notifier {
     struct INotifier base;
 
-    char key[NAME_SIZE];
+    const char *key;
 };
-
-struct INotifier *puremvc_notifier_init(struct INotifier *notifier);

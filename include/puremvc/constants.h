@@ -7,5 +7,4 @@
 */
 #pragma once
 
-#define NAME_SIZE 32
 #define KEY_SIZE 32

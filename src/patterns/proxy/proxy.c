@@ -39,9 +39,8 @@ static void onRemove(struct IProxy *self) {
     (void)self;
 }
 
-size_t puremvc_proxy_size(const char *name) {
-    const size_t len = strlen(name ? name : PROXY_NAME) + 1;
-    return (sizeof(struct Proxy) + len + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1); // align to pointer size
+size_t puremvc_proxy_size() {
+    return (sizeof(struct Proxy) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1); // align to pointer size
 }
 
 struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
@@ -56,10 +55,8 @@ struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
     this->base.onRegister = onRegister;
     this->base.onRemove = onRemove;
 
+    this->name = name != NULL ? name : PROXY_NAME;
     this->data = data;
-
-    this->name_len = strlen(name != NULL ? name : PROXY_NAME) + 1;
-    snprintf(this->name, this->name_len, "%s", name != NULL ? name : PROXY_NAME);
 
     puremvc_notifier_init((struct INotifier *) &this->notifier);
 

@@ -20,12 +20,12 @@ int main() {
  */
 void testConstructor() {
     // Create a new Notification using the Constructor to set the note name and body
-    const struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size("TestNote", NULL)), "TestNote", NULL, NULL);
+    const struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "TestNote", NULL, NULL);
 
     // test assertions
     assert(strcmp(notification->getName(notification), "TestNote") == 0);
     assert(notification->getBody(notification) == NULL);
-    assert(strcmp(notification->getType(notification), "") == 0);
+    assert(notification->getType(notification) == NULL);
 }
 
 /**
@@ -64,10 +64,6 @@ void testTypeAccessors() {
     assert(strcmp(notification->getType(notification), "TestNoteType") == 0);
     notification->setType(notification, "TestType2");
     assert(strcmp(notification->getType(notification), "TestType2") == 0);
-
-    // test assertions for overflow
-    notification->setType(notification, "TestNoteType2"); // "TestNoteType2" len(14), truncates the '2' with warning
-    assert(strcmp(notification->getType(notification), "TestNoteType") == 0); // truncated
 }
 
 /** Node Notifications */

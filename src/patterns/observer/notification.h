@@ -12,9 +12,7 @@
 struct Notification {
     struct INotification base;
 
+    const char *name;
     void *body;
-
-    size_t name_len;
-    size_t type_len;
-    char data[]; // Double-Buffer FAM Pattern: data = [name][\0][type][\0]
+    const char *type;
 };

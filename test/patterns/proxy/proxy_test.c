@@ -18,7 +18,7 @@ int main(void) {
  * Test Constructor
  */
 void testConstructor() {
-    const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size(NULL)), NULL, NULL);
+    const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
 
     // test assertions
     assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
@@ -30,13 +30,12 @@ void testConstructor() {
  * Tests getting the name using Proxy class accessor method. Setting can only be done in constructor.
  */
 void testNameAccessors() {
-    const char *name = "TestProxy";
-    const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size(name)), name, NULL);
+    const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), "TestProxy", NULL);
 
     // test assertions
     assert(strcmp(proxy->getName(proxy), "TestProxy") == 0);
 
-    const struct IProxy *proxy2 = puremvc_proxy_init(alloca(puremvc_proxy_size(NULL)), NULL, NULL);
+    const struct IProxy *proxy2 = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
     assert(strcmp(proxy2->getName(proxy2), PROXY_NAME) == 0);
 }
 
@@ -44,9 +43,8 @@ void testNameAccessors() {
  * Tests setting and getting the item using Proxy class accessor methods.
  */
 void testDataAccessors() {
-    const char *name = "colors";
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
-    const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size(name)), name, colors);
+    const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), "TestProxy", colors);
 
     const char **data = proxy->getData(proxy);
 
@@ -58,10 +56,9 @@ void testDataAccessors() {
 }
 
 void testDataReassign() {
-    const char *name = "colors";
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
 
-    struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size(name)), name, colors);
+    struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), "colors", colors);
 
     // Re-assign the same data to ensure the proxy does not free it
     proxy->setData(proxy, colors);
@@ -75,7 +72,7 @@ void testDataReassign() {
 }
 
 void testNotifier() {
-    struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size(NULL)), NULL, NULL);
+    const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
     assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
 
     proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), "testing");

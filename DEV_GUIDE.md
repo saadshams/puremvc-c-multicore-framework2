@@ -170,3 +170,27 @@ struct ControllerMap *storage[] = {
     NULL // End of storage
 };
 ```
+
+**The "Hidden" Dangers in Embedded**
+
+Even though the language is "good," embedded compilers often implement the C standard in a "freestanding" environment. This means some parts of C11 might be missing or dangerous:
+
+Variable Length Arrays (VLAs): C11 made VLAs optional. In embedded, you should avoid them. They behave like alloca(), but if the size is too big, they crash the stack silently. Your current alloca() approach is actually more "explicit" and often preferred.
+
+The Standard Library: Functions like printf or snprintf (which you used) are often very "heavy" for tiny microcontrollers (they can add 20KB+ to your binary). Most embedded devs use a "mini-printf" library.
+
+Multithreading (threads.h): Most embedded compilers (like GCC for ARM) do not implement the C11 threads library. They expect you to use FreeRTOS or POSIX threads instead.
+
+If you are building an embedded system where stack space is tight (e.g., 2KB total stack), go with Option 1 (Double-Buffer FAM).
+
+**Stack Depth (The "Runtime" Cost**
+
+```c++
+#include <sys/resource.h>
+
+void print_memory_usage() {
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    printf("Max RSS: %ld KB\n", usage.ru_maxrss);
+}
+```

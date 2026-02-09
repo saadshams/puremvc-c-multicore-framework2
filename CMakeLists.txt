@@ -5,8 +5,8 @@ set(CMAKE_C_STANDARD 11)
 
 add_library(puremvc STATIC
 #        src/core/controller.c
-#        src/core/model.c
-#        src/core/view.c
+        src/core/model.c
+        src/core/view.c
         src/patterns/command/simple_command.c
         src/patterns/command/macro_command.c
 #        src/patterns/facade/facade.c

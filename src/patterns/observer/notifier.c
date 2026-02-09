@@ -6,7 +6,7 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include "puremvc/notifier.h"
+#include "notifier.h"
 // #include "puremvc/facade.h"
 
 #include <stdio.h>
@@ -30,9 +30,7 @@ const char *getMultitonKey(const struct INotifier *self) {
 
 static void initializeNotifier(struct INotifier *self, const char *key) {
     struct Notifier *this = (struct Notifier *) self;
-    int len = snprintf(this->key, KEY_SIZE, "%s", key);
-    if (len >= KEY_SIZE)
-        fprintf(stderr, "\033[0;31m[PureMVC::Notifier::initializeNotifier] Warning: Key Truncated: '%s' (Original length: %d, Buffer size: %d).\033[0m\n", key, len, KEY_SIZE);
+    this->key = key;
 }
 
 // static void sendNotification(const struct INotifier *self, const char *notificationName, void *body, const char *type) {
@@ -40,11 +38,20 @@ static void initializeNotifier(struct INotifier *self, const char *key) {
 //     facade->sendNotification(facade, notificationName, body, type);
 // }
 
-struct INotifier *puremvc_notifier_init(struct INotifier *const notifier) {
-    // notifier->getFacade = getFacade;
-    notifier->getMultitonKey = getMultitonKey;
-    notifier->initializeNotifier = initializeNotifier;
-    // notifier->sendNotification = sendNotification;
-
-    return notifier;
+size_t puremvc_notifier_size() {
+    return (sizeof(struct Notifier) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
 }
+
+struct INotifier *puremvc_notifier_init(void *buffer) {
+    struct Notifier *this = (struct Notifier *) buffer;
+
+    memset(this, 0, sizeof *this);
+
+    // this->base.getFacade = getFacade;
+    this->base.getMultitonKey = getMultitonKey;
+    this->base.initializeNotifier = initializeNotifier;
+    // this->base.sendNotification = sendNotification;
+
+    return (struct INotifier *) this;
+}
+
