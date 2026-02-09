@@ -13,7 +13,7 @@ add_library(puremvc STATIC
         src/patterns/mediator/mediator.c
         src/patterns/observer/notification.c
         src/patterns/observer/notifier.c
-#        src/patterns/observer/observer.c
+        src/patterns/observer/observer.c
         src/patterns/proxy/proxy.c)
 
 if(WIN32)

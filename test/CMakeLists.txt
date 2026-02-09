@@ -47,10 +47,10 @@ add_test(NAME PureMVC.NotificationTest COMMAND NotificationTest)
 #add_executable(NotifierTest patterns/observer/notifier_test.c)
 #target_link_libraries(NotifierTest PRIVATE puremvc)
 #add_test(NAME PureMVC.NotifierTest COMMAND NotifierTest)
-#
-#add_executable(ObserverTest patterns/observer/observer_test.c)
-#target_link_libraries(ObserverTest PRIVATE puremvc)
-#add_test(NAME PureMVC.ObserverTest COMMAND ObserverTest)
+
+add_executable(ObserverTest patterns/observer/observer_test.c)
+target_link_libraries(ObserverTest PRIVATE puremvc)
+add_test(NAME PureMVC.ObserverTest COMMAND ObserverTest)
 
 add_executable(ProxyTest patterns/proxy/proxy_test.c)
 target_link_libraries(ProxyTest PRIVATE puremvc)

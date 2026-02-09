@@ -7,7 +7,6 @@
 * @copyright BSD 3-Clause License
 */
 #include "mediator.h"
-#include "puremvc/i_notifier.h"
 
 #include <stdio.h>
 #include <string.h>

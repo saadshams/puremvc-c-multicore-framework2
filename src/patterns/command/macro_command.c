@@ -7,8 +7,6 @@
 * @copyright BSD 3-Clause License
 */
 #include "macro_command.h"
-#include "puremvc/i_command.h"
-#include "puremvc/i_notifier.h"
 
 #include <stddef.h>
 

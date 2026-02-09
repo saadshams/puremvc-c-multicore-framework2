@@ -7,8 +7,7 @@
 */
 #pragma once
 
-#include "i_observer.h"
-#include "i_notification.h"
+#include "puremvc/i_observer.h"
 
 struct Observer {
     struct IObserver base;
@@ -17,5 +16,3 @@ struct Observer {
 
     void (*notify)(const void *context, const struct INotification *notification);
 };
-
-struct IObserver *puremvc_observer_init(struct IObserver *observer, void (*notify)(const void *context, const struct INotification *notification), void *context);

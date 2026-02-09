@@ -28,3 +28,7 @@ struct ICommand {
 size_t puremvc_simple_command_size();
 
 struct ICommand *puremvc_simple_command_init(void *buffer);
+
+size_t puremvc_macro_command_size();
+
+struct ICommand *puremvc_macro_command_init(void *buffer);

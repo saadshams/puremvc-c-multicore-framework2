@@ -17,7 +17,7 @@ void testMacroCommandExecute() {
 
     struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size("MacroCommandTest", NULL)), "MacroCommandTest", &vo, NULL);
 
-    const struct ICommand *command = macro_command_test_command(alloca(puremvc_simple_command_size()));
+    const struct ICommand *command = macro_command_test_command(alloca(puremvc_macro_command_size()));
 
     command->getNotifier(command)->initializeNotifier(command->getNotifier(command), "MacroCommandTestkey1");
 

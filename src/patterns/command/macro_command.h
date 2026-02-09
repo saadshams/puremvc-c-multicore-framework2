@@ -6,3 +6,5 @@
 * @copyright BSD 3-Clause License
 */
 #pragma once
+
+#include "puremvc/i_command.h"

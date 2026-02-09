@@ -7,7 +7,6 @@
 * @copyright BSD 3-Clause License
 */
 #include "simple_command.h"
-#include "puremvc/i_notifier.h"
 
 static struct INotifier *getNotifier(const struct ICommand *self) {
     struct SimpleCommand *this = (struct SimpleCommand *) self;

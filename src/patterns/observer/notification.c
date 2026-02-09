@@ -7,7 +7,6 @@
 * @copyright BSD 3-Clause License
 */
 #include "notification.h"
-#include "puremvc/i_notification.h"
 
 #include <stdio.h>
 #include <string.h>

@@ -6,7 +6,7 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include "puremvc/observer.h"
+#include "observer.h"
 
 static void *getContext(const struct IObserver *self) {
     const struct Observer *this = (struct Observer *) self;
@@ -40,18 +40,22 @@ static bool compareNotifyContext(const struct IObserver *self, const void *conte
     return this->context == context;
 }
 
-struct IObserver *puremvc_observer_init(struct IObserver *const observer, void (*notify)(const void *context, const struct INotification *notification), void *context) {
-    struct Observer *this = (struct Observer *) observer;
+size_t puremvc_observer_size() {
+    return (sizeof(struct Observer) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+}
+
+struct IObserver *puremvc_observer_init(void *buffer, void (*notify)(const void *context, const struct INotification *notification), void *context) {
+    struct Observer *this = (struct Observer *) buffer;
     
-    observer->getContext = getContext;
-    observer->setContext = setContext;
-    observer->getNotify = getNotify;
-    observer->setNotify = setNotify;
-    observer->notifyObserver = notifyObserver;
-    observer->compareNotifyContext = compareNotifyContext;
+    this->base.getContext = getContext;
+    this->base.setContext = setContext;
+    this->base.getNotify = getNotify;
+    this->base.setNotify = setNotify;
+    this->base.notifyObserver = notifyObserver;
+    this->base.compareNotifyContext = compareNotifyContext;
 
     this->context = context;
     this->notify = notify;
 
-    return observer;
+    return (struct IObserver *) this;
 }

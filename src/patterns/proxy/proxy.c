@@ -7,7 +7,6 @@
 * @copyright BSD 3-Clause License
 */
 #include "proxy.h"
-#include "puremvc/i_notifier.h"
 
 #include <stdio.h>
 #include <string.h>
