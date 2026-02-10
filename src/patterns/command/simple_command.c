@@ -8,6 +8,8 @@
 */
 #include "simple_command.h"
 
+#include <string.h>
+
 static struct INotifier *getNotifier(const struct ICommand *self) {
     struct SimpleCommand *this = (struct SimpleCommand *) self;
     return (struct INotifier *) &this->notifier;
@@ -23,6 +25,8 @@ size_t puremvc_simple_command_size() {
 
 struct ICommand *puremvc_simple_command_init(void *buffer) {
     struct SimpleCommand *this = (struct SimpleCommand *) buffer;
+
+    memset(this, 0, sizeof(struct SimpleCommand));
 
     this->base.getNotifier = getNotifier;
     this->base.execute = execute;

@@ -28,9 +28,9 @@
  */
 
 struct FacadeMap {
-    char key[KEY_SIZE];
-    struct IFacade *facade;
+    const char *eky;
 
+    struct IFacade *facade;
     struct ModelMap **modelMap;
     struct ViewMap **viewMap;
     struct ControllerMap **controllerMap;

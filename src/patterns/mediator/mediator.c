@@ -49,15 +49,14 @@ static void onRemove(struct IMediator *self) {
     (void)self;
 }
 
-size_t puremvc_mediator_size(const char *name) {
-    const size_t len = strlen(name ? name : MEDIATOR_NAME) + 1;
-    return (sizeof(struct Mediator) + len + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+size_t puremvc_mediator_size() {
+    return (sizeof(struct Mediator) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
 }
 
 struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *component) {
     struct Mediator *this = (struct Mediator *) buffer;
 
-    memset(this, 0, sizeof *this);
+    memset(this, 0, sizeof(struct Mediator));
 
     this->base.getName = getName;
     this->base.setComponent = setComponent;

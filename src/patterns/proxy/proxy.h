@@ -14,8 +14,8 @@
 struct Proxy {
     struct IProxy base;
 
-    struct Notifier notifier;
-
     const char *name;
     void *data;
+
+    struct Notifier notifier;
 };

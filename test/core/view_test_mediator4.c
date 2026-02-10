@@ -16,8 +16,8 @@ static void onRemove(struct IMediator *self) {
     viewTest->onRemoveCalled = true;
 }
 
-struct IMediator *view_test_mediator4(struct IMediator *const mediator, const char *name, void *component) {
-    struct IMediator *self = puremvc_mediator_init(mediator, name, component);
+struct IMediator *view_test_mediator4(void *buffer, const char *name, void *component) {
+    struct IMediator *self = puremvc_mediator_init(buffer, name, component);
     self->listNotificationInterests = listNotificationInterests;
     self->onRegister = onRegister;
     self->onRemove = onRemove;

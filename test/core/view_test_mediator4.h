@@ -1,7 +1,7 @@
 #pragma once
 
-#include "puremvc/mediator.h"
+#include "puremvc/i_mediator.h"
 
 #define view_test_mediator4_NAME "Mediator4"
 
-struct IMediator *view_test_mediator4(struct IMediator *mediator, const char *name, void *component);
+struct IMediator *view_test_mediator4(void *buffer, const char *name, void *component);

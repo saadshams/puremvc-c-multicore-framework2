@@ -8,20 +8,16 @@
 */
 #pragma once
 
-#include "mutex.h"
-#include "constants.h"
-#include "i_controller.h"
-#include "i_view.h"
+#include "puremvc/i_mutex.h"
+#include "puremvc/i_controller.h"
+#include "puremvc/i_view.h"
 
 struct Controller {
     struct IController base;
 
-    char multitonKey[KEY_SIZE];
+    const char *multitonKey;
     struct IView *view;
+    struct CommandMap **commandMap;
 
     Mutex commandMapMutex;
-    struct CommandMap {
-        char key[KEY_SIZE];
-        struct ICommand *(*factory)(struct ICommand *);
-    } **commandMap;
 };

@@ -10,10 +10,6 @@
 
 #include <stddef.h>
 
-#ifndef KEY_SIZE
-#define KEY_SIZE 32
-#endif
-
 // struct IFacade; // Forward-declare IFacade to avoid including it and break reference cycle
 
 struct INotifier {

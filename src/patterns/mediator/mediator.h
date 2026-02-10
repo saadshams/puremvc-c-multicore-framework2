@@ -13,8 +13,8 @@
 struct Mediator {
     struct IMediator base;
 
-    struct Notifier notifier;
-
     const char *name;
     void *component;
+
+    struct Notifier notifier;
 };

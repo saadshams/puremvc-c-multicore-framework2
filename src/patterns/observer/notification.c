@@ -50,7 +50,7 @@ size_t puremvc_notification_size() {
 struct INotification *puremvc_notification_init(void *buffer, const char *name, void *body, const char *type) {
     struct Notification *this = (struct Notification *) buffer;
 
-    memset(this, 0, sizeof *this);
+    memset(this, 0, sizeof(struct Notification));
 
     this->base.getName = getName;
     this->base.getBody = getBody;

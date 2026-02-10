@@ -8,9 +8,9 @@ static void onRemove(struct IProxy *self) {
     self->setData(self, ON_REMOVE_CALLED);
 }
 
-struct IProxy *model_test_proxy(struct IProxy *const proxy, const char *name, void *data) {
-    struct IProxy *self = puremvc_proxy_init(proxy, name, data);
+struct IProxy *model_test_proxy(void *buffer, const char *name, void *data) {
+    struct IProxy *proxy = puremvc_proxy_init(buffer, name, data);
     proxy->onRegister = onRegister;
     proxy->onRemove = onRemove;
-    return self;
+    return proxy;
 }

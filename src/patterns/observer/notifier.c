@@ -45,7 +45,7 @@ size_t puremvc_notifier_size() {
 struct INotifier *puremvc_notifier_init(void *buffer) {
     struct Notifier *this = (struct Notifier *) buffer;
 
-    memset(this, 0, sizeof *this);
+    memset(this, 0, sizeof(struct Notifier));
 
     // this->base.getFacade = getFacade;
     this->base.getMultitonKey = getMultitonKey;

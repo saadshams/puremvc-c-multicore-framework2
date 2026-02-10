@@ -16,13 +16,13 @@ add_library(puremvc STATIC
         src/patterns/observer/observer.c
         src/patterns/proxy/proxy.c)
 
+add_library(puremvc::puremvc ALIAS puremvc)
+
 if(WIN32)
     target_sources(puremvc PRIVATE src/platform/win/mutex.c)
 else()
-    target_sources(puremvc PRIVATE src/platform/posix/mutex.c)
+    target_sources(puremvc PRIVATE src/platform/posix/i_mutex.c)
 endif()
-
-add_library(puremvc::puremvc ALIAS puremvc)
 
 # 4️⃣ Target include paths
 target_include_directories(puremvc
@@ -36,7 +36,7 @@ target_compile_options(puremvc
             $<$<C_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Werror>
             $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
 
-## 5️⃣ Install rules
+# 5️⃣ Install rules
 include(GNUInstallDirs)
 
 install(TARGETS puremvc
@@ -46,20 +46,20 @@ install(TARGETS puremvc
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-## 6️⃣ Export targets for find_package()
+# 6️⃣ Export targets for find_package()
 install(EXPORT puremvc-targets
         FILE puremvc-targets.cmake
         NAMESPACE puremvc::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/puremvc)
 
-## 7️⃣ Package configuration files
+# 7️⃣ Package configuration files
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/puremvc-config.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/puremvc-config.cmake
         INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/puremvc)
 
-## 8️⃣ Package version file
+# 8️⃣ Package version file
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/puremvc-config-version.cmake
         VERSION ${PROJECT_VERSION}
         COMPATIBILITY SameMajorVersion)

@@ -9,13 +9,17 @@
 
 #include <stdbool.h>
 
-#include "constants.h"
 #include "i_command.h"
 #include "i_notification.h"
 
 struct ControllerMap {
-    char key[KEY_SIZE];
+    const char *key;
     struct IController *controller;
+};
+
+struct CommandMap {
+    const char *key;
+    struct ICommand *(*factory)(struct ICommand *);
 };
 
 /**

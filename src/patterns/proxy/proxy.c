@@ -40,13 +40,13 @@ static void onRemove(struct IProxy *self) {
 }
 
 size_t puremvc_proxy_size() {
-    return (sizeof(struct Proxy) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1); // align to pointer size
+    return (sizeof(struct Proxy) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
 }
 
 struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
     struct Proxy *this = (struct Proxy *) buffer;
 
-    memset(this, 0, sizeof *this);
+    memset(this, 0, sizeof(struct Proxy));
 
     this->base.getName = getName;
     this->base.getData = getData;

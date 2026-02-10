@@ -8,6 +8,8 @@
 */
 #include "observer.h"
 
+#include <string.h>
+
 static void *getContext(const struct IObserver *self) {
     const struct Observer *this = (struct Observer *) self;
     return this->context;
@@ -46,7 +48,9 @@ size_t puremvc_observer_size() {
 
 struct IObserver *puremvc_observer_init(void *buffer, void (*notify)(const void *context, const struct INotification *notification), void *context) {
     struct Observer *this = (struct Observer *) buffer;
-    
+
+    memset(this, 0, sizeof(struct Observer));
+
     this->base.getContext = getContext;
     this->base.setContext = setContext;
     this->base.getNotify = getNotify;

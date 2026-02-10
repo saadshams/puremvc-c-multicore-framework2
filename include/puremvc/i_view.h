@@ -8,15 +8,24 @@
  */
 #pragma once
 
-#include "constants.h"
 #include "i_mediator.h"
 #include "i_notification.h"
 
 #include <stdbool.h>
 
 struct ViewMap {
-    char key[KEY_SIZE];
+    const char *key;
     struct IView *view;
+};
+
+struct MediatorMap {
+    const char *key;
+    struct IMediator *mediator;
+};
+
+struct ObserverMap {
+    const char *key;
+    struct IObserver **observers;
 };
 
 /**
@@ -27,7 +36,7 @@ struct ViewMap {
  * for delivering notifications to interested parties.
  */
 struct IView {
-    void (*initializeView)(struct IView *self);
+    void (*initializeView)(struct IView *self, struct ObserverMap **observerMap, struct MediatorMap **mediatorMap);
 
     bool (*registerObserver)(struct IView *self, const char *notificationName, void (*notify)(const void *context, const struct INotification *notification), void *context);
 
@@ -35,7 +44,7 @@ struct IView {
 
     bool (*removeObserver)(struct IView *self, const char *notificationName, const void *notifyContext);
 
-    bool (*registerMediator)(struct IView *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component);
+    bool (*registerMediator)(struct IView *self, struct IMediator *(*factory)(void *buffer, const char *name, void *component), const char *name, void *component);
 
     struct IMediator *(*retrieveMediator)(const struct IView *self, const char *mediatorName);
 
@@ -43,6 +52,10 @@ struct IView {
 
     bool (*removeMediator)(struct IView *self, const char *mediatorName, struct IMediator **mediator);
 };
+
+size_t puremvc_view_size();
+
+struct IView *puremvc_view_init(void *buffer, const char *key);
 
 struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key);
 

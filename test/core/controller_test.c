@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "puremvc/controller.h"
+#include "../../src/core/controller.h"
 #include "puremvc/view.h"
 
 #include "controller_test.h"

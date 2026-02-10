@@ -1,5 +1,5 @@
 #include "notifier_test.h"
-#include "puremvc/facade.h"
+#include "../../../src/patterns/facade/facade.h"
 #include "puremvc/i_notifier.h"
 #include "puremvc/i_command.h"
 

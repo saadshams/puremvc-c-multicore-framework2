@@ -30,6 +30,6 @@ struct IMediator {
     void (*onRemove)(struct IMediator *self);
 };
 
-size_t puremvc_mediator_size(const char *name);
+size_t puremvc_mediator_size();
 
 struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *component);

@@ -8,17 +8,15 @@
 */
 #pragma once
 
-#include "constants.h"
-#include "i_facade.h"
-#include "i_controller.h"
-#include "i_model.h"
-#include "i_view.h"
+#include "puremvc/i_facade.h"
+#include "puremvc/i_controller.h"
+#include "puremvc/i_model.h"
+#include "puremvc/i_view.h"
 
 struct Facade {
     struct IFacade base;
 
-    char multitonKey[KEY_SIZE];
-
+    const char *multitonKey;
     struct IController *controller;
     struct IModel *model;
     struct IView *view;
