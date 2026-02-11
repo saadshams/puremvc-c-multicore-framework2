@@ -176,7 +176,7 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
     mutex_lock(&modelMapMutex);
 
     size_t i = 0;
-    for (; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find model
+    for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find model
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&modelMapMutex);
             return instanceMap[i]->model;

@@ -170,7 +170,7 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
     mutex_lock(&facadeMapMutex);
 
     size_t i = 0;
-    for (; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find facade
+    for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find facade
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&facadeMapMutex);
             return instanceMap[i]->facade;

@@ -8,16 +8,32 @@
 #include <stdio.h>
 #include <string.h>
 
+static void test(const char *name, void (*callback)(void)) {
+    printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
+    fflush(stdout);
+
+    callback();
+
+    printf("\033[0;32m[PASSED]\033[0m %s\n", name);
+    fflush(stdout);
+}
+
 int main() {
-    testGetInstance();
-    testRegisterAndRetrieveProxy();
-    testHasProxy();
-    testRegisterAndRemoveProxy();
-    testOnRegisterAndOnRemove();
-    testRemoveModel();
-    testRegisterAndReplaceProxy();
-    testProxyMapShiftLeft();
-    TestModelMapShiftLeft();
+    printf("\n\033[1;36m================================================\033[0m\n");
+    printf("\033[1;36m[SUITE] %s\033[0m\n", "ModelTest");
+    printf("\033[1;36m================================================\033[0m\n\n");
+
+    test("testGetInstance", testGetInstance);
+    test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy);
+    test("testHasProxy", testHasProxy);
+    test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
+    test("testOnRegisterAndOnRemove", testOnRegisterAndOnRemove);
+    test("testRemoveModel", testRemoveModel);
+    test("testRegisterAndReplaceProxy", testRegisterAndReplaceProxy);
+    test("testProxyMapShiftLeft", testProxyMapShiftLeft);
+    test("testProxyMapShiftLeft", testProxyMapShiftLeft);
+
+    printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;
 }
 

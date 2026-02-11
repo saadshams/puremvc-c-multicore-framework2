@@ -315,7 +315,7 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
     mutex_lock(&viewMapMutex);
 
     size_t i = 0;
-    for (; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find view
+    for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find view
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&viewMapMutex);
             return instanceMap[i]->view;

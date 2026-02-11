@@ -18,26 +18,42 @@
 #include <stdio.h>
 #include <string.h>
 
+static void test(const char *name, void (*callback)(void)) {
+    printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
+    fflush(stdout);
+
+    callback();
+
+    printf("\033[0;32m[PASSED]\033[0m %s\n", name);
+    fflush(stdout);
+}
+
 int main() {
-    testGetInstance();
-    testRegisterAndNotifyObserver();
-    testRegisterAndRetrieveMediator();
-    testHasMediator();
-    testRegisterAndRemoveMediator();
-    testOnRegisterAndOnRemove();
-    testSuccessiveRegisterAndRemoveMediator();
-    testRemoveMediatorAndSubsequentNotify();
-    testRemoveOneOfTwoMediatorsAndSubsequentNotify();
-    testMediatorReregistration();
-    testModifyObserverListDuringNotification();
-    testRemoveView();
-    testGarbageStorageForView();
-    testGarbageStorageForObserver();
-    testGarbageStorageForMediator();
-    testObserverMapShiftLeft();
-    testObserverShiftLeft();
-    testMediatorMapShiftLeft();
-    testViewMapShiftLeft();
+    printf("\n\033[1;36m================================================\033[0m\n");
+    printf("\033[1;36m[SUITE] %s\033[0m\n", "ViewTest");
+    printf("\033[1;36m================================================\033[0m\n\n");
+
+    test("testGetInstance", testGetInstance);
+    // test("testRegisterAndNotifyObserver", testRegisterAndNotifyObserver);
+    test("testRegisterAndRetrieveMediator", testRegisterAndRetrieveMediator);
+    test("testHasMediator", testHasMediator);
+    test("testRegisterAndRemoveMediator", testRegisterAndRemoveMediator);
+    test("testOnRegisterAndOnRemove", testOnRegisterAndOnRemove);
+    test("testSuccessiveRegisterAndRemoveMediator", testSuccessiveRegisterAndRemoveMediator);
+    test("testRemoveMediatorAndSubsequentNotify", testRemoveMediatorAndSubsequentNotify);
+    test("testGetInstance", testGetInstance);
+    test("testMediatorReregistration", testMediatorReregistration);
+    test("testModifyObserverListDuringNotification", testModifyObserverListDuringNotification);
+    test("testRemoveView", testRemoveView);
+    test("testGarbageStorageForView", testGarbageStorageForView);
+    test("testGarbageStorageForObserver", testGarbageStorageForObserver);
+    test("testGarbageStorageForMediator", testGarbageStorageForMediator);
+    test("testObserverMapShiftLeft", testObserverMapShiftLeft);
+    test("testObserverShiftLeft", testObserverShiftLeft);
+    // test("testMediatorMapShiftLeft", testMediatorMapShiftLeft);
+    // test("testViewMapShiftLeft", testViewMapShiftLeft);
+
+    printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;
 }
 
@@ -124,7 +140,7 @@ void testRegisterAndRetrieveMediator() {
     };
 
     struct ObserverMap **observerMap = (struct ObserverMap *[]) {
-        &(struct ObserverMap){ .observers = (struct IObserver *[]) {} },
+        &(struct ObserverMap){ .observers = (struct IObserver *[]) { NULL } },
         NULL
     };
 

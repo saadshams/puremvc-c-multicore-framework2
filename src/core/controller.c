@@ -177,7 +177,7 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
     mutex_lock(&controllerMapMutex);
 
     size_t i = 0;
-    for (; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find controller
+    for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find controller
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&controllerMapMutex);
             return instanceMap[i]->controller;

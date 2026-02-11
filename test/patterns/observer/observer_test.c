@@ -4,11 +4,28 @@
 
 #include <alloca.h>
 #include <assert.h>
+#include <stdio.h>
+
+static void test(const char *name, void (*callback)(void)) {
+    printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
+    fflush(stdout);
+
+    callback();
+
+    printf("\033[0;32m[PASSED]\033[0m %s\n", name);
+    fflush(stdout);
+}
 
 int main() {
-    testObserverConstructor();
-    testObserverAccessors();
-    testCompareNotifyContext();
+    printf("\n\033[1;36m================================================\033[0m\n");
+    printf("\033[1;36m[SUITE] %s\033[0m\n", "ObserverTest");
+    printf("\033[1;36m================================================\033[0m\n\n");
+
+    test("testObserverConstructor", testObserverConstructor);
+    test("testObserverAccessors", testObserverAccessors);
+    test("testCompareNotifyContext", testCompareNotifyContext);
+
+    printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;
 }
 
@@ -35,7 +52,7 @@ void testObserverConstructor() {
     const struct IObserver *observer = puremvc_observer_init(alloca(puremvc_observer_size()), handleNotification, &object);
 
     struct ObserverTestVar var = {.value = 5};
-    struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size("ObserverTestNote", NULL)), "ObserverTestNote", &var, NULL);
+    struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "ObserverTestNote", &var, NULL);
     observer->notifyObserver(observer, notification);
 
     // test assertions
@@ -65,7 +82,7 @@ void testObserverAccessors() {
     // observerTestVar being set to the value we pass in
     // on the note body.
     struct ObserverTestVar vo = {.value = 10};
-    struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size("ObserverTestNote", NULL)), "ObserverTestNote", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "ObserverTestNote", &vo, NULL);
     observer->notifyObserver(observer, notification);
 }
 

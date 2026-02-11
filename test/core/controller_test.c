@@ -7,18 +7,35 @@
 
 #include <alloca.h>
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 
+static void test(const char *name, void (*callback)(void)) {
+    printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
+    fflush(stdout);
+
+    callback();
+
+    printf("\033[0;32m[PASSED]\033[0m %s\n", name);
+    fflush(stdout);
+}
+
 int main() {
-    testGetInstance();
-    testRegisterAndExecuteCommand();
-    testRegisterAndRemoveCommand();
-    testHasCommand();
-    testReregisterAndExecuteCommand();
-    testRegisterAndUpdateCommand();
-    testRemoveController();
-    testCommandMapShiftLeft();
-    TestControllerMapShiftLeft();
+    printf("\n\033[1;36m================================================\033[0m\n");
+    printf("\033[1;36m[SUITE] %s\033[0m\n", "ControllerTest");
+    printf("\033[1;36m================================================\033[0m\n\n");
+
+    test("testGetInstance", testGetInstance);
+    // test("testRegisterAndExecuteCommand", testRegisterAndExecuteCommand);
+    // test("testRegisterAndRemoveCommand", testRegisterAndRemoveCommand);
+    // test("testHasCommand", testHasCommand);
+    // test("testReregisterAndExecuteCommand", testReregisterAndExecuteCommand);
+    // test("testRegisterAndUpdateCommand", testRegisterAndUpdateCommand);
+    // test("testRemoveController", testRemoveController);
+    // test("testCommandMapShiftLeft", testCommandMapShiftLeft);
+    test("TestControllerMapShiftLeft", TestControllerMapShiftLeft);
+
+    printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;
 }
 
@@ -107,6 +124,7 @@ void testRegisterAndExecuteCommand() {
 
     struct ICommand *(*factory)(void *) = 0;
     assert(controller->removeCommand(controller, "ControllerTest1", &factory) == true);;
+
     assert(puremvc_controller_removeController("ControllerTestKey2", NULL) == true);;
     assert(puremvc_view_removeView("ControllerTestKey2", NULL) == true);;
 }

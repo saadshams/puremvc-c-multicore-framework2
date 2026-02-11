@@ -1,14 +1,32 @@
 #include "notifier_test.h"
-#include "../../../src/patterns/facade/facade.h"
+
+#include "puremvc/i_facade.h"
 #include "puremvc/i_notifier.h"
 #include "puremvc/i_command.h"
 
 #include <alloca.h>
 #include <assert.h>
+#include <stdio.h>
+
+static void test(const char *name, void (*callback)(void)) {
+    printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
+    fflush(stdout);
+
+    callback();
+
+    printf("\033[0;32m[PASSED]\033[0m %s\n", name);
+    fflush(stdout);
+}
 
 int main() {
-    // testInstance();
-    // testRegisterCommandAndSendNotification();
+    printf("\n\033[1;36m================================================\033[0m\n");
+    printf("\033[1;36m[SUITE] %s\033[0m\n", "NotifierTest");
+    printf("\033[1;36m================================================\033[0m\n\n");
+
+    // test("testInstance", testInstance);
+    // test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification);
+
+    printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;
 }
 
