@@ -3,9 +3,9 @@
 #include "view_test_mediator7.h"
 #include "view_test.h"
 
-static const char **listNotificationInterests(const struct IMediator *self) {
+static const char *const *listNotificationInterests(const struct IMediator *self) {
     (void)self;
-    static const char *interests[] = { NOTE7, NULL };
+    static const char *const interests[] = { NOTE7, NULL };
     return interests;
 }
 

@@ -11,6 +11,7 @@
 #include <stddef.h>
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
+    (void)self;
     struct ICommand *(*subCommands[1])() = { NULL };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {

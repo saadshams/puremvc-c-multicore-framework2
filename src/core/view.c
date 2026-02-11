@@ -168,17 +168,15 @@ bool registerMediator(struct IView *self, struct IMediator *(*factory)(void *buf
         return false;
     }
 
-    // todo check if mediator exists
+    // todo check if mediator exists (error if .mediator wasn't alloca)
     struct IMediator *mediator = factory(this->mediatorMap[i]->mediator, name, component); // registration
     this->mediatorMap[i]->key = mediator->getName(mediator);
     this->mediatorMap[i]->mediator = mediator;
 
     mediator->getNotifier(mediator)->initializeNotifier(mediator->getNotifier(mediator), this->multitonKey);
 
-    const char **interests = mediator->listNotificationInterests(mediator);
-    for (const char **interest = interests; *interest; interest++) { // register observers (mutex guards context if mediator is removed)
-        // void (*notify)(const void *, const struct INotification *) = (void (*)(const void *, const struct INotification *)) this->mediatorMap[i]->mediator->handleNotification;
-        // void *context = this->mediatorMap[i]->mediator;
+    const char *const *interests = mediator->listNotificationInterests(mediator);
+    for (const char *const *interest = interests; *interest; interest++) { // register observers (mutex guards context if mediator is removed)
         self->registerObserver(self, *interest, (void (*)(const void *, const struct INotification *)) mediator->handleNotification, mediator);
     }
 
@@ -227,8 +225,8 @@ static bool removeMediator(struct IView *self, const char *mediatorName, struct 
             if (out != NULL) // out param
                 *out = this->mediatorMap[i]->mediator;
 
-            const char **interests = this->mediatorMap[i]->mediator->listNotificationInterests(this->mediatorMap[i]->mediator);
-            for (const char **cursor = interests; *cursor != NULL; cursor++) { // remove notification observers
+            const char *const *interests = this->mediatorMap[i]->mediator->listNotificationInterests(this->mediatorMap[i]->mediator);
+            for (const char *const *cursor = interests; *cursor != NULL; cursor++) { // remove notification observers
                 self->removeObserver(self, *cursor, this->mediatorMap[i]->mediator);
             }
             this->mediatorMap[i]->mediator->onRemove(this->mediatorMap[i]->mediator);
@@ -242,8 +240,8 @@ static bool removeMediator(struct IView *self, const char *mediatorName, struct 
                 *this->mediatorMap[index] = *this->mediatorMap[i]; // shift left first
                 this->mediatorMap[i]->key = NULL; // remove key only
 
-                const char **interests = this->mediatorMap[index]->mediator->listNotificationInterests(this->mediatorMap[index]->mediator);
-                for (const char **cursor = interests; *cursor; cursor++) { // update observer context to relocated mediators
+                const char *const *interests = this->mediatorMap[index]->mediator->listNotificationInterests(this->mediatorMap[index]->mediator);
+                for (const char *const *cursor = interests; *cursor; cursor++) { // update observer context to relocated mediators
                     for (size_t j = 0; this->observerMap[j] != NULL && this->observerMap[j]->key != NULL; j++) {
                         if (this->observerMap[j]->key == *cursor || strcmp(this->observerMap[j]->key, *cursor) == 0) {
                             struct IObserver **observers = this->observerMap[j]->observers;
@@ -359,7 +357,7 @@ bool puremvc_view_removeView(const char *key, struct IView **out) {
     size_t index = 0;
     for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find view
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
-            instanceMap[i]->key = NULL;
+            instanceMap[i]->key = NULL; // remove
             if (out != NULL)
                 *out = instanceMap[i]->view;
         } else {

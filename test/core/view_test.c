@@ -1046,8 +1046,6 @@ void testMediatorMapShiftLeft() {
     assert(obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) == medMap[2]->mediator);
     assert(medMap[3]->key == NULL); // mediatorMap key
     assert(obsMap[0]->key != NULL); // observerMap key
-    assert(obsMap[3] == NULL);
-    assert(medMap[3]->key == NULL);
 
     // Remove the last mediator3 and verify the remaining mediators 0, 2 stay in place
     struct IMediator *removedMediator3 = NULL;

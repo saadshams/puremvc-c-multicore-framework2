@@ -31,9 +31,9 @@ static struct INotifier *getNotifier(const struct IMediator *self) {
     return (struct INotifier *) &this->notifier;
 }
 
-static const char **listNotificationInterests(const struct IMediator *self) {
+static const char *const *listNotificationInterests(const struct IMediator *self) {
     (void)self;
-    static const char *interests[] = { NULL };
+    static const char *const interests[] = { NULL };
     return interests;
 }
 

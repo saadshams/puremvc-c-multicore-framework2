@@ -1,13 +1,14 @@
+#include "facade_test.h"
+#include "facade_test_command.h"
+#include "facade_test_vo.h"
+
+#include "puremvc/i_facade.h"
+#include "puremvc/i_observer.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
-#include "puremvc/facade.h"
-
-#include "facade_test.h"
-#include "facade_test_command.h"
-#include "facade_test_vo.h"
 
 int main() {
     testGetInstance();
@@ -20,24 +21,65 @@ int main() {
     testHasMediator();
     testHasCommand();
     testHasCoreAndRemoveCore();
-    // testAddAndRemoveMultipleCores();
+    testFacadeMapShiftLeft();
     return 0;
 }
 
 void testGetInstance() {
+    struct FacadeMap **instanceMap = (struct FacadeMap *[]) {
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
+        NULL
+    };
+
     // Test Factory Method
-    struct IFacade *facade = puremvc_facade_getInstance("FacadeTestKey1", puremvc_facade);
+    struct IFacade *facade = puremvc_facade_getInstance(instanceMap, "FacadeTestKey1");
 
     // test assertions
     assert(facade != NULL);
-    puremvc_facade_removeFacade("FacadeTestKey1");
+    assert(facade == puremvc_facade_getInstance(instanceMap, "FacadeTestKey1"));
+
+    struct IFacade *removedFacade = NULL;
+    assert(puremvc_facade_removeFacade("FacadeTestKey1", &removedFacade) == true);
+    assert(instanceMap[0]->key == NULL);
 }
 
 void testRegisterCommandAndSendNotification() {
+    struct ViewMap **viewMap = (struct ViewMap *[]) {
+        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
+        NULL
+    };
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) {
+        .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } }, NULL
+    };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey2");
+    view->initializeView(view, observerMap, NULL);
+
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
+        NULL
+    };
+    struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey2");
+    controller->initializeController(controller, view, commandMap);
+
+    struct ModelMap **modelMap = (struct ModelMap *[]) {
+        &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
+        NULL
+    };
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey2");
+    model->initializeModel(model, NULL);
+
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) {
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
+        NULL
+    };
+
     // Create the Facade, register the FacadeTestCommand to
     // handle 'FacadeTest' notifications
-    struct IFacade *facade = puremvc_facade_getInstance("FacadeTestKey2", puremvc_facade);
-    facade->registerCommand(facade, "FacadeTestNote", test_facade_command);
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey2");
+    facade->initializeFacade(facade, model, view, controller);
+
+    assert(facade->registerCommand(facade, "FacadeTestNote", test_facade_command) == true);
 
     // Send notification. The Command associated with the event
     // (FacadeTestCommand) will be invoked, and will multiply
@@ -48,16 +90,36 @@ void testRegisterCommandAndSendNotification() {
 
     // test assertions
     assert(vo->result == 64);
-    facade->removeCommand(facade, "FacadeTestNote");
-    puremvc_facade_removeFacade("FacadeTestKey2");
+
+    struct ICommand *(*factory)(void *) = 0;
+    assert(facade->removeCommand(facade, "FacadeTestNote", &factory) == true);
+
+    struct IFacade *removedFacade = NULL;
+    assert(puremvc_facade_removeFacade("FacadeTestKey2", &removedFacade) == true);
 }
 
 void testRegisterAndRemoveCommandAndSendNotification() {
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) {
+        &(struct ObserverMap){ .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } },
+        NULL
+    };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey3");
+    view->initializeView(view, observerMap, NULL);
+
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey3");
+    controller->initializeController(controller, view, commandMap);
+
     // Create the Facade, register the FacadeTestCommand to
     // handle 'FacadeTest' events
-    struct IFacade *facade = puremvc_facade_getInstance("FacadeTestKey3", puremvc_facade);
-    facade->registerCommand(facade, "FacadeTestNote", test_facade_command);
-    facade->removeCommand(facade, "FacadeTestNote");
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL };
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey3");
+    facade->initializeFacade(facade, NULL, view, controller);
+
+    assert(facade->registerCommand(facade, "FacadeTestNote", test_facade_command) == true);
+    assert(facade->removeCommand(facade, "FacadeTestNote", NULL) == true);
 
     // Send notification. The Command associated with the event
     // (FacadeTestCommand) will NOT be invoked, and will NOT multiply
@@ -68,26 +130,31 @@ void testRegisterAndRemoveCommandAndSendNotification() {
 
     // test assertions
     assert(vo->result == 0);
-    puremvc_facade_removeFacade("FacadeTestKey3");
+
+    struct IFacade *removedFacade = NULL;
+    assert(puremvc_facade_removeFacade("FacadeTestKey3", &removedFacade) == true);
 }
 
 void testRegisterAndRetrieveProxy() {
-    // register a new and retrieve it.
-    struct IFacade *facade = puremvc_facade_getInstance("FacadeTestKey4", puremvc_facade);
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct ProxyMap **proxyMap = (struct ProxyMap *[]) { &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) }, NULL };
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey4");
+    model->initializeModel(model, proxyMap);
 
-    const char **colors = malloc(sizeof(char*) * 4);
-    memset(colors, 0, sizeof(char*) * 4);
-    for(const char **data = (const char *[]) {"red", "green", "blue", NULL}, **cursor = colors; *data; data++, cursor++) {
-        *cursor = strdup(*data);
-    }
+    // register a facade and retrieve it.
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey4");
+    facade->initializeFacade(facade, model, NULL, NULL);
 
-    facade->registerProxy(facade, puremvc_proxy_init("colors", colors));
+    static char *colors[] = { "red", "green", "blue", NULL};
+
+    assert(facade->registerProxy(facade, puremvc_proxy_init, "colors", colors) == true);
     const struct IProxy *proxy = facade->retrieveProxy(facade, "colors");
 
     // test assertions
     assert(proxy != NULL);
 
-    // retrieve data from new
+    // retrieve data from proxy
     const char **data = proxy->getData(proxy);
 
     // test assertions
@@ -96,162 +163,257 @@ void testRegisterAndRetrieveProxy() {
     assert(strcmp(data[1], "green") == 0);
     assert(strcmp(data[2], "blue") == 0);
 
-    struct Proxy removedProxy = facade->removeProxy(facade, "colors");
-    proxy = NULL;
-    puremvc_facade_removeFacade("FacadeTestKey4");
+    struct IProxy *removedProxy = NULL;
+    assert(facade->removeProxy(facade, "colors", &removedProxy) == true);
+
+    struct IFacade *removedFacade = NULL;
+    assert(puremvc_facade_removeFacade("FacadeTestKey4", &removedFacade) == true);
 }
 
 void testRegisterAndRemoveProxy() {
-    // register a new, remove it, then try to retrieve it
-    const struct IFacade *facade = puremvc_facade_getInstance("FacadeTestKey5", puremvc_facade);
-    const char **sizes = malloc(sizeof(char*) * 4);
-    memset(sizes, 0, sizeof(char*) * 4);
-    for(const char **data = (const char *[]) {"7", "13", "21", NULL}, **cursor = sizes; *data; data++, cursor++) {
-        *cursor = strdup(*data);
-    }
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct ProxyMap **proxyMap = (struct ProxyMap *[]) { &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) }, NULL };
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey5");
+    model->initializeModel(model, proxyMap);
 
-    facade->registerProxy(facade, puremvc_proxy_init("sizes", sizes));
+    // register a proxy, remove it, then try to retrieve it
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey5");
+    facade->initializeFacade(facade, model, NULL, NULL);
 
-    // remove the new
-    const struct Proxy removedProxy = facade->removeProxy(facade, "sizes");
+    static int sizes[] = { 7, 13, 21, 0 }; // 0 is the sentinel
+    assert(facade->registerProxy(facade, puremvc_proxy_init, "sizes", sizes) == true);;
 
-    // assert that we removed the appropriate new
-    assert(strcmp(removedProxy.name, "sizes") == 0);
+    const struct IProxy *proxy = facade->retrieveProxy(facade, "sizes");
 
-    // test assertions - make sure we can no longer retrieve the new from the model
+    // 1. Retrieve as the raw pointer (void * becomes int *)
+    int *data = proxy->getData(proxy);
+
+    // 2. Test assertions
+    assert(data != NULL);
+    assert(data[0] == 7);
+    assert(data[1] == 13);
+    assert(data[2] == 21);
+    assert(data[3] == 0); // Checking the sentinel
+
+    // remove the proxy
+    struct IProxy *removedProxy = NULL;
+    assert(facade->removeProxy(facade, "sizes", &removedProxy) == true);
+
+    // assert that we removed the appropriate proxy
+    assert(strcmp(removedProxy->getName(removedProxy), "sizes") == 0);
+
+    // test assertions - make sure we can no longer retrieve the proxy from the model
     assert(facade->retrieveProxy(facade, "sizes") == NULL);
 
-    puremvc_facade_removeFacade("FacadeTestKey5");
+    struct IFacade *removedFacade = NULL;
+    assert(puremvc_facade_removeFacade("FacadeTestKey5", &removedFacade) == true);
 }
 
 void testRegisterRetrieveAndRemoveMediator() {
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct MediatorMap **mediatorMap = (struct MediatorMap *[]){ &(struct MediatorMap){ .mediator = alloca(puremvc_mediator_size()) }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey6");
+    view->initializeView(view, NULL, mediatorMap);
+
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey6");
+    facade->initializeFacade(facade, NULL, view, NULL);
+
     // register a mediator, remove it, then try to retrieve it
     struct Object {int x;} object;
-    const struct IFacade *facade = puremvc_facade_getInstance("FacadeTestKey6", puremvc_facade);
-
-    facade->registerMediator(facade, puremvc_mediator(MEDIATOR_NAME, &object));
+    assert(facade->registerMediator(facade, puremvc_mediator_init, MEDIATOR_NAME, &object) == true);
 
     // retrieve the mediator
     assert(facade->retrieveMediator(facade, MEDIATOR_NAME) != NULL);
 
     // remove the mediator
-    const struct Mediator removedMediator = facade->removeMediator(facade, MEDIATOR_NAME);
+    struct IMediator *removedMediator = NULL;
+    assert(facade->removeMediator(facade, MEDIATOR_NAME, &removedMediator) == true);
 
     // assert that we have removed the appropriate mediator
-    assert(strcmp(removedMediator.name, MEDIATOR_NAME) == 0);
+    assert(strcmp(removedMediator->getName(removedMediator), MEDIATOR_NAME) == 0);
 
     // assert that the mediator is no longer retrievable
     assert(facade->retrieveMediator(facade, MEDIATOR_NAME) == NULL);
-   puremvc_facade_removeFacade("FacadeTestKey6");
+
+    struct IFacade *removedFacade = NULL;
+    assert(puremvc_facade_removeFacade("FacadeTestKey6", &removedFacade) == true);
 }
 
 void testHasProxy() {
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct ProxyMap **proxyMap = (struct ProxyMap *[]) { &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) }, NULL };
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey7");
+    model->initializeModel(model, proxyMap);
+
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey7");
+    facade->initializeFacade(facade, model, NULL, NULL);
+
+    static int sizes[] = { 7, 13, 21, 0 }; // 0 is the sentinel
+
     // register a Proxy
-    const struct IFacade *facade = puremvc_facade_getInstance("FacadeTestKey7", puremvc_facade);
-
-    int *sizes = malloc(sizeof(int) * 4), *cursor = sizes;
-    memset(sizes, 0, sizeof(int) * 4);
-    for(const int *data = (int []) {1, 2, 3, 0}; *data != 0; data++, cursor++) // 0 as terminator, or use -1
-        *cursor = *data;
-
-    facade->registerProxy(facade, puremvc_proxy_init("hasProxyTest", sizes));
+    assert(facade->registerProxy(facade, puremvc_proxy_init, "hasProxyTest", sizes) == true);
 
     // assert that the model.hasProxy method returns true
     // for that new name
     assert(facade->hasProxy(facade, "hasProxyTest") == true);
 
-    facade->removeProxy(facade, "hasProxyTest");
+    assert(facade->removeProxy(facade, "hasProxyTest", NULL) == true);;
     assert(facade->hasProxy(facade, "hasProxyTest") == false);
-    puremvc_facade_removeFacade("FacadeTestKey7");
+
+    assert(puremvc_facade_removeFacade("FacadeTestKey7", NULL) == true);
 }
 
 void testHasMediator() {
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct MediatorMap **mediatorMap = (struct MediatorMap *[]){ &(struct MediatorMap){ .mediator = alloca(puremvc_mediator_size()) }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey8");
+    view->initializeView(view, NULL, mediatorMap);
+
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey8");
+    facade->initializeFacade(facade, NULL, view, NULL);
+
     // register a Mediator
     struct Object {int x;} object;
-    const struct IFacade *facade = puremvc_facade_getInstance("FacadeTestKey8", puremvc_facade);
-
-    facade->registerMediator(facade, puremvc_mediator("facadeHasMediatorTest", &object));
+    assert(facade->registerMediator(facade, puremvc_mediator_init, "facadeHasMediatorTest", &object) == true);
 
     // assert that the facade.hasMediator method returns true
     // for that mediator name
     assert(facade->hasMediator(facade, "facadeHasMediatorTest") == true);
 
-    facade->removeMediator(facade, "facadeHasMediatorTest");
+    assert(facade->removeMediator(facade, "facadeHasMediatorTest", NULL) == true);
 
     // assert that the facade.hasMediator method returns false
     // for that mediator name
     assert(facade->hasMediator(facade, "facadeHasMediatorTest") == false);
-    puremvc_facade_removeFacade("FacadeTestKey8");
+    assert(puremvc_facade_removeFacade("FacadeTestKey8", NULL) == true);
 }
 
 void testHasCommand() {
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) {
+        &(struct ObserverMap){ .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } },
+        NULL
+    };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey3");
+    view->initializeView(view, observerMap, NULL);
+
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey3");
+    controller->initializeController(controller, view, commandMap);
+
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL };
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey10");
+    facade->initializeFacade(facade, NULL, view, controller);
+
     // register the ControllerTestCommand to handle 'hasCommandTest' notes
-    const struct IFacade *facade = puremvc_facade_getInstance("FacadeTestKey10", puremvc_facade);
-    facade->registerCommand(facade, "facadeHasCommandTest", test_facade_command);
+    assert(facade->registerCommand(facade, "facadeHasCommandTest", test_facade_command) == true);
 
     // test that hasCommand returns true for hasCommandTest notifications
     assert(facade->hasCommand(facade, "facadeHasCommandTest") == true);
 
     // Remove the Command from the Controller
-    facade->removeCommand(facade, "facadeHasCommandTest");
+    struct ICommand *(*removedCommand)(void *) = 0;
+    assert(facade->removeCommand(facade, "facadeHasCommandTest", &removedCommand) == true);
+    assert(removedCommand == test_facade_command);
 
     // test that hasCommand returns false for hasCommandTest notifications
     assert(facade->hasCommand(facade, "facadeHasCommandTest") == false);
-    puremvc_facade_removeFacade("FacadeTestKey10");
+
+    assert(puremvc_facade_removeFacade("FacadeTestKey10", NULL) == true);
 }
 
 void testHasCoreAndRemoveCore() {
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL };
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey11");
+    facade->initializeFacade(facade, NULL, NULL, NULL);
+
     // assert that the Facade.hasCore method returns false first
-    assert(puremvc_facade_hasCore("FacadeTestKey11") == false);
+    assert(puremvc_facade_hasCore("unregistered") == false);
 
     // register a Core
-    puremvc_facade_getInstance("FacadeTestKey11", puremvc_facade);
+    puremvc_facade_getInstance(facadeMap, "FacadeTestKey11");
 
     assert(puremvc_facade_hasCore("FacadeTestKey11") == true);
 
     // remove the Core
-    puremvc_facade_removeFacade("FacadeTestKey11");
+    puremvc_facade_removeFacade("FacadeTestKey11", NULL);
 
     // assert that the Facade.hasCore method returns false now that the core has been removed.
     assert(puremvc_facade_hasCore("FacadeTestKey11") == false);
 }
 
-// void testAddAndRemoveMultipleCores() {
-//     struct IFacade *facade1 = puremvc_facade_getInstance("facade1", puremvc_facade);
-//     struct Facade *self1 = (struct Facade *)facade1;
-//     struct Controller *controller1 = (struct Controller *) self1->controller;
-//     assert(strcmp(controller1.multitonKey, "facade1") == 0);
-//     assert(strcmp(facade1->model->multitonKey, "facade1") == 0);
-//     assert(strcmp(facade1->view->multitonKey, "facade1") == 0);
-//     assert(puremvc_facade_hasCore("facade1") == true);
-//
-//     struct IFacade *facade2 = puremvc_facade_getInstance("facade2", puremvc_facade);
-//     assert(strcmp(facade2->controller->multitonKey, "facade2") == 0);
-//     assert(strcmp(facade2->model->multitonKey, "facade2") == 0);
-//     assert(strcmp(facade2->view->multitonKey, "facade2") == 0);
-//     assert(puremvc_facade_hasCore("facade2") == true);
-//
-//     struct IFacade *facade3 = puremvc_facade_getInstance("facade3", puremvc_facade);
-//     assert(strcmp(facade3->controller->multitonKey, "facade3") == 0);
-//     assert(strcmp(facade3->model->multitonKey, "facade3") == 0);
-//     assert(strcmp(facade3->view->multitonKey, "facade3") == 0);
-//     assert(puremvc_facade_hasCore("facade3") == true);
-//
-//     struct IFacade *facade4 = puremvc_facade_getInstance("facade4", puremvc_facade);
-//     assert(strcmp(facade4->controller->multitonKey, "facade4") == 0);
-//     assert(strcmp(facade4->model->multitonKey, "facade4") == 0);
-//     assert(strcmp(facade4->view->multitonKey, "facade4") == 0);
-//     assert(puremvc_facade_hasCore("facade4") == true);
-//
-//     puremvc_facade_removeFacade("facade2"); // remove middle
-//     assert(puremvc_facade_hasCore("facade2") == false);
-//
-//     puremvc_facade_removeFacade("facade4"); // remove last
-//     assert(puremvc_facade_hasCore("facade4") == false);
-//
-//     puremvc_facade_removeFacade("facade1"); // remove first
-//     assert(puremvc_facade_hasCore("facade1") == false);
-//
-//     puremvc_facade_removeFacade("facade3"); // remove remaining
-//     assert(puremvc_facade_hasCore("facade3") == false);
-// }
+void testFacadeMapShiftLeft() {
+    struct FacadeMap **instanceMap = (struct FacadeMap *[]) { // facadeMap with 4 slots for the instance
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
+        NULL
+    };
+
+    assert(puremvc_facade_getInstance(instanceMap, "facade0") != NULL);
+    assert(strcmp(instanceMap[0]->key, "facade0") == 0);
+    const char **key0 = (const char **)((char *) instanceMap[0]->facade + sizeof(struct IFacade));
+    assert(strcmp(*key0, "facade0") == 0);
+    assert(puremvc_facade_hasCore("facade0") == true);
+
+    assert(puremvc_facade_getInstance(instanceMap, "facade1") != NULL);
+    assert(strcmp(instanceMap[1]->key, "facade1") == 0);
+    const char **key1 = (const char **)((char *) instanceMap[1]->facade + sizeof(struct IFacade));
+    assert(strcmp(*key1, "facade1") == 0);
+    assert(puremvc_facade_hasCore("facade1") == true);
+
+    assert(puremvc_facade_getInstance(instanceMap, "facade2") != NULL);
+    assert(strcmp(instanceMap[2]->key, "facade2") == 0);
+    const char **key2 = (const char **)((char *) instanceMap[2]->facade + sizeof(struct IFacade));
+    assert(strcmp(*key2, "facade2") == 0);
+    assert(puremvc_facade_hasCore("facade2") == true);
+
+    assert(puremvc_facade_getInstance(instanceMap, "facade3") != NULL);
+    assert(strcmp(instanceMap[3]->key, "facade3") == 0);
+    const char **key3 = (const char **)((char *) instanceMap[3]->facade + sizeof(struct IFacade));
+    assert(strcmp(*key3, "facade3") == 0);
+    assert(puremvc_facade_hasCore("facade3") == true);
+
+    // remove
+    struct IFacade *facade1 = NULL; // remove middle1, remaining 0, 2, 3
+    assert(puremvc_facade_removeFacade("facade1", &facade1) == true);
+    assert(strcmp(instanceMap[0]->key, "facade0") == 0);
+    assert(strcmp(instanceMap[1]->key, "facade2") == 0);
+    assert(strcmp(instanceMap[2]->key, "facade3") == 0);
+    assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
+    assert(puremvc_facade_hasCore("facade1") == false);
+
+    struct IFacade *facade3 = NULL; // remove last3, remaining 0, 2
+    assert(puremvc_facade_removeFacade("facade3", &facade3) == true);
+    assert(strcmp(instanceMap[0]->key, "facade0") == 0);
+    assert(strcmp(instanceMap[1]->key, "facade2") == 0);
+    assert(instanceMap[2]->key == NULL);
+    assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
+    assert(puremvc_facade_hasCore("facade3") == false);
+
+    struct IFacade *facade0 = NULL; // remove first, remaining 2
+    assert(puremvc_facade_removeFacade("facade0", &facade0) == true);
+    assert(strcmp(instanceMap[0]->key, "facade2") == 0);
+    assert(instanceMap[1]->key == NULL);
+    assert(instanceMap[2]->key == NULL);
+    assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
+    assert(puremvc_facade_hasCore("facade0") == false);
+
+    struct IFacade *facade2 = NULL; // remove remaining
+    assert(puremvc_facade_removeFacade("facade2", &facade0) == true);
+    assert(instanceMap[0]->key == NULL);
+    assert(instanceMap[1]->key == NULL);
+    assert(instanceMap[2]->key == NULL);
+    assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
+    assert(puremvc_facade_hasCore("facade2") == false);
+}

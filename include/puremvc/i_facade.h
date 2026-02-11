@@ -28,30 +28,30 @@
  */
 
 struct FacadeMap {
-    const char *eky;
-
+    const char *key;
     struct IFacade *facade;
+
     struct ModelMap **modelMap;
     struct ViewMap **viewMap;
     struct ControllerMap **controllerMap;
 };
 
 struct IFacade {
-    void (*initializeFacade)(struct IFacade *self, struct FacadeMap **facadeMap);
+    void (*initializeFacade)(struct IFacade *self, struct IModel *model, struct IView *view, struct IController *controller);
     
-    void (*initializeController)(struct IFacade *self, struct ControllerMap **controllerMap);
+    void (*initializeController)(struct IFacade *self, struct IController *controller);
 
-    void (*initializeModel)(struct IFacade *self, struct ModelMap **modelMap);
+    void (*initializeModel)(struct IFacade *self, struct IModel *model);
     
-    void (*initializeView)(struct IFacade *self, struct ViewMap **viewMap);
+    void (*initializeView)(struct IFacade *self, struct IView *view);
 
-    bool (*registerCommand)(const struct IFacade *self, const char *notificationName, struct ICommand *(*factory)());
+    bool (*registerCommand)(const struct IFacade *self, const char *notificationName, struct ICommand *(*factory)(void *buffer));
     
     bool (*hasCommand)(const struct IFacade *self, const char *notificationName);
 
-    bool (*removeCommand)(const struct IFacade *self, const char *notificationName, struct ICommand *(**factory)());
+    bool (*removeCommand)(const struct IFacade *self, const char *notificationName, struct ICommand *(**factory)(void *buffer));
 
-    bool (*registerProxy)(const struct IFacade *self, struct IProxy *(*factory)(struct IProxy *proxy, const char *name, void *data), const char *name, void *data);
+    bool (*registerProxy)(const struct IFacade *self, struct IProxy *(*factory)(void *buffer, const char *name, void *data), const char *name, void *data);
 
     struct IProxy *(*retrieveProxy)(const struct IFacade *self, const char *proxyName);
 
@@ -59,7 +59,7 @@ struct IFacade {
 
     bool (*removeProxy)(const struct IFacade *self, const char *proxyName, struct IProxy **proxy);
 
-    bool (*registerMediator)(const struct IFacade *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component);
+    bool (*registerMediator)(const struct IFacade *self, struct IMediator *(*factory)(void *buffer, const char *name, void *component), const char *name, void *component);
 
     struct IMediator *(*retrieveMediator)(const struct IFacade *self, const char *mediatorName);
 
@@ -72,8 +72,12 @@ struct IFacade {
     void (*sendNotification)(const struct IFacade *self, const char *notificationName, void *body, const char *type);
 };
 
+size_t puremvc_facade_size();
+
+struct IFacade *puremvc_facade_init(void *buffer, const char *key);
+
 struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const char *key);
 
-bool puremvc_facade_hasCore(struct FacadeMap **facadeMap, const char *key);
+bool puremvc_facade_hasCore(const char *key);
 
 bool puremvc_facade_removeFacade(const char *key, struct IFacade **out);

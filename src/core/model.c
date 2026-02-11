@@ -53,7 +53,7 @@ static bool registerProxy(struct IModel *self, struct IProxy *(*factory)(void *b
         return false;
     }
 
-    // todo check if proxy exists
+    // todo check if proxy exists (error if .proxy wasn't alloca)
     struct IProxy *proxy = factory(this->proxyMap[i]->proxy, name, data); // registration
     this->proxyMap[i]->key = proxy->getName(proxy);
 
@@ -219,7 +219,7 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
     size_t index = 0;
     for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find model
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
-            instanceMap[i]->key = NULL;
+            instanceMap[i]->key = NULL; // remove
             if (out != NULL)
                 *out = instanceMap[i]->model;
 

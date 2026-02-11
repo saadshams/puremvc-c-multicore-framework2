@@ -8,8 +8,6 @@
 #include <alloca.h>
 #include <assert.h>
 #include <string.h>
-#include <stddef.h>
-#include <stdio.h>
 
 int main() {
     testGetInstance();
@@ -31,7 +29,7 @@ void testGetInstance() {
     };
 
     // Test Factory Method
-   assert(puremvc_view_getInstance(viewMap, "ControllerTestKey1") != NULL); // pre-initialize View for the Controller
+   struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey1"); // pre-initialize View for the Controller
 
     struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
         &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
@@ -45,7 +43,7 @@ void testGetInstance() {
 
     // Test Factory Method
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey1");
-    controller->initializeController(controller, commandMap);
+    controller->initializeController(controller, view, commandMap);
 
     // test assertions
     assert(controller != NULL);
@@ -53,11 +51,9 @@ void testGetInstance() {
 
     struct IController *removedController = NULL;
     assert(puremvc_controller_removeController("ControllerTestKey1", &removedController) == true);
-    // assert(strcmp(((struct Controller *) removedController)->multitonKey, "ControllerTestKey1") == 0);
 
     struct IView *removedView = NULL;
     assert(puremvc_view_removeView("ControllerTestKey1", &removedView) == true);
-    // assert(strcmp(((struct View *) removedView)->multitonKey, "ControllerTestKey1") == 0);
 }
 
 void testRegisterAndExecuteCommand() {
@@ -93,7 +89,7 @@ void testRegisterAndExecuteCommand() {
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey2");
     assert(controller != NULL);
 
-    controller->initializeController(controller, commandMap);
+    controller->initializeController(controller, view, commandMap);
 
     assert(controller->registerCommand(controller, "ControllerTest1", test_controller_command_init) == true);
 
@@ -147,7 +143,7 @@ void testRegisterAndRemoveCommand() {
 
     // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey3");
-    controller->initializeController(controller, commandMap);
+    controller->initializeController(controller, view, commandMap);
 
     assert(controller->registerCommand(controller, "ControllerRemoveTest", test_controller_command_init) == true);;
 
@@ -206,7 +202,7 @@ void testHasCommand() {
 
     // register the ControllerTestCommand to handle 'hasCommandTest' notes
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey4");
-    controller->initializeController(controller, commandMap);
+    controller->initializeController(controller, view, commandMap);
 
     // test that hasCommand returns true for hasCommandTest notifications
     assert(controller->registerCommand(controller, "hasCommandTest", test_controller_command_init) == true);;
@@ -251,7 +247,7 @@ void testReregisterAndExecuteCommand() {
 
     // Fetch the controller, register the ControllerTestCommand to handle 'ControllerTest2' notes
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey5");
-    controller->initializeController(controller, commandMap);
+    controller->initializeController(controller, view, commandMap);
 
     assert(controller->registerCommand(controller, "ControllerTest2", test_controller_command2_init) == true);
 
@@ -314,7 +310,7 @@ void testRegisterAndUpdateCommand() {
     };
 
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey6");
-    controller->initializeController(controller, commandMap);
+    controller->initializeController(controller, view, commandMap);
 
     // first registration
     assert(controller->registerCommand(controller, "ControllerTest2", test_controller_command_init) == true);
@@ -345,7 +341,7 @@ void testRemoveController() {
 
     // Get a Multiton Controller instance
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey6");;
-    controller->initializeController(controller, commandMap);
+    controller->initializeController(controller, NULL, commandMap);
 
     assert(controller != NULL);
 
@@ -393,7 +389,7 @@ void testCommandMapShiftLeft() {
     };
 
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey8");
-    controller->initializeController(controller, commandMap);
+    controller->initializeController(controller, view, commandMap);
 
     size_t offset1 = sizeof(struct IView) + sizeof(const char *);
     struct ObserverMap ***ppp1 = (struct ObserverMap ***)((char *) view + offset1);

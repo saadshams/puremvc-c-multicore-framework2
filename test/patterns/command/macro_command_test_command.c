@@ -26,8 +26,8 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     }
 }
 
-struct ICommand *macro_command_test_command(struct ICommand *const command) {
-    struct ICommand *self = puremvc_macro_command_init(command);
+struct ICommand *macro_command_test_command(void *buffer) {
+    struct ICommand *self = puremvc_macro_command_init(buffer);
     self->execute = execute;
     return self;
 }

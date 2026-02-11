@@ -354,15 +354,15 @@ void TestModelMapShiftLeft() {
     assert(strcmp(*key3, "model3") == 0);
 
     // remove
-    struct IModel *model1 = NULL;
-    assert(puremvc_model_removeModel("model1", &model1) == true); // remove middle1, remaining 0, 2, 3
+    struct IModel *model1 = NULL; // remove middle1, remaining 0, 2, 3
+    assert(puremvc_model_removeModel("model1", &model1) == true);
     assert(strcmp(instanceMap[0]->key, "model0") == 0);
     assert(strcmp(instanceMap[1]->key, "model2") == 0);
     assert(strcmp(instanceMap[2]->key, "model3") == 0);
     assert(instanceMap[3]->key == NULL);
     assert(instanceMap[4] == NULL);
 
-    struct IModel *model3 = NULL; // remove last, remaining 0, 2
+    struct IModel *model3 = NULL; // remove last3, remaining 0, 2
     assert(puremvc_model_removeModel("model3", &model3) == true);
     assert(strcmp(instanceMap[0]->key, "model0") == 0);
     assert(strcmp(instanceMap[1]->key, "model2") == 0);

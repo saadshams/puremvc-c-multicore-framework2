@@ -1,8 +1,8 @@
 #include "view_test_mediator6.h"
 #include "view_test.h"
 
-static const char **listNotificationInterests(const struct IMediator *self) {
-    static const char *interests[] = { NOTE6, NULL };
+static const char *const *listNotificationInterests(const struct IMediator *self) {
+    static const char *const interests[] = { NOTE6, NULL };
     return interests;
 }
 

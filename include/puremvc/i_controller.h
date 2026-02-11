@@ -11,6 +11,7 @@
 
 #include "i_command.h"
 #include "i_notification.h"
+#include "i_view.h"
 
 struct ControllerMap {
     const char *key;
@@ -31,7 +32,7 @@ struct CommandMap {
  * is responsible for executing commands in response to notifications.
  */
 struct IController {
-    void (*initializeController)(struct IController *self, struct CommandMap **commandMap);
+    void (*initializeController)(struct IController *self, struct IView *view, struct CommandMap **commandMap);
 
     bool (*registerCommand)(struct IController *self, const char *notificationName, struct ICommand *(*factory)(void *buffer));
 
@@ -39,7 +40,7 @@ struct IController {
 
     bool (*hasCommand)(const struct IController *self, const char *notificationName);
 
-    bool (*removeCommand)(struct IController *self, const char *notificationName, struct ICommand *(**out)(void *));
+    bool (*removeCommand)(struct IController *self, const char *notificationName, struct ICommand *(**out)(void *buffer));
 };
 
 size_t puremvc_controller_size();

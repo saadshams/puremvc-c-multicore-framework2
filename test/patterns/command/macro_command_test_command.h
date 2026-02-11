@@ -2,4 +2,4 @@
 
 #include "puremvc/i_command.h"
 
-struct ICommand *macro_command_test_command(struct ICommand *command);
+struct ICommand *macro_command_test_command(void *buffer);

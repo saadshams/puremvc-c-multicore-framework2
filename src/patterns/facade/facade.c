@@ -6,9 +6,6 @@
 * @author Saad Shams <saad.shams@puremvc.org>
 * @copyright BSD 3-Clause License
 */
-#include <stdio.h>
-#include <string.h>
-
 #include "facade.h"
 
 #include <puremvc/i_mutex.h>
@@ -18,6 +15,10 @@
 #include "puremvc/i_view.h"
 #include "puremvc/i_notification.h"
 
+#include <alloca.h>
+#include <stdio.h>
+#include <string.h>
+
 // instanceMap
 static struct FacadeMap **instanceMap = NULL;
 
@@ -25,39 +26,32 @@ static struct FacadeMap **instanceMap = NULL;
 static Mutex facadeMapMutex;
 static MutexOnce facadeMutexOnce = MUTEX_ONCE_INIT;
 
-static void initializeFacade(struct IFacade *self, struct FacadeMap **facadeMap) {
-    if (!self || !facadeMap) return;
-
-    self->initializeModel(self, (*facadeMap)->modelMap);
-    self->initializeView(self, (*facadeMap)->viewMap);
-    self->initializeController(self, (*facadeMap)->controllerMap);
+static void initializeFacade(struct IFacade *self, struct IModel *model, struct IView *view, struct IController *controller) {
+    if (self == NULL) return;
+    self->initializeModel(self, model);
+    self->initializeView(self, view);
+    self->initializeController(self, controller);
 }
 
-static void initializeController(struct IFacade *self, struct ControllerMap **controllerMap) {
+static void initializeController(struct IFacade *self, struct IController *controller) {
     struct Facade *this = (struct Facade *) self;
-    if (this->controller != NULL) return;
-
-    this->controller = puremvc_controller_getInstance(controllerMap, this->multitonKey);
-    this->controller->initializeController(this->controller);
+    if (this->controller != NULL || controller == NULL) return;
+    this->controller = controller;
 }
 
-static void initializeModel(struct IFacade *self, struct ModelMap **modelMap) {
+static void initializeModel(struct IFacade *self, struct IModel *model) {
     struct Facade *this = (struct Facade *) self;
-    if (this->model != NULL) return;
-
-    this->model = puremvc_model_getInstance(modelMap, this->multitonKey);
-    this->model->initializeModel(this->model);
+    if (this->model != NULL || model == NULL) return;
+    this->model = model;
 }
 
-static void initializeView(struct IFacade *self, struct ViewMap **viewMap) {
+static void initializeView(struct IFacade *self, struct IView *view) {
     struct Facade *this = (struct Facade *) self;
-    if (this->view != NULL) return;
-
-    this->view = puremvc_view_getInstance(viewMap, this->multitonKey);
-    this->view->initializeView(this->view);
+    if (this->view != NULL || view == NULL) return;
+    this->view = view;
 }
 
-static bool registerCommand(const struct IFacade *self, const char *notificationName, struct ICommand *(*factory)(struct ICommand *)) {
+static bool registerCommand(const struct IFacade *self, const char *notificationName, struct ICommand *(*factory)(void *buffer)) {
     const struct Facade *this = (struct Facade *) self;
     return this->controller->registerCommand(this->controller, notificationName, factory);
 }
@@ -67,12 +61,12 @@ static bool hasCommand(const struct IFacade *self, const char *notificationName)
     return this->controller->hasCommand(this->controller, notificationName);
 }
 
-static bool removeCommand(const struct IFacade *self, const char *notificationName, struct ICommand *(**factory)(struct ICommand *)) {
+static bool removeCommand(const struct IFacade *self, const char *notificationName, struct ICommand *(**factory)(void *)) {
     const struct Facade *this = (struct Facade *) self;
     return this->controller->removeCommand(this->controller, notificationName, factory);
 }
 
-static bool registerProxy(const struct IFacade *self, struct IProxy *(*factory)(struct IProxy *proxy, const char *name, void *data), const char *name, void *data) {
+static bool registerProxy(const struct IFacade *self, struct IProxy *(*factory)(void *buffer, const char *name, void *data), const char *name, void *data) {
     const struct Facade *this = (struct Facade *) self;
     return this->model->registerProxy(this->model, factory, name, data);
 }
@@ -92,7 +86,7 @@ static bool removeProxy(const struct IFacade *self, const char *proxyName, struc
     return this->model->removeProxy(this->model, proxyName, out);
 }
 
-static bool registerMediator(const struct IFacade *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component) {
+static bool registerMediator(const struct IFacade *self, struct IMediator *(*factory)(void *buffer, const char *name, void *component), const char *name, void *component) {
     const struct Facade *this = (struct Facade *) self;
     return this->view->registerMediator(this->view, factory, name, component);
 }
@@ -118,34 +112,40 @@ static void notifyObservers(const struct IFacade *self, struct INotification *no
 }
 
 static void sendNotification(const struct IFacade *self, const char *notificationName, void *body, const char *type) {
-    struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, notificationName, body, type);
+    struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), notificationName, body, type);
     self->notifyObservers(self, notification);
 }
 
-static void puremvc_facade_init(struct IFacade *facade, const char *key) {
-    struct Facade *this = (struct Facade *) facade;
+size_t puremvc_facade_size() {
+    return (sizeof(struct Facade) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+}
+
+struct IFacade *puremvc_facade_init(void *buffer, const char *key) {
+    struct Facade *this = (struct Facade *) buffer;
 
     memset(this, 0, sizeof(struct Facade));
 
-    facade->initializeFacade = initializeFacade;
-    facade->initializeController = initializeController;
-    facade->initializeModel = initializeModel;
-    facade->initializeView = initializeView;
-    facade->registerCommand = registerCommand;
-    facade->hasCommand = hasCommand;
-    facade->removeCommand = removeCommand;
-    facade->registerProxy = registerProxy;
-    facade->retrieveProxy = retrieveProxy;
-    facade->hasProxy = hasProxy;
-    facade->removeProxy = removeProxy;
-    facade->registerMediator = registerMediator;
-    facade->retrieveMediator = retrieveMediator;
-    facade->hasMediator = hasMediator;
-    facade->removeMediator = removeMediator;
-    facade->notifyObservers = notifyObservers;
-    facade->sendNotification = sendNotification;
+    this->base.initializeFacade = initializeFacade;
+    this->base.initializeController = initializeController;
+    this->base.initializeModel = initializeModel;
+    this->base.initializeView = initializeView;
+    this->base.registerCommand = registerCommand;
+    this->base.hasCommand = hasCommand;
+    this->base.removeCommand = removeCommand;
+    this->base.registerProxy = registerProxy;
+    this->base.retrieveProxy = retrieveProxy;
+    this->base.hasProxy = hasProxy;
+    this->base.removeProxy = removeProxy;
+    this->base.registerMediator = registerMediator;
+    this->base.retrieveMediator = retrieveMediator;
+    this->base.hasMediator = hasMediator;
+    this->base.removeMediator = removeMediator;
+    this->base.notifyObservers = notifyObservers;
+    this->base.sendNotification = sendNotification;
 
     this->multitonKey = key;
+
+    return (struct IFacade *) this;
 }
 
 static void dispatchOnce(void) {
@@ -183,19 +183,28 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
         return NULL;
     }
 
+    if (instanceMap[i]->facade == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: Missing Facade storage; skipping registration.\033[0m\n");
+        return NULL;
+    }
+
     instanceMap[i]->key = key; // init
     puremvc_facade_init(facadeMap[i]->facade, key);
-    instanceMap[i]->facade->initializeFacade(instanceMap[i]->facade, facadeMap);
 
     mutex_unlock(&facadeMapMutex);
     return instanceMap[i]->facade;
 }
 
-bool puremvc_facade_hasCore(struct FacadeMap **facadeMap, const char *key) {
+bool puremvc_facade_hasCore(const char *key) {
+    if (instanceMap == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::hasFacade] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
+        return false;
+    }
+
     mutex_lock_shared(&facadeMapMutex);
     bool exists = false;
-    for (size_t i = 0; facadeMap != NULL && facadeMap[i]->key != NULL; i++) {
-        if (facadeMap[i]->key == key || strcmp(facadeMap[i]->key, key) == 0) {
+    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) {
+        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             exists = true;
             break;
         }
@@ -225,7 +234,7 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
     size_t index = 0;
     for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find facade
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
-            instanceMap[i]->key = NULL; // clear model
+            instanceMap[i]->key = NULL; // remove
             if (out != NULL)
                 *out = instanceMap[i]->facade;
         } else {

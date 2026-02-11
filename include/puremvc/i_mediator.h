@@ -23,7 +23,7 @@ struct IMediator {
     void *(*getComponent)(const struct IMediator *self);
     struct INotifier *(*getNotifier)(const struct IMediator *self);
 
-    const char **(*listNotificationInterests)(const struct IMediator *self);
+    const char *const *(*listNotificationInterests)(const struct IMediator *self);
     void (*handleNotification)(const struct IMediator *self, struct INotification *notification);
 
     void (*onRegister)(struct IMediator *self);

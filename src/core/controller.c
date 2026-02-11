@@ -12,7 +12,6 @@
 #include "puremvc/i_mutex.h"
 #include "puremvc/i_controller.h"
 #include "puremvc/i_command.h"
-#include "puremvc/i_view.h"
 
 #include <alloca.h>
 #include <stdio.h>
@@ -25,11 +24,11 @@ static struct ControllerMap **instanceMap = NULL;
 static Mutex controllerMapMutex;
 static MutexOnce controllerMutexOnce = MUTEX_ONCE_INIT;
 
-static void initializeController(struct IController *self, struct CommandMap **commandMap) {
+static void initializeController(struct IController *self, struct IView *view, struct CommandMap **commandMap) {
     struct Controller *this = (struct Controller *) self;
     if (commandMap != NULL) this->commandMap = commandMap;
-    if (this->view != NULL) return;
-    this->view = puremvc_view_getInstance(NULL, this->multitonKey);
+    if (this->view != NULL || view == NULL) return;
+    this->view = view;
 }
 
 static bool registerCommand(struct IController *self, const char *notificationName, struct ICommand *(*factory)(void *buffer)) {
@@ -105,7 +104,7 @@ static bool hasCommand(const struct IController *self, const char *notificationN
     return exists;
 }
 
-static bool removeCommand(struct IController *self, const char *notificationName, struct ICommand *(**out)(void *)) {
+static bool removeCommand(struct IController *self, const char *notificationName, struct ICommand *(**out)(void *buffer)) {
     struct Controller *this = (struct Controller *) self;
     bool removed = false;
 
