@@ -8,4 +8,4 @@ void testHasProxy();
 void testOnRegisterAndOnRemove();
 void testRemoveModel();
 void testProxyMapShiftLeft();
-void TestModelShiftLeft();
+void TestModelMapShiftLeft();

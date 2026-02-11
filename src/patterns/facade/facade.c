@@ -87,9 +87,9 @@ static bool hasProxy(const struct IFacade *self, const char *proxyName) {
     return this->model->hasProxy(this->model, proxyName);
 }
 
-static bool removeProxy(const struct IFacade *self, const char *proxyName, struct IProxy **proxy) {
+static bool removeProxy(const struct IFacade *self, const char *proxyName, struct IProxy **out) {
     const struct Facade *this = (struct Facade *) self;
-    return this->model->removeProxy(this->model, proxyName, proxy);
+    return this->model->removeProxy(this->model, proxyName, out);
 }
 
 static bool registerMediator(const struct IFacade *self, struct IMediator *(*factory)(struct IMediator *mediator, const char *name, void *component), const char *name, void *component) {
@@ -107,9 +107,9 @@ static bool hasMediator(const struct IFacade *self, const char *mediatorName) {
     return this->view->hasMediator(this->view, mediatorName);
 }
 
-static bool removeMediator(const struct IFacade *self, const char *mediatorName, struct IMediator **mediator) {
+static bool removeMediator(const struct IFacade *self, const char *mediatorName, struct IMediator **out) {
     const struct Facade *this = (struct Facade *) self;
-    return this->view->removeMediator(this->view, mediatorName, mediator);
+    return this->view->removeMediator(this->view, mediatorName, out);
 }
 
 static void notifyObservers(const struct IFacade *self, struct INotification *notification) {
@@ -204,7 +204,7 @@ bool puremvc_facade_hasCore(struct FacadeMap **facadeMap, const char *key) {
     return exists;
 }
 
-bool puremvc_facade_removeFacade(const char *key, struct IFacade **facade) {
+bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
     if (instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeFacade] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
         return false;
@@ -226,8 +226,8 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **facade) {
     for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find facade
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             instanceMap[i]->key = NULL; // clear model
-            if (facade != NULL)
-                *facade = instanceMap[i]->facade;
+            if (out != NULL)
+                *out = instanceMap[i]->facade;
         } else {
             if (index != i) { // shift left
                 *instanceMap[index] = *instanceMap[i];

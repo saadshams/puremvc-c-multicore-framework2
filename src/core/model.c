@@ -95,7 +95,7 @@ static bool hasProxy(const struct IModel *self, const char *proxyName) {
     return exists;
 }
 
-static bool removeProxy(struct IModel *self, const char *proxyName, struct IProxy **proxy) {
+static bool removeProxy(struct IModel *self, const char *proxyName, struct IProxy **out) {
     struct Model *this = (struct Model *) self;
     bool removed = false;
 
@@ -104,17 +104,17 @@ static bool removeProxy(struct IModel *self, const char *proxyName, struct IProx
     size_t index = 0, i = 0;
     for (; this->proxyMap != NULL && this->proxyMap[i] != NULL && this->proxyMap[i]->key != NULL; i++) {
         if (this->proxyMap[i]->key == proxyName || strcmp(this->proxyMap[i]->key, proxyName) == 0) { // match
-            if (proxy != NULL)
-                *proxy = this->proxyMap[i]->proxy;
+            if (out != NULL)
+                *out = this->proxyMap[i]->proxy;
 
             this->proxyMap[i]->proxy->onRemove(this->proxyMap[i]->proxy);
 
-            this->proxyMap[i]->key = NULL; // remove
+            this->proxyMap[i]->key = NULL; // remove key only, proxy is borrowed
             removed = true;
         } else {
             if (index != i) { // shift left
-                *this->proxyMap[index] = *this->proxyMap[i];
-                this->proxyMap[i]->key = NULL;
+                *this->proxyMap[index] = *this->proxyMap[i]; // shift left first
+                this->proxyMap[i]->key = NULL; // remove key only
             }
             index++;
         }
@@ -177,7 +177,7 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
 
     size_t i = 0;
     for (; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find model
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) { // todo check with == (string pooling)
+        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&modelMapMutex);
             return instanceMap[i]->model;
         }
@@ -202,7 +202,7 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
     return instanceMap[i]->model;
 }
 
-bool puremvc_model_removeModel(const char *key, struct IModel **model) {
+bool puremvc_model_removeModel(const char *key, struct IModel **out) {
     if (instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] FATAL: Missing ModelMap storage; skipping removal.\033[0m\n");
         return false;
@@ -220,8 +220,8 @@ bool puremvc_model_removeModel(const char *key, struct IModel **model) {
     for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find model
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             instanceMap[i]->key = NULL;
-            if (model != NULL)
-                *model = instanceMap[i]->model;
+            if (out != NULL)
+                *out = instanceMap[i]->model;
 
             // ((struct Model *) s_modelMap[i]->model)->proxyMap[0]->key // todo remove proxies?
         } else {

@@ -17,7 +17,7 @@ int main() {
     testRemoveModel();
     testRegisterAndReplaceProxy();
     testProxyMapShiftLeft();
-    TestModelShiftLeft();
+    TestModelMapShiftLeft();
     return 0;
 }
 
@@ -269,21 +269,22 @@ void testProxyMapShiftLeft() {
     struct ProxyMap **actualMap = *ppp;
 
     // Register four proxies and verify that each is correctly associated to their dictionaries
-    model->registerProxy(model, puremvc_proxy_init, "proxy0", NULL);
+    assert(model->registerProxy(model, puremvc_proxy_init, "proxy0", NULL) == true);
     const struct IProxy *proxy0 = actualMap[0]->proxy;
     assert(strcmp(actualMap[0]->key, "proxy0") == 0);
     assert(strcmp(proxy0->getName(proxy0), "proxy0") == 0);
 
-    model->registerProxy(model, puremvc_proxy_init, "proxy1", NULL);
+    assert(model->registerProxy(model, puremvc_proxy_init, "proxy1", NULL) == true);
     const struct IProxy *proxy1 = actualMap[1]->proxy;
     assert(strcmp(actualMap[1]->key, "proxy1") == 0);
     assert(strcmp(proxy1->getName(proxy1), "proxy1") == 0);
 
-    model->registerProxy(model, puremvc_proxy_init, "proxy2", NULL);
+    assert(model->registerProxy(model, puremvc_proxy_init, "proxy2", NULL) == true);
     const struct IProxy *proxy2 = actualMap[2]->proxy;
     assert(strcmp(actualMap[2]->key, "proxy2") == 0);
+    assert(strcmp(proxy2->getName(proxy2), "proxy2") == 0);
 
-    model->registerProxy(model, puremvc_proxy_init, "proxy3", NULL);
+    assert(model->registerProxy(model, puremvc_proxy_init, "proxy3", NULL) == true);
     const struct IProxy *proxy3 = actualMap[3]->proxy;
     assert(strcmp(actualMap[3]->key, "proxy3") == 0);
     assert(strcmp(proxy3->getName(proxy3), "proxy3") == 0);
@@ -322,7 +323,7 @@ void testProxyMapShiftLeft() {
     model = NULL;
 }
 
-void TestModelShiftLeft() {
+void TestModelMapShiftLeft() {
     struct ModelMap **instanceMap = (struct ModelMap *[]) { // modelMap with 4 slots for the instance
         &(struct ModelMap) { .model = alloca(puremvc_model_size()) },
         &(struct ModelMap) { .model = alloca(puremvc_model_size()) },
@@ -332,62 +333,53 @@ void TestModelShiftLeft() {
     };
 
     // create 4 instances
-    puremvc_model_getInstance(instanceMap, "model0");
+    assert(puremvc_model_getInstance(instanceMap, "model0") != NULL);
     assert(strcmp(instanceMap[0]->key, "model0") == 0);
     const char **key0 = (const char **)((char *) instanceMap[0]->model + sizeof(struct IModel));
     assert(strcmp(*key0, "model0") == 0);
 
-    puremvc_model_getInstance(instanceMap, "model1");
+    assert(puremvc_model_getInstance(instanceMap, "model1") != NULL);
     assert(strcmp(instanceMap[1]->key, "model1") == 0);
-    const char **key1 = (const char **)((char *) instanceMap[0]->model + sizeof(struct IModel));
-    assert(strcmp(*key1, "model0") == 0);
+    const char **key1 = (const char **)((char *) instanceMap[1]->model + sizeof(struct IModel));
+    assert(strcmp(*key1, "model1") == 0);
 
-    puremvc_model_getInstance(instanceMap, "model2");
+    assert(puremvc_model_getInstance(instanceMap, "model2") != NULL);
     assert(strcmp(instanceMap[2]->key, "model2") == 0);
-    const char **key2 = (const char **)((char *) instanceMap[0]->model + sizeof(struct IModel));
-    assert(strcmp(*key2, "model0") == 0);
+    const char **key2 = (const char **)((char *) instanceMap[2]->model + sizeof(struct IModel));
+    assert(strcmp(*key2, "model2") == 0);
 
-    puremvc_model_getInstance(instanceMap, "model3");
+    assert(puremvc_model_getInstance(instanceMap, "model3") != NULL);
     assert(strcmp(instanceMap[3]->key, "model3") == 0);
-    const char **key3 = (const char **)((char *) instanceMap[0]->model + sizeof(struct IModel));
-    assert(strcmp(*key3, "model0") == 0);
+    const char **key3 = (const char **)((char *) instanceMap[3]->model + sizeof(struct IModel));
+    assert(strcmp(*key3, "model3") == 0);
 
     // remove
-    struct IModel *removedModel1 = NULL;
-    assert(puremvc_model_removeModel("model1", &removedModel1) == true); // remove middle, remaining 0, 2, 3
-    key1 = (const char **)((char *) removedModel1 + sizeof(struct IModel)); // multitonKey
-    assert(strcmp(*key1, "model1") == 0);
-    assert(strcmp(*((const char **)((char *) instanceMap[0]->model + sizeof(struct IModel))), "model0") == 0); // model->multitonKey
-    assert(strcmp(*((const char **)((char *) instanceMap[1]->model + sizeof(struct IModel))), "model2") == 0);
-    assert(strcmp(*((const char **)((char *) instanceMap[2]->model + sizeof(struct IModel))), "model3") == 0);
-    assert(strcmp(instanceMap[0]->key, "model0") == 0); // instanceMap->key
+    struct IModel *model1 = NULL;
+    assert(puremvc_model_removeModel("model1", &model1) == true); // remove middle1, remaining 0, 2, 3
+    assert(strcmp(instanceMap[0]->key, "model0") == 0);
     assert(strcmp(instanceMap[1]->key, "model2") == 0);
     assert(strcmp(instanceMap[2]->key, "model3") == 0);
     assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
 
-    struct IModel *removedModel3 = NULL;
-    assert(puremvc_model_removeModel("model3", &removedModel3) == true); // remove last, remaining 0, 2
-    key3 = (const char **)((char *) removedModel3 + sizeof(struct IModel)); // multitonKey
-    assert(strcmp(*key3, "model3") == 0);
-    assert(strcmp(*((const char **)((char *) instanceMap[0]->model + sizeof(struct IModel))), "model0") == 0);
-    assert(strcmp(*((const char **)((char *) instanceMap[1]->model + sizeof(struct IModel))), "model2") == 0);
+    struct IModel *model3 = NULL; // remove last, remaining 0, 2
+    assert(puremvc_model_removeModel("model3", &model3) == true);
     assert(strcmp(instanceMap[0]->key, "model0") == 0);
     assert(strcmp(instanceMap[1]->key, "model2") == 0);
     assert(instanceMap[2]->key == NULL);
     assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
 
-    struct IModel *removedModel0 = NULL;
-    assert(puremvc_model_removeModel("model0", &removedModel0) == true); // remove first, remaining 2
-    key0 = (const char **)((char *) removedModel0 + sizeof(struct IModel)); // multitonKey
-    assert(strcmp(*key0, "model0") == 0);
-    assert(strcmp(*((const char **)((char *) instanceMap[0]->model + sizeof(struct IModel))), "model2") == 0);
+    struct IModel *model0 = NULL; // remove first, remaining 2
+    assert(puremvc_model_removeModel("model0", &model0) == true);
     assert(strcmp(instanceMap[0]->key, "model2") == 0);
     assert(instanceMap[1]->key == NULL);
     assert(instanceMap[2]->key == NULL);
     assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
 
-    struct IModel *model2 = NULL;
-    assert(puremvc_model_removeModel("model2", &model2) == true); // remove remaining
+    struct IModel *model2 = NULL; // remove remaining
+    assert(puremvc_model_removeModel("model2", &model2) == true);
     assert(instanceMap[0]->key == NULL);
     assert(instanceMap[1]->key == NULL);
     assert(instanceMap[2]->key == NULL);

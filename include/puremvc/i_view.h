@@ -50,7 +50,7 @@ struct IView {
 
     bool (*hasMediator)(const struct IView *self, const char *mediatorName);
 
-    bool (*removeMediator)(struct IView *self, const char *mediatorName, struct IMediator **mediator);
+    bool (*removeMediator)(struct IView *self, const char *mediatorName, struct IMediator **out);
 };
 
 size_t puremvc_view_size();
@@ -59,4 +59,4 @@ struct IView *puremvc_view_init(void *buffer, const char *key);
 
 struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key);
 
-bool puremvc_view_removeView(const char *key, struct IView **view);
+bool puremvc_view_removeView(const char *key, struct IView **out);

@@ -14,6 +14,7 @@
 #include "puremvc/i_command.h"
 #include "puremvc/i_view.h"
 
+#include <alloca.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -24,13 +25,14 @@ static struct ControllerMap **instanceMap = NULL;
 static Mutex controllerMapMutex;
 static MutexOnce controllerMutexOnce = MUTEX_ONCE_INIT;
 
-static void initializeController(struct IController *self) {
+static void initializeController(struct IController *self, struct CommandMap **commandMap) {
     struct Controller *this = (struct Controller *) self;
+    if (commandMap != NULL) this->commandMap = commandMap;
     if (this->view != NULL) return;
     this->view = puremvc_view_getInstance(NULL, this->multitonKey);
 }
 
-static bool registerCommand(struct IController *self, const char *notificationName, struct ICommand *(*factory)(struct ICommand *)) {
+static bool registerCommand(struct IController *self, const char *notificationName, struct ICommand *(*factory)(void *buffer)) {
     struct Controller *this = (struct Controller *) self;
 
     if (this->view == NULL) {
@@ -78,8 +80,8 @@ static void executeCommand(const struct IController *self, struct INotification 
 
     for (size_t i = 0; this->commandMap != NULL && this->commandMap[i] != NULL && this->commandMap[i]->key != NULL; i++) {
         if (this->commandMap[i]->key == notification->getName(notification) || strcmp(this->commandMap[i]->key, notification->getName(notification)) == 0) {
-            struct ICommand *(*factory)(struct ICommand *) = this->commandMap[i]->factory;
-            const struct ICommand *command = factory((struct ICommand *) &(struct SimpleCommand){});
+            struct ICommand *(*factory)(void *) = this->commandMap[i]->factory;
+            const struct ICommand *command = factory(alloca(puremvc_simple_command_size()));
             command->getNotifier(command)->initializeNotifier(command->getNotifier(command), this->multitonKey);
             command->execute(command, notification);
             break;
@@ -103,7 +105,7 @@ static bool hasCommand(const struct IController *self, const char *notificationN
     return exists;
 }
 
-static bool removeCommand(struct IController *self, const char *notificationName, struct ICommand *(**factory)(struct ICommand *)) {
+static bool removeCommand(struct IController *self, const char *notificationName, struct ICommand *(**out)(void *)) {
     struct Controller *this = (struct Controller *) self;
     bool removed = false;
 
@@ -112,13 +114,13 @@ static bool removeCommand(struct IController *self, const char *notificationName
     size_t index = 0; // One-pass removal (Filter pattern)
     for (size_t i = 0; this->commandMap != NULL && this->commandMap[i] != NULL && this->commandMap[i]->key != NULL; i++) {
         if (this->commandMap[i]->key == notificationName || strcmp(this->commandMap[i]->key, notificationName) == 0) { // match
-            if (factory != NULL) // out param
-                *factory = this->commandMap[i]->factory;
+            if (out != NULL) // out param
+                *out = this->commandMap[i]->factory;
 
             if (this->view->removeObserver(this->view, notificationName, self) == false) // remove observer
                 fprintf(stderr, "\033[0;31m[PureMVC::Controller::removeCommand] WARNING: Couldn't remove Observer for the notification '%s'; removing Command.\033[0m\n", notificationName);
 
-            memset(&this->commandMap[i]->key, 0, sizeof(struct CommandMap)); // remove
+            memset(&this->commandMap[i]->key, 0, sizeof(struct CommandMap)); // remove key only, factory is borrowed
             removed = true;
         } else {
             if (index != i) { // shift left
@@ -133,19 +135,25 @@ static bool removeCommand(struct IController *self, const char *notificationName
     return removed;
 }
 
-static void puremvc_controller_init(struct IController *controller, const char *key) {
-    struct Controller *this = (struct Controller *) controller;
+size_t puremvc_controller_size() {
+    return (sizeof(struct Controller) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+}
+
+static struct IController *puremvc_controller_init(void *buffer, const char *key) {
+    struct Controller *this = (struct Controller *) buffer;
 
     memset(this, 0, sizeof(struct Controller));
 
-    controller->initializeController = initializeController;
-    controller->executeCommand = executeCommand;
-    controller->registerCommand = registerCommand;
-    controller->hasCommand = hasCommand;
-    controller->removeCommand = removeCommand;
+    this->base.initializeController = initializeController;
+    this->base.executeCommand = executeCommand;
+    this->base.registerCommand = registerCommand;
+    this->base.hasCommand = hasCommand;
+    this->base.removeCommand = removeCommand;
 
     this->multitonKey = key;
     mutex_init(&this->commandMapMutex);
+
+    return (struct IController *) this;
 }
 
 static void dispatchOnce(void) {
@@ -190,13 +198,12 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
 
     instanceMap[i]->key = key; // init
     puremvc_controller_init(instanceMap[i]->controller, key);
-    instanceMap[i]->controller->initializeController(instanceMap[i]->controller);
 
     mutex_unlock(&controllerMapMutex);
     return instanceMap[i]->controller;
 }
 
-bool puremvc_controller_removeController(const char *key, struct IController **controller) {
+bool puremvc_controller_removeController(const char *key, struct IController **out) {
     if (instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Controller::removeController] FATAL: Missing ControllerMap storage; skipping removal.\033[0m\n");
         return false;
@@ -214,8 +221,8 @@ bool puremvc_controller_removeController(const char *key, struct IController **c
     for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) {
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             instanceMap[i]->key = NULL; // remove
-            if (controller != NULL)
-                *controller = instanceMap[i]->controller;
+            if (out != NULL)
+                *out = instanceMap[i]->controller;
         } else {
             if (index != i) { // shift left
                 *instanceMap[index] = *instanceMap[i];

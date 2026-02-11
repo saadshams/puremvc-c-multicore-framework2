@@ -37,7 +37,7 @@ int main() {
     testObserverMapShiftLeft();
     testObserverShiftLeft();
     testMediatorMapShiftLeft();
-    testViewShiftLeft();
+    testViewMapShiftLeft();
     return 0;
 }
 
@@ -908,22 +908,22 @@ void testObserverShiftLeft() {
     struct ObserverMap **obsMap = *ppp1;
 
     // register four observers, check association and remove them
-    view->registerObserver(view, "notification0", NULL, (void *) &context0);
+    assert(view->registerObserver(view, "notification0", NULL, (void *) &context0) == true);
     assert(strcmp(obsMap[0]->key, "notification0") == 0); // key gets created
     assert(obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) == &context0);
 
-    view->registerObserver(view, "notification0", NULL, &context1);
+    assert(view->registerObserver(view, "notification0", NULL, &context1) == true);
     assert(obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) == &context1);
 
-    view->registerObserver(view, "notification0", NULL, &context2);
+    assert(view->registerObserver(view, "notification0", NULL, &context2) == true);
     assert(obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) == &context2);
 
-    view->registerObserver(view, "notification0", NULL, &context3);
+    assert(view->registerObserver(view, "notification0", NULL, &context3) == true);
     assert(obsMap[0]->observers[3]->getContext(obsMap[0]->observers[3]) == &context3);
     assert(obsMap[0]->observers[4] == NULL);
 
     // remove the middle context1; remaining entries (2, 3) shift left and the tail is reinit.
-    view->removeObserver(view, "notification0", &context1);
+    assert(view->removeObserver(view, "notification0", &context1) == true);
     assert(obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) == &context0);
     assert(obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) == &context2);
     assert(obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) == &context3);
@@ -931,7 +931,7 @@ void testObserverShiftLeft() {
     assert(obsMap[0]->observers[4] == NULL);
 
     // remove the last context3 and verify the remaining entries (0, 2) stay in place
-    view->removeObserver(view, "notification0", &context3);
+    assert(view->removeObserver(view, "notification0", &context3) == true);
     assert(obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) == &context0);
     assert(obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) == &context2);
     assert(obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) == NULL);
@@ -939,7 +939,7 @@ void testObserverShiftLeft() {
     assert(obsMap[0]->observers[4] == NULL);
 
     // remove the first context0 and verify that remaining observer shift left
-    view->removeObserver(view, "notification0", &context0);
+    assert(view->removeObserver(view, "notification0", &context0) == true);
     assert(obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) == &context2);
     assert(obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) == NULL);
     assert(obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) == NULL);
@@ -947,7 +947,7 @@ void testObserverShiftLeft() {
     assert(obsMap[0]->observers[4] == NULL);
 
     // Remove the remaining context2
-    view->removeObserver(view, "notification0", &context2);
+    assert(view->removeObserver(view, "notification0", &context2) == true);
     assert(obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) == NULL);
     assert(obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) == NULL);
     assert(obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) == NULL);
@@ -957,10 +957,10 @@ void testObserverShiftLeft() {
     assert(obsMap[0]->key == NULL); // key gets deleted
 
     // Test duplicate context registration and repeated removal:
-    view->registerObserver(view, "notification0", NULL, &context0);
-    view->registerObserver(view, "notification0", NULL, &context0);
-    view->registerObserver(view, "notification0", NULL, &context0);
-    view->registerObserver(view, "notification0", NULL, &context0);
+    assert(view->registerObserver(view, "notification0", NULL, &context0) == true);
+    assert(view->registerObserver(view, "notification0", NULL, &context0) == false);
+    assert(view->registerObserver(view, "notification0", NULL, &context0) == false);
+    assert(view->registerObserver(view, "notification0", NULL, &context0) == false);
 
     assert(obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) == &context0); // only one gets registered
     assert(obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) == NULL);
@@ -968,13 +968,13 @@ void testObserverShiftLeft() {
     assert(obsMap[0]->observers[3]->getContext(obsMap[0]->observers[3]) == NULL);
     assert(obsMap[0]->observers[4] == NULL);
 
-    view->removeObserver(view, "notification0", &context0);
-    view->removeObserver(view, "notification0", &context0);
-    view->removeObserver(view, "notification0", &context0);
-    view->removeObserver(view, "notification0", &context0);
+    assert(view->removeObserver(view, "notification0", &context0) == true);
+    assert(view->removeObserver(view, "notification0", &context0) == false);
+    assert(view->removeObserver(view, "notification0", &context0) == false);
+    assert(view->removeObserver(view, "notification0", &context0) == false);
 
     // Removing a context that was never registered
-    view->removeObserver(view, "notification0", &(struct ViewComponent){0});
+    assert(view->removeObserver(view, "notification0", &(struct ViewComponent){0}) == false);
 }
 
 void testMediatorMapShiftLeft() {
@@ -1085,7 +1085,7 @@ void testMediatorMapShiftLeft() {
     assert(puremvc_view_removeView("ViewTestKey17", NULL) == true);
 }
 
-void testViewShiftLeft() {
+void testViewMapShiftLeft() {
     struct ViewMap **instanceMap = (struct ViewMap *[]) {
         &(struct ViewMap) { .view = alloca(puremvc_view_size()) },
         &(struct ViewMap) { .view = alloca(puremvc_view_size()) },
@@ -1097,47 +1097,51 @@ void testViewShiftLeft() {
     // create 4 instances
     puremvc_view_getInstance(instanceMap, "view0");
     assert(strcmp(instanceMap[0]->key, "view0") == 0);
-    assert(instanceMap[0]->view != NULL);
+    const char **key0 = (const char **)((char *) instanceMap[0]->view + sizeof(struct IView));
+    assert(strcmp(*key0, "view0") == 0);
 
     puremvc_view_getInstance(instanceMap, "view1");
     assert(strcmp(instanceMap[1]->key, "view1") == 0);
-    assert(instanceMap[1]->view != NULL);
+    const char **key1 = (const char **)((char *) instanceMap[1]->view + sizeof(struct IView));
+    assert(strcmp(*key1, "view1") == 0);
 
     puremvc_view_getInstance(instanceMap, "view2");
     assert(strcmp(instanceMap[2]->key, "view2") == 0);
-    assert(instanceMap[2]->view != NULL);
+    const char **key2 = (const char **)((char *) instanceMap[2]->view + sizeof(struct IView));
+    assert(strcmp(*key2, "view2") == 0);
 
     puremvc_view_getInstance(instanceMap, "view3");
     assert(strcmp(instanceMap[3]->key, "view3") == 0);
-    assert(instanceMap[3]->view != NULL);
+    const char **key3 = (const char **)((char *) instanceMap[3]->view + sizeof(struct IView));
+    assert(strcmp(*key3, "view3") == 0);
 
     // remove
-    struct IView *view1 = NULL;
-    assert(puremvc_view_removeView("view1", &view1) == true); // remove middle, remaining 0, 2, 3
+    struct IView *view1 = NULL; // remove middle view1, remaining 0, 2, 3
+    assert(puremvc_view_removeView("view1", &view1) == true);
     assert(strcmp(instanceMap[0]->key, "view0") == 0);
     assert(strcmp(instanceMap[1]->key, "view2") == 0);
     assert(strcmp(instanceMap[2]->key, "view3") == 0);
     assert(instanceMap[3]->key == NULL);
     assert(instanceMap[4] == NULL);
 
-    struct IView *view3 = NULL;
-    assert(puremvc_view_removeView("view3", &view3) == true); // remove last view3, remaining 0, 2
+    struct IView *view3 = NULL; // remove last view3, remaining 0, 2
+    assert(puremvc_view_removeView("view3", &view3) == true);
     assert(strcmp(instanceMap[0]->key, "view0") == 0);
     assert(strcmp(instanceMap[1]->key, "view2") == 0);
     assert(instanceMap[2]->key == NULL);
     assert(instanceMap[3]->key == NULL);
     assert(instanceMap[4] == NULL);
 
-    struct IView *view0 = NULL;
-    assert(puremvc_view_removeView("view0", &view0) == true); // remove first, remaining 2
+    struct IView *view0 = NULL; // remove first, remaining 2
+    assert(puremvc_view_removeView("view0", &view0) == true);
     assert(strcmp(instanceMap[0]->key, "view2") == 0);
     assert(instanceMap[1]->key == NULL);
     assert(instanceMap[2]->key == NULL);
     assert(instanceMap[3]->key == NULL);
     assert(instanceMap[4] == NULL);
 
-    struct IView *view2 = NULL;
-    assert(puremvc_view_removeView("view2", &view2) == true); // remove remaining
+    struct IView *view2 = NULL; // remove remaining
+    assert(puremvc_view_removeView("view2", &view2) == true);
     assert(instanceMap[0]->key == NULL);
     assert(instanceMap[1]->key == NULL);
     assert(instanceMap[2]->key == NULL);

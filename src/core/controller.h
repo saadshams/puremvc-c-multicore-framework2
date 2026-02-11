@@ -16,8 +16,8 @@ struct Controller {
     struct IController base;
 
     const char *multitonKey;
-    struct IView *view;
     struct CommandMap **commandMap;
+    struct IView *view;
 
     Mutex commandMapMutex;
 };

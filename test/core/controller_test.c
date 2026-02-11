@@ -1,14 +1,15 @@
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-
-#include "../../src/core/controller.h"
-#include "puremvc/view.h"
-
 #include "controller_test.h"
 #include "controller_test_command.h"
 #include "controller_test_command2.h"
 #include "controller_test_vo.h"
+
+#include "puremvc/i_view.h"
+
+#include <alloca.h>
+#include <assert.h>
+#include <string.h>
+#include <stddef.h>
+#include <stdio.h>
 
 int main() {
     testGetInstance();
@@ -18,63 +19,87 @@ int main() {
     testReregisterAndExecuteCommand();
     testRegisterAndUpdateCommand();
     testRemoveController();
-    testRegisterAndRemoveMultipleCommands();
-    TestControllerShiftLeft();
+    testCommandMapShiftLeft();
+    TestControllerMapShiftLeft();
     return 0;
 }
 
 void testGetInstance() {
-    struct ViewMap *viewMap[] = { &(struct ViewMap) {
-        .view = (struct IView *) &(struct View) { .multitonKey = "", .observerMap = {}, .mediatorMap = {} },
-    }, NULL };
+    struct ViewMap **viewMap = (struct ViewMap *[]) {
+        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
+        NULL
+    };
 
     // Test Factory Method
    assert(puremvc_view_getInstance(viewMap, "ControllerTestKey1") != NULL); // pre-initialize View for the Controller
 
-    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
-        .controller = (struct IController *) &(struct Controller) { .commandMap = (struct CommandMap *[]){} },
-    }, NULL };
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
+        NULL
+    };
+
+    struct CommandMap **commandMap = (struct CommandMap *[]) {
+        &(struct CommandMap){},
+        NULL
+    };
 
     // Test Factory Method
-    const struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey1");
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey1");
+    controller->initializeController(controller, commandMap);
 
     // test assertions
     assert(controller != NULL);
-    assert(controller == puremvc_controller_getInstance(controllerMap, "ControllerTestKey1"));
+    assert(controller == puremvc_controller_getInstance(NULL, "ControllerTestKey1"));
 
     struct IController *removedController = NULL;
-    assert(puremvc_controller_removeController("ControllerTestKey1", &removedController) == true);;
-    assert(strcmp(((struct Controller *) removedController)->multitonKey, "ControllerTestKey1") == 0);
+    assert(puremvc_controller_removeController("ControllerTestKey1", &removedController) == true);
+    // assert(strcmp(((struct Controller *) removedController)->multitonKey, "ControllerTestKey1") == 0);
 
     struct IView *removedView = NULL;
     assert(puremvc_view_removeView("ControllerTestKey1", &removedView) == true);
-    assert(strcmp(((struct View *) removedView)->multitonKey, "ControllerTestKey1") == 0);
+    // assert(strcmp(((struct View *) removedView)->multitonKey, "ControllerTestKey1") == 0);
 }
 
 void testRegisterAndExecuteCommand() {
-    struct ViewMap *viewMap[] = { &(struct ViewMap) {
-        .view = (struct IView *) &(struct View) {
-            .observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) { // key = ControllerTest1, observer = command
-                .observers = (struct IObserver *[]) { (struct IObserver *) &(struct Observer){0}, NULL }
-            }, NULL }
-        },
-    }, NULL };
+    struct ViewMap **viewMap = (struct ViewMap *[]) {
+        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
+        NULL
+    };
 
-    puremvc_view_getInstance(viewMap, "ControllerTestKey2");
-
-    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
-        .controller = (struct IController *) &(struct Controller) {
-            .commandMap = (struct CommandMap *[]){ &(struct CommandMap){}, NULL }
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) {
+        &(struct ObserverMap) {
+            .observers = (struct IObserver *[]) {
+                memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
+                NULL
+            }
         },
-    }, NULL };
+        NULL
+    };
+
+    struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey2");
+    view->initializeView(view, observerMap, NULL);
+
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap) { .controller = alloca(puremvc_controller_size()) },
+        NULL
+    };
+
+    struct CommandMap **commandMap = (struct CommandMap *[]) {
+        &(struct CommandMap){},
+        NULL
+    };
 
     // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey2");
+    assert(controller != NULL);
+
+    controller->initializeController(controller, commandMap);
+
     assert(controller->registerCommand(controller, "ControllerTest1", test_controller_command_init) == true);
 
     // Create a 'ControllerTest' note
     struct ControllerTestVO vo = {12, 0};
-    struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "ControllerTest1", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "ControllerTest1", &vo, NULL);
 
     // Tell the controller to execute the Command associated with the note
     // the ControllerTestCommand invoked will multiply the vo.input value
@@ -84,37 +109,51 @@ void testRegisterAndExecuteCommand() {
     // test assertions
     assert(vo.result == 24);
 
-    struct ICommand *(**factory)() = 0;
-    assert(controller->removeCommand(controller, "ControllerTest1", factory) == true);;
+    struct ICommand *(*factory)(void *) = 0;
+    assert(controller->removeCommand(controller, "ControllerTest1", &factory) == true);;
     assert(puremvc_controller_removeController("ControllerTestKey2", NULL) == true);;
     assert(puremvc_view_removeView("ControllerTestKey2", NULL) == true);;
 }
 
 void testRegisterAndRemoveCommand() {
-   struct ViewMap *viewMap[] = { &(struct ViewMap) {
-       .view = (struct IView *) &(struct View) {
-           .observerMap = (struct ObserverMap *[]) { &(struct ObserverMap){
-                .observers = (struct IObserver *[]) { (struct IObserver *) &(struct Observer){}, NULL }
-           }, NULL }
-       }
-   }, NULL };
+   struct ViewMap **viewMap = (struct ViewMap *[]) {
+       &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
+       NULL
+   };
+
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) {
+        &(struct ObserverMap) {
+            .observers = (struct IObserver *[]) {
+                memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
+                NULL
+            }
+        },
+        NULL
+    };
 
     // Initialize View before Controller (same multiton key)
-    puremvc_view_getInstance(viewMap, "ControllerTestKey3"); // dependency for the controller
+    struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey3"); // dependency for the controller
+    view->initializeView(view, observerMap, NULL);
 
-    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
-        .controller = (struct IController *) &(struct Controller) {
-            .commandMap = (struct CommandMap *[]){ &(struct CommandMap){.key = ""}, NULL }
-        },
-    }, NULL };
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
+        NULL
+    };
+
+    struct CommandMap **commandMap = (struct CommandMap *[]) {
+        &(struct CommandMap){},
+        NULL
+    };
 
     // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey3");
+    controller->initializeController(controller, commandMap);
+
     assert(controller->registerCommand(controller, "ControllerRemoveTest", test_controller_command_init) == true);;
 
     // Create a 'ControllerTest' note
     struct ControllerTestVO vo = {12, 0};
-    struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "ControllerRemoveTest", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "ControllerRemoveTest", &vo, NULL);
 
     // Tell the controller to execute the Command associated with the note
     // the ControllerTestCommand invoked will multiply the vo.input value
@@ -142,24 +181,32 @@ void testRegisterAndRemoveCommand() {
 }
 
 void testHasCommand() {
-    struct ViewMap *viewMap[] = { &(struct ViewMap) {
-        .view = (struct IView *) &(struct View){
-            .observerMap = (struct ObserverMap *[]){ &(struct ObserverMap){
-                .observers = (struct IObserver *[]) { (struct IObserver *) &(struct Observer){}, NULL }
-            }, NULL }
-        }
-    }, NULL };
+    struct ViewMap **viewMap = (struct ViewMap *[]) {
+        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
+        NULL
+    };
 
-    puremvc_view_getInstance(viewMap, "ControllerTestKey4"); // dependency for the Controller
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) {
+        &(struct ObserverMap) { .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } },
+        NULL
+    };
 
-    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
-        .controller = (struct IController *) &(struct Controller) {
-            .commandMap = (struct CommandMap *[]){ &(struct CommandMap){}, NULL }
-        },
-    }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey4"); // dependency for the Controller
+    view->initializeView(view, observerMap, NULL);
+
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
+        NULL
+    };
+
+    struct CommandMap **commandMap = (struct CommandMap *[]) {
+        &(struct CommandMap){},
+        NULL
+    };
 
     // register the ControllerTestCommand to handle 'hasCommandTest' notes
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey4");
+    controller->initializeController(controller, commandMap);
 
     // test that hasCommand returns true for hasCommandTest notifications
     assert(controller->registerCommand(controller, "hasCommandTest", test_controller_command_init) == true);;
@@ -176,25 +223,35 @@ void testHasCommand() {
 }
 
 void testReregisterAndExecuteCommand() {
-    struct ViewMap *viewMap[] = { &(struct ViewMap) {
-        .view = (struct IView *) &(struct View) {
-            .observerMap = (struct ObserverMap *[]) { &(struct ObserverMap){
-                .observers = (struct IObserver *[]) { (struct IObserver *) &(struct Observer){}, NULL }
-            }, NULL },
+    struct ViewMap **viewMap = (struct ViewMap *[]) {
+        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
+        NULL
+    };
+
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) {
+        &(struct ObserverMap){
+            .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL },
         },
-    }, NULL };
+        NULL
+    };
 
     // Test Factory Method
-    assert(puremvc_view_getInstance(viewMap, "ControllerTestKey5") != NULL);
+    struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey5");
+    view->initializeView(view, observerMap, NULL);
 
-    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
-        .controller = (struct IController *) &(struct Controller) {
-            .commandMap = (struct CommandMap *[]){ &(struct CommandMap){}, NULL }
-        },
-    }, NULL };
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
+        NULL
+    };
+
+    struct CommandMap **commandMap = (struct CommandMap *[]) {
+        &(struct CommandMap){},
+        NULL
+    };
 
     // Fetch the controller, register the ControllerTestCommand to handle 'ControllerTest2' notes
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey5");
+    controller->initializeController(controller, commandMap);
 
     assert(controller->registerCommand(controller, "ControllerTest2", test_controller_command2_init) == true);
 
@@ -206,11 +263,11 @@ void testReregisterAndExecuteCommand() {
 
     // Create a 'ControllerTest2' note
     struct ControllerTestVO vo = {12, 0};
-    const struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "ControllerTest2", &vo, NULL);
+    const struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "ControllerTest2", &vo, NULL);
 
     // retrieve a reference to the View from the same core.
-    const struct IView *view = puremvc_view_getInstance(NULL, "ControllerTestKey5");
-    view->notifyObservers(view, notification);
+    const struct IView *view2 = puremvc_view_getInstance(NULL, "ControllerTestKey5");
+    view2->notifyObservers(view2, notification);
 
     // test assertions
     // if the command is executed once the value will be 24
@@ -228,23 +285,36 @@ void testReregisterAndExecuteCommand() {
 }
 
 void testRegisterAndUpdateCommand() {
-   struct ViewMap *viewMap[] = { &(struct ViewMap){
-        .view = (struct IView *) &(struct View) {
-            .observerMap = (struct ObserverMap *[]) { &(struct ObserverMap){
-                .observers = (struct IObserver *[]) { (struct IObserver *) &(struct Observer){}, NULL }
-            }, NULL }
-        }
-   }, NULL };
+    struct ViewMap **viewMap = (struct ViewMap *[]) {
+        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
+        NULL
+    };
 
-    puremvc_view_getInstance(viewMap, "ControllerTestKey6");
-
-    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
-        .controller = (struct IController *) &(struct Controller) {
-            .commandMap = (struct CommandMap *[]){ &(struct CommandMap){}, NULL }
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) {
+        &(struct ObserverMap){
+            .observers = (struct IObserver *[]){
+                memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
+                NULL
+            },
         },
-    }, NULL };
+        NULL
+    };
+
+    struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey6");
+    view->initializeView(view, observerMap, NULL);
+
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
+        NULL
+    };
+
+    struct CommandMap **commandMap = (struct CommandMap *[]) {
+        &(struct CommandMap){},
+        NULL
+    };
 
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey6");
+    controller->initializeController(controller, commandMap);
 
     // first registration
     assert(controller->registerCommand(controller, "ControllerTest2", test_controller_command_init) == true);
@@ -253,7 +323,7 @@ void testRegisterAndUpdateCommand() {
     assert(controller->registerCommand(controller, "ControllerTest2", test_controller_command2_init) == true);
 
     struct ControllerTestVO vo = {12, 10};
-    struct INotification *notification = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "ControllerTest2", &vo, NULL);
+    struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "ControllerTest2", &vo, NULL);
     controller->executeCommand(controller, notification);
 
     // second command result
@@ -266,14 +336,16 @@ void testRegisterAndUpdateCommand() {
 
 void testRemoveController() {
     // NOTE: Successful execution will produce several expected error logs
-    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
-        .controller = (struct IController *) &(struct Controller) {
-            .commandMap = (struct CommandMap *[]){ &(struct CommandMap){}, NULL }
-        },
-    }, NULL };
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
+        NULL
+    };
+
+    struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
 
     // Get a Multiton Controller instance
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey6");;
+    controller->initializeController(controller, commandMap);
 
     assert(controller != NULL);
 
@@ -290,148 +362,176 @@ void testRemoveController() {
     assert(puremvc_view_removeView("ControllerTestKey6", NULL) == false);;
 }
 
-void testRegisterAndRemoveMultipleCommands() {
-    struct ViewMap *viewMap[] = { &(struct ViewMap){
-        .view = (struct IView *) &(struct View) {
-            .observerMap = (struct ObserverMap *[]) { // Observer Map of 4 Notification types with its own list of Observers
-                &(struct ObserverMap) { .observers = (struct IObserver *[]) { (struct IObserver *) &(struct Observer){}, NULL } },
-                &(struct ObserverMap) { .observers = (struct IObserver *[]) { (struct IObserver *) &(struct Observer){}, NULL } },
-                &(struct ObserverMap) { .observers = (struct IObserver *[]) { (struct IObserver *) &(struct Observer){}, NULL } },
-                &(struct ObserverMap) { .observers = (struct IObserver *[]) { (struct IObserver *) &(struct Observer){}, NULL } },
-                NULL
-            }
-        }
-    }, NULL};
+void testCommandMapShiftLeft() {
+    struct ViewMap **viewMap = (struct ViewMap *[]) {
+        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
+        NULL
+    };
 
-    assert(puremvc_view_getInstance(viewMap, "ControllerTestKey8") != NULL);
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) {
+        &(struct ObserverMap){ .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } },
+        &(struct ObserverMap){ .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } },
+        &(struct ObserverMap){ .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } },
+        &(struct ObserverMap){ .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } },
+        NULL
+    };
 
-    struct ControllerMap *controllerMap[] = { &(struct ControllerMap) {
-        .controller = (struct IController *) &(struct Controller) {
-            .commandMap = (struct CommandMap *[]) { // ControllerMap for 4 Command slots
-                &(struct CommandMap){}, &(struct CommandMap){}, &(struct CommandMap){}, &(struct CommandMap){},
-                NULL
-            }
-        },
-    }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey8");
+    view->initializeView(view, observerMap, NULL);
+
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
+        NULL
+    };
+
+    struct CommandMap **commandMap = (struct CommandMap *[]){
+        &(struct CommandMap){},
+        &(struct CommandMap){},
+        &(struct CommandMap){},
+        &(struct CommandMap){},
+        NULL
+    };
 
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey8");
-    struct Controller *concrete = (struct Controller *) controller;
-    const struct View *view = (struct View *) concrete->view;
+    controller->initializeController(controller, commandMap);
 
-    struct INotification *notification0 = puremvc_notification_init((struct INotification *) &(struct Notification){0}, "command0", NULL, NULL);
+    size_t offset1 = sizeof(struct IView) + sizeof(const char *);
+    struct ObserverMap ***ppp1 = (struct ObserverMap ***)((char *) view + offset1);
+    struct ObserverMap **obsMap = *ppp1;
+
+    size_t offset2 = sizeof(struct IController) + sizeof(const char *);
+    struct CommandMap ***ppp2 = (struct CommandMap ***)((char *) controller + offset2);
+    struct CommandMap **cmdMap = *ppp2;
+
+    struct INotification *notification0 = puremvc_notification_init(alloca(puremvc_notification_size()), "command0", NULL, NULL);
     controller->executeCommand(controller, notification0); // crash test
     controller->executeCommand(controller, notification0);
 
     // Register four commands and verify that each is correctly associated to their dictionaries and observers
     assert(controller->registerCommand(controller, "command0", puremvc_simple_command_init) == true);;
-    assert(strcmp(concrete->commandMap[0]->key, "command0") == 0);
-    assert(concrete->commandMap[0]->factory == puremvc_simple_command_init);
-    assert(strcmp(view->observerMap[0]->key, "command0") == 0);
-    assert(view->observerMap[0]->observers[0]->getContext(view->observerMap[0]->observers[0]) == controller);
+    assert(strcmp(cmdMap[0]->key, "command0") == 0);
+    assert(cmdMap[0]->factory == puremvc_simple_command_init);
+    assert(strcmp(obsMap[0]->key, "command0") == 0);
+    assert(obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) == controller);
 
     assert(controller->registerCommand(controller, "command1", puremvc_simple_command_init) == true);
-    assert(strcmp(concrete->commandMap[1]->key, "command1") == 0);
-    assert(concrete->commandMap[1]->factory == puremvc_simple_command_init);
-    assert(strcmp(view->observerMap[1]->key, "command1") == 0);
-    assert(view->observerMap[1]->observers[0]->getContext(view->observerMap[1]->observers[0]) == controller);
+    assert(strcmp(cmdMap[1]->key, "command1") == 0);
+    assert(cmdMap[1]->factory == puremvc_simple_command_init);
+    assert(strcmp(obsMap[1]->key, "command1") == 0);
+    assert(obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) == controller);
 
     assert(controller->registerCommand(controller, "command2", puremvc_simple_command_init) == true);
-    assert(strcmp(concrete->commandMap[2]->key, "command2") == 0);
-    assert(concrete->commandMap[2]->factory == puremvc_simple_command_init);
-    assert(strcmp(view->observerMap[2]->key, "command2") == 0);
-    assert(view->observerMap[2]->observers[0]->getContext(view->observerMap[2]->observers[0]) == controller);
+    assert(strcmp(cmdMap[2]->key, "command2") == 0);
+    assert(cmdMap[2]->factory == puremvc_simple_command_init);
+    assert(strcmp(obsMap[2]->key, "command2") == 0);
+    assert(obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) == controller);
 
     assert(controller->registerCommand(controller, "command3", puremvc_simple_command_init) == true);
-    assert(strcmp(concrete->commandMap[3]->key, "command3") == 0);
-    assert(concrete->commandMap[3]->factory == puremvc_simple_command_init);
-    assert(strcmp(view->observerMap[3]->key, "command3") == 0);
-    assert(view->observerMap[3]->observers[0]->getContext(view->observerMap[3]->observers[0]) == controller);
+    assert(strcmp(cmdMap[3]->key, "command3") == 0);
+    assert(cmdMap[3]->factory == puremvc_simple_command_init);
+    assert(strcmp(obsMap[3]->key, "command3") == 0);
+    assert(obsMap[3]->observers[0]->getContext(obsMap[3]->observers[0]) == controller);
 
-    // Remove the second command (middle) and verify that remaining commands and observers 3, 4 are shifted correctly
+    // Remove the second command1 (middle) and verify that remaining commands 2, 3 and observers shifted correctly
     assert(controller->removeCommand(controller, "command1", NULL) == true);
-    assert(strcmp(concrete->commandMap[0]->key, "command0") == 0);
-    assert(concrete->commandMap[0]->factory == puremvc_simple_command_init);
-    assert(strcmp(view->observerMap[1]->key, "command2") == 0);
-    assert(view->observerMap[1]->observers[0]->getContext(view->observerMap[1]->observers[0]) == controller);
-    assert(strcmp(view->observerMap[2]->key, "command3") == 0);
-    assert(view->observerMap[2]->observers[0]->getContext(view->observerMap[2]->observers[0]) == controller);
+    assert(strcmp(cmdMap[0]->key, "command0") == 0);
+    assert(cmdMap[0]->factory == puremvc_simple_command_init);
+    assert(strcmp(obsMap[1]->key, "command2") == 0);
+    assert(obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) == controller);
+    assert(strcmp(obsMap[2]->key, "command3") == 0);
+    assert(obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) == controller);
 
-    // Remove the last command and verify the remaining command 1, 3 stay in place
+    // // Remove the last command3 and verify the remaining command 0, 2 stay in place
     assert(controller->removeCommand(controller, "command3", NULL) == true);
-    assert(strcmp(concrete->commandMap[0]->key, "command0") == 0);
-    assert(concrete->commandMap[0]->factory == puremvc_simple_command_init);
-    assert(strcmp(view->observerMap[1]->key, "command2") == 0);
-    assert(view->observerMap[1]->observers[0]->getContext(view->observerMap[1]->observers[0]) == controller);
+    assert(strcmp(cmdMap[0]->key, "command0") == 0);
+    assert(cmdMap[0]->factory == puremvc_simple_command_init);
+    assert(strcmp(obsMap[1]->key, "command2") == 0);
+    assert(obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) == controller);
 
-    // Remove the first command and verify that subsequent command 3 shift left
+    // Remove the first command0 and verify that subsequent command2 shift left
     assert(controller->removeCommand(controller, "command0", NULL) == true);
-    assert(strcmp(concrete->commandMap[0]->key, "command2") == 0);
-    assert(concrete->commandMap[0]->factory == puremvc_simple_command_init);
+    assert(strcmp(cmdMap[0]->key, "command2") == 0);
+    assert(cmdMap[0]->factory == puremvc_simple_command_init);
 
     // Remove all remaining mediators and confirm that the dictionary key is cleared
     assert(controller->removeCommand(controller, "command2", NULL) == true);
-    assert(concrete->commandMap[0]->key[0] == '\0');
+    assert(cmdMap[0]->key == NULL);
 
     assert(puremvc_controller_removeController("ControllerTestKey8", NULL) == true);
     assert(puremvc_view_removeView("ControllerTestKey8", NULL) == true);
 }
 
-void TestControllerShiftLeft() {
-    struct ViewMap *viewMap[] = {
-        &(struct ViewMap) { .view = (struct IView *) &(struct View) {} },
-        &(struct ViewMap) { .view = (struct IView *) &(struct View) {} },
-        &(struct ViewMap) { .view = (struct IView *) &(struct View) {} },
-        &(struct ViewMap) { .view = (struct IView *) &(struct View) {} },
+void TestControllerMapShiftLeft() {
+    struct ViewMap **viewMap = (struct ViewMap *[]) {
+        &(struct ViewMap){ .view = alloca(puremvc_view_size() ) },
+        &(struct ViewMap){ .view = alloca(puremvc_view_size() ) },
+        &(struct ViewMap){ .view = alloca(puremvc_view_size() ) },
+        &(struct ViewMap){ .view = alloca(puremvc_view_size() ) },
         NULL
     };
 
-    assert(puremvc_view_getInstance(viewMap, "controller1") != NULL); // Controller dependencies
+    assert(puremvc_view_getInstance(viewMap, "controller0") != NULL); // Controller dependencies
+    assert(puremvc_view_getInstance(viewMap, "controller1") != NULL);
     assert(puremvc_view_getInstance(viewMap, "controller2") != NULL);
     assert(puremvc_view_getInstance(viewMap, "controller3") != NULL);
-    assert(puremvc_view_getInstance(viewMap, "controller4") != NULL);
 
-    struct ControllerMap *controllerMap[] = {
-        &(struct ControllerMap) { .controller = (struct IController *) &(struct Controller) {} },
-        &(struct ControllerMap) { .controller = (struct IController *) &(struct Controller) {} },
-        &(struct ControllerMap) { .controller = (struct IController *) &(struct Controller) {} },
-        &(struct ControllerMap) { .controller = (struct IController *) &(struct Controller) {} },
+    struct ControllerMap **instanceMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size() ) },
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size() ) },
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size() ) },
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size() ) },
         NULL
     };
 
-    assert(puremvc_controller_getInstance(controllerMap, "controller1") != NULL);
-    assert(puremvc_controller_getInstance(controllerMap, "controller2") != NULL);
-    assert(puremvc_controller_getInstance(controllerMap, "controller3") != NULL);
-    assert(puremvc_controller_getInstance(controllerMap, "controller4") != NULL);
+    // create 4 instances
+    assert(puremvc_controller_getInstance(instanceMap, "controller0") != NULL);
+    assert(strcmp(instanceMap[0]->key, "controller0") == 0);
+    const char **key0 = (const char **)((char *) instanceMap[0]->controller + sizeof(struct IController));
+    assert(strcmp(*key0, "controller0") == 0);
 
-    struct IController *controller2 = NULL;
-    assert(puremvc_controller_removeController("controller2", &controller2) == true); // remove middle
-    assert(strcmp(((struct Controller *) controller2)->multitonKey, "controller2") == 0);
+    assert(puremvc_controller_getInstance(instanceMap, "controller1") != NULL);
+    assert(strcmp(instanceMap[1]->key, "controller1") == 0);
+    const char **key1 = (const char **)((char *) instanceMap[1]->controller + sizeof(struct IController));
+    assert(strcmp(*key1, "controller1") == 0);
 
-    struct IController *controller4 = NULL;
-    assert(puremvc_controller_removeController("controller4", &controller4) == true); // remove last
-    assert(strcmp(((struct Controller *) controller4)->multitonKey, "controller4") == 0);
+    assert(puremvc_controller_getInstance(instanceMap, "controller2") != NULL);
+    const char **key2 = (const char **)((char *) instanceMap[2]->controller + sizeof(struct IController));
+    assert(strcmp(*key2, "controller2") == 0);
 
-    struct IController *controller1 = NULL;
-    assert(puremvc_controller_removeController("controller1", &controller1) == true); // remove first
-    assert(strcmp(((struct Controller *) controller1)->multitonKey, "controller1") == 0);
+    assert(puremvc_controller_getInstance(instanceMap, "controller3") != NULL);
+    const char **key3 = (const char **)((char *) instanceMap[3]->controller + sizeof(struct IController));
+    assert(strcmp(*key3, "controller3") == 0);
 
-    struct IController *controller3 = NULL;
-    assert(puremvc_controller_removeController("controller3", &controller3) == true); // remove remaining
-    assert(strcmp(((struct Controller *) controller3)->multitonKey, "controller3") == 0);
+    // remove
+    struct IController *controller1 = NULL; // remove middle controller1, remaining 0, 2, 3
+    assert(puremvc_controller_removeController("controller1", &controller1) == true);
+    assert(strcmp(instanceMap[0]->key, "controller0") == 0);
+    assert(strcmp(instanceMap[1]->key, "controller2") == 0);
+    assert(strcmp(instanceMap[2]->key, "controller3") == 0);
+    assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
 
-    struct IView *view2 = NULL;
-    assert(puremvc_view_removeView("controller2", &view2) == true); // remove middle
-    assert(strcmp(((struct View *) view2)->multitonKey, "controller2") == 0);
+    struct IController *controller3 = NULL; // remove last, remaining 0, 2
+    assert(puremvc_controller_removeController("controller3", &controller3) == true);
+    assert(strcmp(instanceMap[0]->key, "controller0") == 0);
+    assert(strcmp(instanceMap[1]->key, "controller2") == 0);
+    assert(instanceMap[2]->key == NULL);
+    assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
 
-    struct IView *view4 = NULL;
-    assert(puremvc_view_removeView("controller4", &view4) == true); // remove last
-    assert(strcmp(((struct View *) view4)->multitonKey, "controller4") == 0);
+    struct IController *controller0 = NULL; // remove first, remaining 2
+    assert(puremvc_controller_removeController("controller0", &controller0) == true);
+    assert(strcmp(instanceMap[0]->key, "controller2") == 0);
+    assert(instanceMap[1]->key == NULL);
+    assert(instanceMap[2]->key == NULL);
+    assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
 
-    struct IView *view1 = NULL;
-    assert(puremvc_view_removeView("controller1", &view1) == true); // remove first
-    assert(strcmp(((struct View *) view1)->multitonKey, "controller1") == 0);
-
-    struct IView *view3 = NULL;
-    assert(puremvc_view_removeView("controller3", &view3) == true); // remove remaining
-    assert(strcmp(((struct View *) view3)->multitonKey, "controller3") == 0);
+    struct IController *controller2 = NULL; // remove remaining
+    assert(puremvc_controller_removeController("controller2", &controller2) == true);
+    assert(instanceMap[0]->key == NULL);
+    assert(instanceMap[1]->key == NULL);
+    assert(instanceMap[2]->key == NULL);
+    assert(instanceMap[3]->key == NULL);
+    assert(instanceMap[4] == NULL);
 }

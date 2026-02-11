@@ -215,7 +215,7 @@ static bool hasMediator(const struct IView *self, const char *mediatorName) {
     return exists;
 }
 
-static bool removeMediator(struct IView *self, const char *mediatorName, struct IMediator **mediator) {
+static bool removeMediator(struct IView *self, const char *mediatorName, struct IMediator **out) {
     struct View *this = (struct View *) self;
     bool removed = false;
 
@@ -224,8 +224,8 @@ static bool removeMediator(struct IView *self, const char *mediatorName, struct 
     size_t index = 0, i = 0;
     for (; this->mediatorMap != NULL && this->mediatorMap[i] != NULL && this->mediatorMap[i]->key != NULL; i++) { // find mediator
         if (this->mediatorMap[i]->key == mediatorName || strcmp(this->mediatorMap[i]->key, mediatorName) == 0) { // match
-            if (mediator != NULL) // out param
-                *mediator = this->mediatorMap[i]->mediator;
+            if (out != NULL) // out param
+                *out = this->mediatorMap[i]->mediator;
 
             const char **interests = this->mediatorMap[i]->mediator->listNotificationInterests(this->mediatorMap[i]->mediator);
             for (const char **cursor = interests; *cursor != NULL; cursor++) { // remove notification observers
@@ -233,14 +233,14 @@ static bool removeMediator(struct IView *self, const char *mediatorName, struct 
             }
             this->mediatorMap[i]->mediator->onRemove(this->mediatorMap[i]->mediator);
 
-            this->mediatorMap[i]->key = NULL; // remove key only
+            this->mediatorMap[i]->key = NULL; // remove key only, mediator is borrowed
             removed = true;
         } else {
             if (index != i) { // shift mediatorMap left
                 const struct IMediator *previous = this->mediatorMap[i]->mediator;
 
-                *this->mediatorMap[index] = *this->mediatorMap[i]; // shift left first, then remove
-                this->mediatorMap[i]->key = NULL; // remove
+                *this->mediatorMap[index] = *this->mediatorMap[i]; // shift left first
+                this->mediatorMap[i]->key = NULL; // remove key only
 
                 const char **interests = this->mediatorMap[index]->mediator->listNotificationInterests(this->mediatorMap[index]->mediator);
                 for (const char **cursor = interests; *cursor; cursor++) { // update observer context to relocated mediators
@@ -342,7 +342,7 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
     return instanceMap[i]->view;
 }
 
-bool puremvc_view_removeView(const char *key, struct IView **view) {
+bool puremvc_view_removeView(const char *key, struct IView **out) {
     if (instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::removeView] FATAL: Missing ViewMap storage; skipping removal.\033[0m\n");
         return false;
@@ -360,8 +360,8 @@ bool puremvc_view_removeView(const char *key, struct IView **view) {
     for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find view
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             instanceMap[i]->key = NULL;
-            if (view != NULL)
-                *view = instanceMap[i]->view;
+            if (out != NULL)
+                *out = instanceMap[i]->view;
         } else {
             if (index != i) { // shift left
                 *instanceMap[index] = *instanceMap[i];

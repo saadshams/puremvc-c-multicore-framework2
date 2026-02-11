@@ -28,7 +28,7 @@ void testGarbageStorageForMediator();
 void testObserverMapShiftLeft();
 void testObserverShiftLeft();
 void testMediatorMapShiftLeft();
-void testViewShiftLeft();
+void testViewMapShiftLeft();
 
 struct ViewTest {
     const char *lastNotification;

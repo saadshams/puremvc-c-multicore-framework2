@@ -7,5 +7,5 @@ void testHasCommand();
 void testReregisterAndExecuteCommand();
 void testRegisterAndUpdateCommand();
 void testRemoveController();
-void testRegisterAndRemoveMultipleCommands();
-void TestControllerShiftLeft();
+void testCommandMapShiftLeft();
+void TestControllerMapShiftLeft();

@@ -19,7 +19,7 @@ struct ControllerMap {
 
 struct CommandMap {
     const char *key;
-    struct ICommand *(*factory)(struct ICommand *);
+    struct ICommand *(*factory)(void *);
 };
 
 /**
@@ -31,17 +31,19 @@ struct CommandMap {
  * is responsible for executing commands in response to notifications.
  */
 struct IController {
-    void (*initializeController)(struct IController *self);
+    void (*initializeController)(struct IController *self, struct CommandMap **commandMap);
 
-    bool (*registerCommand)(struct IController *self, const char *notificationName, struct ICommand *(*factory)(struct ICommand *));
+    bool (*registerCommand)(struct IController *self, const char *notificationName, struct ICommand *(*factory)(void *buffer));
 
     void (*executeCommand)(const struct IController *self, struct INotification *notification);
 
     bool (*hasCommand)(const struct IController *self, const char *notificationName);
 
-    bool (*removeCommand)(struct IController *self, const char *notificationName, struct ICommand *(**factory)(struct ICommand *));
+    bool (*removeCommand)(struct IController *self, const char *notificationName, struct ICommand *(**out)(void *));
 };
+
+size_t puremvc_controller_size();
 
 struct IController *puremvc_controller_getInstance(struct ControllerMap **controllerMap, const char *key);
 
-bool puremvc_controller_removeController(const char *key, struct IController **controller);
+bool puremvc_controller_removeController(const char *key, struct IController **out);

@@ -76,4 +76,4 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
 
 bool puremvc_facade_hasCore(struct FacadeMap **facadeMap, const char *key);
 
-bool puremvc_facade_removeFacade(const char *key, struct IFacade **facade);
+bool puremvc_facade_removeFacade(const char *key, struct IFacade **out);
