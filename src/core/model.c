@@ -154,7 +154,7 @@ static void dispatchOnce(void) {
     mutex_init(&modelMapMutex);
 }
 
-struct IModel *puremvc_model_getInstance(struct ModelMap *volatile *modelMap, const char *key) {
+struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key) {
     if (modelMap == NULL && instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] FATAL: Missing ModelMap storage; skipping registration.\033[0m\n");
         return NULL;

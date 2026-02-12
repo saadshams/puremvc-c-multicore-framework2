@@ -29,7 +29,7 @@ int main() {
     // test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
     // test("testOnRegisterAndOnRemove", testOnRegisterAndOnRemove);
     // test("testRemoveModel", testRemoveModel);
-    test("testRegisterAndReplaceProxy", testRegisterAndReplaceProxy); //
+    test("testRegisterAndReplaceProxy2", testRegisterAndReplaceProxy); //
     // test("testProxyMapShiftLeft", testProxyMapShiftLeft);
     // test("testProxyMapShiftLeft", testProxyMapShiftLeft);
 
@@ -222,7 +222,7 @@ void testRemoveModel() {
     assert(instanceMap[0]->key == NULL);
 }
 
-void testRegisterAndReplaceProxy() {
+void testRegisterAndReplaceProxy2() {
     // 1. Explicitly named buffers
     // 1. Use volatile pointers to force the compiler to keep them in memory
     void *volatile m_buf = alloca(puremvc_model_size());
@@ -265,7 +265,7 @@ void testRegisterAndReplaceProxy() {
     }
 }
 
-void testRegisterAndReplaceProxy2() {
+void testRegisterAndReplaceProxy() {
     struct ModelMap **instanceMap = (struct ModelMap *[]) {
         &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
         NULL
