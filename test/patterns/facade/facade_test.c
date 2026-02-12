@@ -28,13 +28,11 @@ static void afterEach() {
 static void afterAll() {}
 
 static void test(const char *name, void (*callback)(void)) {
-    beforeEach();
-
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
+    beforeEach();
     callback();
-
     afterEach();
 
     printf("\033[0;32m[PASSED]\033[0m %s\n", name);

@@ -8,11 +8,25 @@
 #include <string.h>
 #include <stdlib.h>
 
+static void beforeAll() {}
+
+static void beforeEach() {
+    puremvc_model_reset();
+}
+
+static void afterEach() {
+    puremvc_model_reset();
+}
+
+static void afterAll() {}
+
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
+    beforeEach();
     callback();
+    afterEach();
 
     printf("\033[0;32m[PASSED]\033[0m %s\n", name);
     fflush(stdout);
@@ -23,15 +37,15 @@ int main() {
     printf("\033[1;36m[SUITE] %s\033[0m\n", "ModelTest");
     printf("\033[1;36m================================================\033[0m\n\n");
 
-    // test("testGetInstance", testGetInstance);
-    // test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy);
-    // test("testHasProxy", testHasProxy);
-    // test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
-    // test("testOnRegisterAndOnRemove", testOnRegisterAndOnRemove);
-    // test("testRemoveModel", testRemoveModel);
+    test("testGetInstance", testGetInstance);
+    test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy);
+    test("testHasProxy", testHasProxy);
+    test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
+    test("testOnRegisterAndOnRemove", testOnRegisterAndOnRemove);
+    test("testRemoveModel", testRemoveModel);
     test("testRegisterAndReplaceProxy", testRegisterAndReplaceProxy); //
-    // test("testProxyMapShiftLeft", testProxyMapShiftLeft);
-    // test("testProxyMapShiftLeft", testProxyMapShiftLeft);
+    test("testProxyMapShiftLeft", testProxyMapShiftLeft);
+    test("testProxyMapShiftLeft", testProxyMapShiftLeft);
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;
@@ -223,49 +237,6 @@ void testRemoveModel() {
 }
 
 void testRegisterAndReplaceProxy() {
-    // 1. Explicitly named buffers
-    // 1. Use volatile pointers to force the compiler to keep them in memory
-    void *volatile model_buffer = alloca(puremvc_model_size());
-    void *volatile proxy_buffer = alloca(puremvc_proxy_size());
-
-    // FORCE the compiler to treat this memory as "used" immediately
-    // memset(model_buffer, 0, puremvc_model_size());
-    // memset(proxy_buffer, 0, puremvc_proxy_size());
-
-    // 2. Named Slots (Do NOT use anonymous compound literals)
-    struct ModelMap model_slot = { .model = model_buffer };
-    struct ProxyMap proxy_slot = { .proxy = proxy_buffer }; // key set later by register
-
-    // 3. Named Maps
-    struct ModelMap *instanceMap[] = { &model_slot, NULL };
-    struct ProxyMap *proxyMap[] = { &proxy_slot, NULL };
-
-    // 4. Execution
-    struct IModel *model = puremvc_model_getInstance(instanceMap, "ModelTestKey9");
-    // after above line it says m_buf = Variable is not available
-
-    model->initializeModel(model, proxyMap);
-
-    // Register
-    model->registerProxy(model, puremvc_proxy_init, "sizes", NULL);
-
-    // Replace with static data
-    static const char *colors[] = {"red", "green", "blue", NULL};
-    model->registerProxy(model, puremvc_proxy_init, "sizes", (void *) colors);
-
-    // 5. Explicit Retrieval Verification
-    const struct IProxy *retrieved = model->retrieveProxy(model, "sizes");
-
-    // Prevent the compiler from optimizing away the retrieval by using the result
-    if (retrieved) {
-        const char **data = (const char **)retrieved->getData(retrieved);
-        // Use a volatile pointer if the debugger still struggles to see 'data'
-        printf("Verified Data: %s\n", data[0]);
-        if (strcmp(data[0], "red") != 0) abort();
-    }
-}
-
-void testRegisterAndReplaceProxy2() {
     struct ModelMap **instanceMap = (struct ModelMap *[]) {
         &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
         NULL

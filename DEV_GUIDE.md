@@ -194,3 +194,22 @@ void print_memory_usage() {
     printf("Max RSS: %ld KB\n", usage.ru_maxrss);
 }
 ```
+
+```c++
+    // 1. Explicitly named buffers
+    // 1. Use volatile pointers to force the compiler to keep them in memory
+    void *volatile model_buffer = alloca(puremvc_model_size());
+    void *volatile proxy_buffer = alloca(puremvc_proxy_size());
+
+    // FORCE the compiler to treat this memory as "used" immediately
+    // memset(model_buffer, 0, puremvc_model_size());
+    // memset(proxy_buffer, 0, puremvc_proxy_size());
+
+    // 2. Named Slots (Do NOT use anonymous compound literals)
+    struct ModelMap model_slot = { .model = model_buffer };
+    struct ProxyMap proxy_slot = { .proxy = proxy_buffer }; // key set later by register
+
+    // 3. Named Maps
+    struct ModelMap *instanceMap[] = { &model_slot, NULL };
+    struct ProxyMap *proxyMap[] = { &proxy_slot, NULL };
+```

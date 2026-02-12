@@ -10,11 +10,27 @@
 #include <string.h>
 #include <stdlib.h>
 
+static void beforeAll() {}
+
+static void beforeEach() {
+    puremvc_controller_reset();
+    puremvc_view_reset();
+}
+
+static void afterEach() {
+    puremvc_controller_reset();
+    puremvc_view_reset();
+}
+
+static void afterAll() {}
+
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
+    beforeEach();
     callback();
+    afterEach();
 
     printf("\033[0;32m[PASSED]\033[0m %s\n", name);
     fflush(stdout);
@@ -29,7 +45,7 @@ int main() {
     test("testRegisterAndExecuteCommand", testRegisterAndExecuteCommand);
     test("testRegisterAndRemoveCommand", testRegisterAndRemoveCommand);
     test("testHasCommand", testHasCommand);
-    // test("testReregisterAndExecuteCommand", testReregisterAndExecuteCommand); //
+    test("testReregisterAndExecuteCommand", testReregisterAndExecuteCommand);
     test("testRegisterAndUpdateCommand", testRegisterAndUpdateCommand);
     test("testRemoveController", testRemoveController);
     test("testCommandMapShiftLeft", testCommandMapShiftLeft);
@@ -240,10 +256,7 @@ void testHasCommand() {
 }
 
 void testReregisterAndExecuteCommand() {
-    struct ViewMap **viewMap = (struct ViewMap *[]) {
-        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
-        NULL
-    };
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
 
     struct ObserverMap **observerMap = (struct ObserverMap *[]) {
         &(struct ObserverMap){
@@ -260,11 +273,7 @@ void testReregisterAndExecuteCommand() {
         &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
         NULL
     };
-
-    struct CommandMap **commandMap = (struct CommandMap *[]) {
-        &(struct CommandMap){},
-        NULL
-    };
+    struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
 
     // Fetch the controller, register the ControllerTestCommand to handle 'ControllerTest2' notes
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey5");
@@ -285,7 +294,9 @@ void testReregisterAndExecuteCommand() {
     const struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "ControllerTest2", &vo, NULL);
 
     // retrieve a reference to the View from the same core.
-    const struct IView *view2 = puremvc_view_getInstance(NULL, "ControllerTestKey5");
+    const struct IView *view2 = puremvc_view_getInstance(viewMap, "ControllerTestKey5");
+    if (view2 == NULL) abort();
+
     view2->notifyObservers(view2, notification);
 
     // test assertions

@@ -18,11 +18,25 @@
 #include <string.h>
 #include <stdlib.h>
 
+static void beforeAll() {}
+
+static void beforeEach() {
+    puremvc_view_reset();
+}
+
+static void afterEach() {
+    puremvc_view_reset();
+}
+
+static void afterAll() {}
+
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
+    beforeEach();
     callback();
+    afterEach();
 
     printf("\033[0;32m[PASSED]\033[0m %s\n", name);
     fflush(stdout);
@@ -34,7 +48,7 @@ int main() {
     printf("\033[1;36m================================================\033[0m\n\n");
 
     test("testGetInstance", testGetInstance);
-    // test("testRegisterAndNotifyObserver", testRegisterAndNotifyObserver); //
+    test("testRegisterAndNotifyObserver", testRegisterAndNotifyObserver); //
     test("testRegisterAndRetrieveMediator", testRegisterAndRetrieveMediator);
     test("testHasMediator", testHasMediator);
     test("testRegisterAndRemoveMediator", testRegisterAndRemoveMediator);
@@ -59,9 +73,9 @@ int main() {
 
 struct ViewTestVar *viewTestVar;
 
-void handleNotification(const void *context, const struct INotification notification) {
+void handleNotification(const void *context, const struct INotification *notification) {
     (void)context;
-    viewTestVar = (struct ViewTestVar *)notification.getBody(&notification);
+    viewTestVar = (struct ViewTestVar *) notification->getBody(notification);
 }
 
 void testGetInstance() {
@@ -109,7 +123,6 @@ void testRegisterAndNotifyObserver() {
     // Register Observer's interest in a particular Notification with the View, passing in notification method and context
     if (view->registerObserver(view, "ViewTestNote1", (void (*)(const void *, const struct INotification *)) handleNotification, &viewComponent) != true)
         abort();
-    // view->registerObserver(view, "ViewTestNote1", observer);
 
     // Create a ViewTestNote, setting
     // a body value, and tell the View to notify
