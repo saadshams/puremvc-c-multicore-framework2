@@ -170,19 +170,19 @@ void testRegisterAndRetrieveProxy() {
     if (proxy == NULL) abort();
 
     // retrieve data from proxy
-    // const char **data = proxy->getData(proxy);
+    const char **data = proxy->getData(proxy);
 
     // test assertions
-    // assert(data != NULL);
-    // assert(strcmp(data[0], "red") == 0);
-    // assert(strcmp(data[1], "green") == 0);
-    // assert(strcmp(data[2], "blue") == 0);
+    if (data == NULL) abort();
+    if (strcmp(data[0], "red") != 0) abort();
+    if (strcmp(data[1], "green") != 0) abort();
+    if (strcmp(data[2], "blue") != 0) abort();
 
-    // struct IProxy *removedProxy = NULL;
-    // assert(facade->removeProxy(facade, "colors", &removedProxy) == true);
+    struct IProxy *removedProxy = NULL;
+    if (facade->removeProxy(facade, "colors", &removedProxy) == false) abort();
 
-    // struct IFacade *removedFacade = NULL;
-    // assert(puremvc_facade_removeFacade("FacadeTestKey4", &removedFacade) == true);
+    struct IFacade *removedFacade = NULL;
+    if (puremvc_facade_removeFacade("FacadeTestKey4", &removedFacade) == false) abort();
 }
 
 void testRegisterAndRemoveProxy() {
