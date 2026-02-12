@@ -8,6 +8,8 @@
 */
 
 #include "model.h"
+
+#include "puremvc/platform.h"
 #include "puremvc/i_proxy.h"
 
 #include <stdio.h>

@@ -7,6 +7,7 @@
 * @copyright BSD 3-Clause License
 */
 #include "view.h"
+
 #include "puremvc/i_mediator.h"
 #include "puremvc/i_observer.h"
 

@@ -1,10 +1,10 @@
 #include "notifier_test.h"
 
+#include "puremvc/platform.h"
 #include "puremvc/i_facade.h"
 #include "puremvc/i_notifier.h"
 #include "puremvc/i_command.h"
 
-#include <alloca.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

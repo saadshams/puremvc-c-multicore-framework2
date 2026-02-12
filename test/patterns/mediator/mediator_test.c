@@ -1,7 +1,8 @@
 #include "mediator_test.h"
+
+#include "puremvc/platform.h"
 #include "puremvc/i_mediator.h"
 
-#include <alloca.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

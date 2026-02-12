@@ -1,8 +1,8 @@
 #include "macro_command_test_command2.h"
 #include "macro_command_test_sub3_command.h"
-#include "puremvc/i_notifier.h"
 
-#include <alloca.h>
+#include "puremvc/platform.h"
+#include "puremvc/i_notifier.h"
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
     struct ICommand *(*subCommands[2])(struct ICommand *) = {

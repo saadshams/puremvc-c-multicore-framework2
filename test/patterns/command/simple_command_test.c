@@ -2,10 +2,11 @@
 #include "simple_command_test_command.h"
 #include "simple_command_test_vo.h"
 
+#include "puremvc/platform.h"
+#include "puremvc/i_command.h"
 #include "puremvc/i_notifier.h"
 #include "puremvc/i_notification.h"
 
-#include <alloca.h>
 #include <stdio.h>
 #include <stdlib.h>
 

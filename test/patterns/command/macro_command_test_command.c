@@ -1,11 +1,10 @@
 #include "macro_command_test_command.h"
-
 #include "macro_command_test_sub1_command.h"
 #include "macro_command_test_sub2_command.h"
 #include "macro_command_test_command2.h"
-#include "puremvc/i_notifier.h"
 
-#include <alloca.h>
+#include "puremvc/platform.h"
+#include "puremvc/i_notifier.h"
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
     struct ICommand *(*subCommands[4])(struct ICommand *) = {

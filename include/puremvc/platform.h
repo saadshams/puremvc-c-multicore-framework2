@@ -17,6 +17,7 @@ typedef INIT_ONCE MutexOnce;
 
 #else
 #include <pthread.h>
+#include <alloca.h>
 
 typedef struct { pthread_rwlock_t rwlock; } Mutex;
 typedef pthread_once_t MutexOnce;

@@ -1,8 +1,3 @@
-#include "puremvc/i_view.h"
-#include "puremvc/i_notification.h"
-#include "puremvc/i_mediator.h"
-#include "puremvc/i_observer.h"
-
 #include "view_test.h"
 
 #include "view_test_mediator.h"
@@ -13,7 +8,12 @@
 #include "view_test_mediator6.h"
 #include "view_test_mediator7.h"
 
-#include <alloca.h>
+#include "puremvc/platform.h"
+#include "puremvc/i_view.h"
+#include "puremvc/i_notification.h"
+#include "puremvc/i_mediator.h"
+#include "puremvc/i_observer.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

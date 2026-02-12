@@ -1,9 +1,9 @@
 #include "model_test.h"
 
+#include "puremvc/platform.h"
 #include "puremvc/i_model.h"
 #include "model_test_proxy.h"
 
-#include <alloca.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

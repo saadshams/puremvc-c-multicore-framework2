@@ -4,7 +4,6 @@
  */
 #pragma once
 
-#include "platform.h"
 #include "i_controller.h"
 #include "i_model.h"
 #include "i_view.h"
@@ -15,3 +14,4 @@
 #include "i_notifier.h"
 #include "i_observer.h"
 #include "i_proxy.h"
+#include "platform.h"

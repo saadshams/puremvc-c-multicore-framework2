@@ -1,8 +1,9 @@
 #include "observer_test.h"
+
+#include "puremvc/platform.h"
 #include "puremvc/i_observer.h"
 #include "puremvc/i_notification.h"
 
-#include <alloca.h>
 #include <stdio.h>
 #include <stdlib.h>
 

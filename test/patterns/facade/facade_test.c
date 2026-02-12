@@ -2,6 +2,7 @@
 #include "facade_test_command.h"
 #include "facade_test_vo.h"
 
+#include "puremvc/platform.h"
 #include "puremvc/i_facade.h"
 #include "puremvc/i_observer.h"
 

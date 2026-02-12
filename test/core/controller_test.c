@@ -3,9 +3,11 @@
 #include "controller_test_command2.h"
 #include "controller_test_vo.h"
 
+#include "puremvc/platform.h"
+#include "puremvc/i_controller.h"
 #include "puremvc/i_view.h"
+#include "puremvc/i_observer.h"
 
-#include <alloca.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

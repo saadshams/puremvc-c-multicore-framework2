@@ -1,8 +1,8 @@
 #include "proxy_test.h"
 
+#include "puremvc/platform.h"
 #include "puremvc/i_proxy.h"
 
-#include <alloca.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

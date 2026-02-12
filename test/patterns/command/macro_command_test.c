@@ -2,9 +2,9 @@
 #include "macro_command_test_command.h"
 #include "macro_command_test_vo.h"
 
+#include "puremvc/platform.h"
 #include "puremvc/i_notification.h"
 
-#include <alloca.h>
 #include <stdio.h>
 #include <stdlib.h>
 
