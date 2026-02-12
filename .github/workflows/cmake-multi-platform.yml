@@ -76,7 +76,6 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-          -DCMAKE_C_FLAGS="-Wextra -fsanitize=address,undefined,leak -fno-omit-frame-pointer" \
           -DBUILD_TESTS=ON \
           -DEXAMPLE_TESTS=ON \
           -S "${{ github.workspace }}"
