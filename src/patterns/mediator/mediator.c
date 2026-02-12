@@ -37,8 +37,9 @@ static const char *const *listNotificationInterests(const struct IMediator *self
     return interests;
 }
 
-static void handleNotification(const struct IMediator *self, struct INotification *notification) {
+static bool handleNotification(const struct IMediator *self, struct INotification *notification) {
     (void)self; (void)notification;
+    return true;
 }
 
 static void onRegister(struct IMediator *self) {

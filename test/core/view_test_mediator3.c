@@ -7,9 +7,11 @@ static const char *const *listNotificationInterests(const struct IMediator *self
     return interests;
 }
 
-static void handleNotification(const struct IMediator *self, struct INotification *notification) {
+static bool handleNotification(const struct IMediator *self, struct INotification *notification) {
+    if (notification == NULL) return false;
     struct ViewTest *viewTest = self->getComponent(self);
     viewTest->lastNotification = notification->getName(notification);
+    return true;
 }
 
 struct IMediator *view_test_mediator3(void *buffer, const char *name, void *component) {
