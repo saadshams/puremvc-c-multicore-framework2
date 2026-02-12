@@ -39,6 +39,7 @@ static void test(const char *name, void (*callback)(void)) {
 }
 
 int main() {
+    beforeAll();
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "ControllerTest");
     printf("\033[1;36m================================================\033[0m\n\n");
@@ -54,6 +55,7 @@ int main() {
     test("TestControllerMapShiftLeft", TestControllerMapShiftLeft);
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
+    afterAll();
     return 0;
 }
 

@@ -37,6 +37,7 @@ int main() {
     printf("\033[1;36m[SUITE] %s\033[0m\n", "ModelTest");
     printf("\033[1;36m================================================\033[0m\n\n");
 
+    beforeAll();
     test("testGetInstance", testGetInstance);
     test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy);
     test("testHasProxy", testHasProxy);
@@ -46,6 +47,7 @@ int main() {
     test("testRegisterAndReplaceProxy", testRegisterAndReplaceProxy);
     test("testProxyMapShiftLeft", testProxyMapShiftLeft);
     test("testProxyMapShiftLeft", testProxyMapShiftLeft);
+    afterAll();
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;

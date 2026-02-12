@@ -10,11 +10,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static void beforeAll() {}
+
+static void beforeEach() {}
+
+static void afterEach() {}
+
+static void afterAll() {}
+
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
+    beforeEach();
     callback();
+    afterEach();
 
     printf("\033[0;32m[PASSED]\033[0m %s\n", name);
     fflush(stdout);
@@ -25,7 +35,9 @@ int main() {
     printf("\033[1;36m[SUITE] %s\033[0m\n", "SimpleCommandTest");
     printf("\033[1;36m================================================\033[0m\n\n");
 
+    beforeAll();
     test("testSimpleCommandExecute", testSimpleCommandExecute);
+    afterAll();
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;

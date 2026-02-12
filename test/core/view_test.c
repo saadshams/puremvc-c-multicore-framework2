@@ -47,6 +47,7 @@ int main() {
     printf("\033[1;36m[SUITE] %s\033[0m\n", "ViewTest");
     printf("\033[1;36m================================================\033[0m\n\n");
 
+    beforeAll();
     test("testGetInstance", testGetInstance);
     test("testRegisterAndNotifyObserver", testRegisterAndNotifyObserver);
     test("testRegisterAndRetrieveMediator", testRegisterAndRetrieveMediator);
@@ -66,6 +67,7 @@ int main() {
     test("testObserverShiftLeft", testObserverShiftLeft);
     test("testMediatorMapShiftLeft", testMediatorMapShiftLeft);
     test("testViewMapShiftLeft", testViewMapShiftLeft);
+    afterAll();
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;

@@ -41,12 +41,11 @@ static void test(const char *name, void (*callback)(void)) {
 }
 
 int main() {
-    beforeAll();
-
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "FacadeTest");
     printf("\033[1;36m================================================\033[0m\n\n");
 
+    beforeAll();
     test("testGetInstance", testGetInstance);
     test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification);
     test("testRegisterAndRemoveCommandAndSendNotification", testRegisterAndRemoveCommandAndSendNotification);
@@ -58,10 +57,9 @@ int main() {
     test("testHasCommand", testHasCommand);
     test("testHasCoreAndRemoveCore", testHasCoreAndRemoveCore);
     test("testFacadeMapShiftLeft", testFacadeMapShiftLeft);
+    afterAll();
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
-
-    afterAll();
     return 0;
 }
 
