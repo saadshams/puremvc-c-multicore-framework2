@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include "i_mutex.h"
+#include "platform.h"
 #include "i_controller.h"
 #include "i_model.h"
 #include "i_view.h"

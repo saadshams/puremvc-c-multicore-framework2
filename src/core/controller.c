@@ -9,7 +9,7 @@
 
 #include "controller.h"
 
-#include "puremvc/i_mutex.h"
+#include "puremvc/platform.h"
 #include "puremvc/i_controller.h"
 #include "puremvc/i_command.h"
 

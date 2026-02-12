@@ -7,7 +7,7 @@
 */
 #pragma once
 
-#include "puremvc/i_mutex.h"
+#include "puremvc/platform.h"
 #include "puremvc/i_model.h"
 
 struct Model {

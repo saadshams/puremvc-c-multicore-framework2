@@ -21,7 +21,7 @@ add_library(puremvc::puremvc ALIAS puremvc)
 if(WIN32)
     target_sources(puremvc PRIVATE src/platform/win/mutex.c)
 else()
-    target_sources(puremvc PRIVATE src/platform/posix/i_mutex.c)
+    target_sources(puremvc PRIVATE src/platform/posix/mutex.c)
 endif()
 
 # 4️⃣ Target include paths

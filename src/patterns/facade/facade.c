@@ -8,7 +8,7 @@
 */
 #include "facade.h"
 
-#include <puremvc/i_mutex.h>
+#include <puremvc/platform.h>
 #include "puremvc/i_facade.h"
 #include "puremvc/i_controller.h"
 #include "puremvc/i_model.h"

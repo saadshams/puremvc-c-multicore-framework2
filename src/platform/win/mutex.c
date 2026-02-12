@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <stdlib.h>
 
-#include "puremvc/i_mutex.h"
+#include "puremvc/platform.h"
 
 void mutex_init(Mutex *mutex) {
     InitializeCriticalSection(&mutex->cs);
