@@ -11,6 +11,8 @@
 #include "i_notification.h"
 #include "i_notifier.h"
 
+#include <stdbool.h>
+
 /**
  * @struct ICommand
  * @brief Represents a command in the PureMVC C framework.
@@ -22,7 +24,7 @@
 struct ICommand {
     struct INotifier *(*getNotifier)(const struct ICommand *self);
 
-    void (*execute)(const struct ICommand *self, struct INotification *notification);
+    bool (*execute)(const struct ICommand *self, struct INotification *notification);
 };
 
 size_t puremvc_simple_command_size();

@@ -244,9 +244,6 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
         }
     }
 
-    if (index == 0) // all keys were removed; reset
-        instanceMap = NULL;
-
     mutex_unlock(&facadeMapMutex);
 
     return true;

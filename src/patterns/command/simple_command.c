@@ -15,8 +15,9 @@ static struct INotifier *getNotifier(const struct ICommand *self) {
     return (struct INotifier *) &this->notifier;
 }
 
-static void execute(const struct ICommand *self, struct INotification *notification) {
+static bool execute(const struct ICommand *self, struct INotification *notification) {
     (void)self; (void)notification;
+    return true;
 }
 
 size_t puremvc_simple_command_size() {

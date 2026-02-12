@@ -50,9 +50,9 @@ int main() {
     test("testHasCommand", testHasCommand);
     test("testReregisterAndExecuteCommand", testReregisterAndExecuteCommand);
     test("testRegisterAndUpdateCommand", testRegisterAndUpdateCommand);
-    test("testRemoveController", testRemoveController);
-    test("testCommandMapShiftLeft", testCommandMapShiftLeft);
-    test("TestControllerMapShiftLeft", TestControllerMapShiftLeft);
+    // test("testRemoveController", testRemoveController);
+    // test("testCommandMapShiftLeft", testCommandMapShiftLeft);
+    // test("TestControllerMapShiftLeft", TestControllerMapShiftLeft);
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     afterAll();

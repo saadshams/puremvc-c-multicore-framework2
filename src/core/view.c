@@ -369,9 +369,6 @@ bool puremvc_view_removeView(const char *key, struct IView **out) {
         }
     }
 
-    if (index == 0) // all keys were removed; reset
-        instanceMap = NULL;
-
     mutex_unlock(&viewMapMutex);
 
     return true;

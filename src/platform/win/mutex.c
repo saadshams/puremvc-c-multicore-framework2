@@ -2,24 +2,34 @@
 
 #include <stdlib.h>
 
-void mutex_init(Mutex *mutex) {
+int mutex_init(Mutex *mutex) {
+    if (mutex == NULL) return -1;
     InitializeCriticalSection(&mutex->cs);
+    return 0;
 }
 
-void mutex_lock(Mutex *mutex) {
+int mutex_lock(Mutex *mutex) {
+    if (mutex == NULL) return -1;
     EnterCriticalSection(&mutex->cs);
+    return 0;
 }
 
-void mutex_lock_shared(Mutex *mutex) {
+int mutex_lock_shared(Mutex *mutex) {
+    if (mutex == NULL) return -1;
     EnterCriticalSection(&mutex->cs);
+    return 0;
 }
 
-void mutex_unlock(Mutex *mutex) {
+int mutex_unlock(Mutex *mutex) {
+    if (mutex == NULL) return -1;
     LeaveCriticalSection(&mutex->cs);
+    return 0;
 }
 
-void mutex_destroy(Mutex *mutex) {
+int mutex_destroy(Mutex *mutex) {
+    if (mutex == NULL) return -1;
     DeleteCriticalSection(&mutex->cs);
+    return 0;
 }
 
 static BOOL CALLBACK _mutex_win_once_wrapper(PINIT_ONCE InitOnce, PVOID Parameter, PVOID* Context) {
@@ -29,6 +39,8 @@ static BOOL CALLBACK _mutex_win_once_wrapper(PINIT_ONCE InitOnce, PVOID Paramete
     return TRUE;
 }
 
-void mutex_once(MutexOnce *once, void (*callback)(void)) {
+int mutex_once(MutexOnce *once, void (*callback)(void)) {
+    if (mutex == NULL) return -1;
     InitOnceExecuteOnce(once, _mutex_win_once_wrapper, (PVOID)callback, NULL);
+    return 0;
 }

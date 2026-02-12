@@ -1,11 +1,14 @@
 #include "facade_test_command.h"
 #include "facade_test_vo.h"
 
-static void execute(const struct ICommand *self, struct INotification *notification) {
+static bool execute(const struct ICommand *self, struct INotification *notification) {
+    if (notification == NULL) return false;
+
     struct FacadeTestVO *vo = (struct FacadeTestVO *)notification->getBody(notification);
 
     // Fabricate a result
     vo->result = 2 * vo->input;
+    return true;
 }
 
 struct ICommand *test_facade_command(void *buffer) {

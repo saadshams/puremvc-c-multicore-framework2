@@ -236,9 +236,6 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
         }
     }
 
-    if (index == 0) // all keys were removed; reset
-        instanceMap = NULL;
-
     mutex_unlock(&modelMapMutex);
 
     return true;

@@ -6,7 +6,9 @@
 #include "puremvc/platform.h"
 #include "puremvc/i_notifier.h"
 
-static void execute(const struct ICommand *self, struct INotification *notification) {
+static bool execute(const struct ICommand *self, struct INotification *notification) {
+    if (notification == NULL) return false;
+
     struct ICommand *(*subCommands[4])(struct ICommand *) = {
         macro_command_test_sub1_command,
         macro_command_test_sub2_command,
@@ -21,8 +23,11 @@ static void execute(const struct ICommand *self, struct INotification *notificat
         struct INotifier *notifier = command->getNotifier(command); // get multitonKey from the parent macro command
         notifier->initializeNotifier(notifier, self->getNotifier(self)->getMultitonKey(self->getNotifier(self)));
 
-        command->execute(command, notification);
+        if (command->execute(command, notification) == false) // stop execution if subCommands fail
+            return false;
     }
+
+    return true;
 }
 
 struct ICommand *macro_command_test_command(void *buffer) {

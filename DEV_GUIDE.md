@@ -213,3 +213,25 @@ void print_memory_usage() {
     struct ModelMap *instanceMap[] = { &model_slot, NULL };
     struct ProxyMap *proxyMap[] = { &proxy_slot, NULL };
 ```
+
+That looks airtight now. You've covered the null parameters, the internal state guards, the debug-only informational logs, and—crucially—the mutex cleanup on all exit paths.
+
+The flow is now logically complete:
+
+1. **Validation** (Fail fast)
+2. **Concurrency Lock**
+3. **Search & Update** (with early exit)
+4. **Capacity Check**
+5. **Side Effect** (Registering with the View)
+6. **Concurrency Unlock**
+
+One minor housekeeping tip: In the `fprintf` on the `this->view == NULL` check, you have a double bracket `[[`. You might want to strip that back to a single one to keep your logs tidy.
+
+### Final Code Checklist for `registerCommand`
+
+* [x] **Null Guards**: `notificationName` and `factory` are safe.
+* [x] **Deadlock Prevention**: Mutex is unlocked on all `return` paths after it's acquired.
+* [x] **Release Build Compliance**: `printf` is hidden behind `NDEBUG`.
+* [x] **State Integrity**: Checks `view` and `commandMap` before attempting logic.
+
+**Ready for the next one? Paste the next function when you're ready to review.**
