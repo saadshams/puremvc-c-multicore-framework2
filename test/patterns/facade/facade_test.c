@@ -367,21 +367,11 @@ void testHasCoreAndRemoveCore() {
 }
 
 void testFacadeMapShiftLeft() {
-    void *volatile facade0_buffer = alloca(puremvc_facade_size());
-    void *volatile facade1_buffer = alloca(puremvc_facade_size());
-    void *volatile facade2_buffer = alloca(puremvc_facade_size());
-    void *volatile facade3_buffer = alloca(puremvc_facade_size());
-
-    // memset(facade0_buffer, 0, puremvc_facade_size());
-    // memset(facade1_buffer, 0, puremvc_facade_size());
-    // memset(facade2_buffer, 0, puremvc_facade_size());
-    // memset(facade3_buffer, 0, puremvc_facade_size());
-
     struct FacadeMap **instanceMap = (struct FacadeMap *[]) { // facadeMap with 4 slots for the instance
-        &(struct FacadeMap){ .facade = facade0_buffer },
-        &(struct FacadeMap){ .facade = facade1_buffer },
-        &(struct FacadeMap){ .facade = facade2_buffer },
-        &(struct FacadeMap){ .facade = facade3_buffer },
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
         NULL
     };
 
