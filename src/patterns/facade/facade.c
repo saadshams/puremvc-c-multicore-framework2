@@ -163,7 +163,8 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
         return NULL;
     }
 
-    instanceMap = facadeMap; // if facadeMap is NULL
+    // instanceMap = facadeMap; // if facadeMap is NULL
+    if (facadeMap != NULL) instanceMap = facadeMap;
 
     mutex_once(&facadeMutexOnce, dispatchOnce);
     mutex_lock(&facadeMapMutex);

@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "puremvc/i_observer.h"
+
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
@@ -25,7 +27,7 @@ int main() {
     printf("\033[1;36m================================================\033[0m\n\n");
 
     test("testInstance", testInstance);
-    // test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification); //
+    test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification); //
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;
@@ -43,13 +45,20 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     temp->result = temp->value * 4;
 }
 
-static struct ICommand *command() {
+static struct ICommand *notifier_command() {
     struct ICommand *command = puremvc_simple_command_init(alloca(puremvc_simple_command_size()));
     command->execute = execute;
     return command;
 }
 
 void testInstance() {
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) {
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size())},
+        NULL
+    };
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "NotifierTest1");
+    facade->initializeFacade(facade, NULL, NULL, NULL);
+
     // create notifier instance
     struct INotifier *notifier = puremvc_notifier_init(alloca(puremvc_notifier_size()));
 
@@ -63,6 +72,39 @@ void testInstance() {
 }
 
 void testRegisterCommandAndSendNotification() {
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) {
+        &(struct ObserverMap) {
+            .observers = (struct IObserver *[]){
+                memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
+                NULL
+            }
+        }, NULL };
+    struct ViewMap **viewMap = (struct ViewMap *[]) {
+        &(struct ViewMap){ .view = alloca(puremvc_view_size())},
+        NULL
+    };
+    struct IView *view = puremvc_view_getInstance(viewMap, "NotifierTest2");
+    view->initializeView(view, observerMap, NULL);
+
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
+        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
+        NULL
+    };
+    struct CommandMap **commandMap = (struct CommandMap *[]) {
+        &(struct CommandMap){},
+        NULL
+    };
+
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "NotifierTest2");
+    controller->initializeController(controller, view, commandMap);
+
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) {
+        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
+        NULL
+    };
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "NotifierTest2");
+    facade->initializeFacade(facade, NULL, view, controller);
+
     // create a notifier
     struct INotifier *notifier = puremvc_notifier_init(alloca(puremvc_notifier_size()));
 
@@ -72,15 +114,15 @@ void testRegisterCommandAndSendNotification() {
     struct Object temp = {4};
 
     // get facade instance
-    // const struct IFacade *facade = notifier->getFacade(notifier);
+    const struct IFacade *facade2 = notifier->getFacade(notifier);
 
     // register a command and send notification
-    // assert(facade->registerCommand(facade, "TestNote", command) == 0);
-    // notifier->sendNotification(notifier, "TestNote", &temp, NULL);
+    if (facade2->registerCommand(facade, "TestNote", notifier_command) == false) abort();
+    notifier->sendNotification(notifier, "TestNote", &temp, NULL);
 
     // assert result
-    // assert(temp.result == 16);
+    if (temp.result != 16) abort();
 
-    // facade->removeCommand(facade, "TestNote", NULL);
-    // puremvc_facade_removeFacade("NotifierTest2", NULL);
+    facade->removeCommand(facade, "TestNote", NULL);
+    puremvc_facade_removeFacade("NotifierTest2", NULL);
 }

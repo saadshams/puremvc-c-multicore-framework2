@@ -7,17 +7,17 @@
 * @copyright BSD 3-Clause License
 */
 #include "notifier.h"
-// #include "puremvc/facade.h"
+#include "puremvc/i_facade.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// static struct IFacade *getFacade(const struct INotifier *self) {
-//     struct IFacade *facade = puremvc_facade_getInstance(self->getMultitonKey(self), puremvc_facade);
-//     facade->initializeFacade(facade);
-//     return facade;
-// }
+static struct IFacade *getFacade(const struct INotifier *self) {
+    struct IFacade *facade = puremvc_facade_getInstance(NULL, self->getMultitonKey(self));
+    facade->initializeFacade(facade, NULL, NULL, NULL);
+    return facade;
+}
 
 const char *getMultitonKey(const struct INotifier *self) {
     const struct Notifier *this = (struct Notifier *) self;
@@ -33,10 +33,10 @@ static void initializeNotifier(struct INotifier *self, const char *key) {
     this->key = key;
 }
 
-// static void sendNotification(const struct INotifier *self, const char *notificationName, void *body, const char *type) {
-//     const struct IFacade *facade = self->getFacade(self);
-//     facade->sendNotification(facade, notificationName, body, type);
-// }
+static void sendNotification(const struct INotifier *self, const char *notificationName, void *body, const char *type) {
+    const struct IFacade *facade = self->getFacade(self);
+    facade->sendNotification(facade, notificationName, body, type);
+}
 
 size_t puremvc_notifier_size() {
     return (sizeof(struct Notifier) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
@@ -47,10 +47,10 @@ struct INotifier *puremvc_notifier_init(void *buffer) {
 
     memset(this, 0, sizeof(struct Notifier));
 
-    // this->base.getFacade = getFacade;
+    this->base.getFacade = getFacade;
     this->base.getMultitonKey = getMultitonKey;
     this->base.initializeNotifier = initializeNotifier;
-    // this->base.sendNotification = sendNotification;
+    this->base.sendNotification = sendNotification;
 
     return (struct INotifier *) this;
 }
