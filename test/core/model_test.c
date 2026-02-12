@@ -279,8 +279,8 @@ void testRegisterAndReplaceProxy() {
     struct IModel *model = puremvc_model_getInstance(instanceMap, "ModelTestKey9");
     model->initializeModel(model, proxyMap);
 
-    // int *sizes = (int []) {1, 0};
-    assert(model->registerProxy(model, puremvc_proxy_init, "sizes", NULL) == true);
+    int *sizes = (int []) {1, 0};
+    assert(model->registerProxy(model, puremvc_proxy_init, "sizes", sizes) == true);
 
     // replace with another proxy
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
