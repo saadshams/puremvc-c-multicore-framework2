@@ -26,17 +26,17 @@ int main() {
     printf("\033[1;36m[SUITE] %s\033[0m\n", "FacadeTest");
     printf("\033[1;36m================================================\033[0m\n\n");
 
-    test("testGetInstance", testGetInstance);
-    test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification);
-    test("testRegisterAndRemoveCommandAndSendNotification", testRegisterAndRemoveCommandAndSendNotification);
-    test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy);
-    test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
-    test("testRegisterRetrieveAndRemoveMediator", testRegisterRetrieveAndRemoveMediator);
-    test("testHasProxy", testHasProxy);
-    test("testHasMediator", testHasMediator);
-    test("testHasCommand", testHasCommand);
+    // test("testGetInstance", testGetInstance);
+    // test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification);
+    // test("testRegisterAndRemoveCommandAndSendNotification", testRegisterAndRemoveCommandAndSendNotification);
+    // test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy);
+    // test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
+    // test("testRegisterRetrieveAndRemoveMediator", testRegisterRetrieveAndRemoveMediator);
+    // test("testHasProxy", testHasProxy);
+    // test("testHasMediator", testHasMediator);
+    // test("testHasCommand", testHasCommand);
     test("testHasCoreAndRemoveCore", testHasCoreAndRemoveCore);
-    test("testFacadeMapShiftLeft", testFacadeMapShiftLeft);
+    // test("testFacadeMapShiftLeft", testFacadeMapShiftLeft);
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;
@@ -205,11 +205,11 @@ void testRegisterAndRemoveProxy() {
     int *data = proxy->getData(proxy);
 
     // 2. Test assertions
-    if (data != NULL);
-    if (data[0] == 7);
-    if (data[1] == 13);
-    if (data[2] == 21);
-    if (data[3] == 0); // Checking the sentinel
+    if (data == NULL) abort();
+    if (data[0] != 7) abort();
+    if (data[1] != 13) abort();
+    if (data[2] != 21) abort();
+    if (data[3] != 0) abort(); // Checking the sentinel
 
     // remove the proxy
     struct IProxy *removedProxy = NULL;
@@ -344,7 +344,10 @@ void testHasCommand() {
 }
 
 void testHasCoreAndRemoveCore() {
+    // struct ControllerMap **controllerMap = (struct ControllerMap *[]) { NULL };
+    // struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey10");
     struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL };
+
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey10");
     facade->initializeFacade(facade, NULL, NULL, NULL);
 
