@@ -79,13 +79,10 @@ void testGetInstance() {
 
     // test assertions
     if (view == NULL) abort();
-    if (view != puremvc_view_getInstance(instanceMap, "ViewTestKey1"))
-        abort();
-    if (strcmp(instanceMap[0]->key, "ViewTestKey1") != 0)
-        abort();
+    if (view != puremvc_view_getInstance(instanceMap, "ViewTestKey1")) abort();
+    if (strcmp(instanceMap[0]->key, "ViewTestKey1") != 0) abort();
 
-    if (puremvc_view_removeView("ViewTestKey1", NULL) != true)
-        abort();
+    if (puremvc_view_removeView("ViewTestKey1", NULL) != true) abort();
     if (instanceMap[0]->key != NULL) abort();
 }
 
@@ -131,13 +128,11 @@ void testRegisterAndNotifyObserver() {
 
     // remove first observer
     viewTestVar->value = 0;
-    if (view->removeObserver(view, "ViewTestNote1", &viewComponent) != true)
-        abort();;
+    if (view->removeObserver(view, "ViewTestNote1", &viewComponent) != true) abort();;
     view->notifyObservers(view, notification);
     if (viewTestVar->value != 0) abort();
 
-    if (puremvc_view_removeView("ViewTestKey2", NULL) != true)
-        abort();
+    if (puremvc_view_removeView("ViewTestKey2", NULL) != true) abort();
 }
 
 void testRegisterAndRetrieveMediator() {
@@ -183,10 +178,8 @@ void testRegisterAndRetrieveMediator() {
 
     // test assertions
     if (mediator == NULL) abort();
-    if (mediator->getComponent(mediator) != &viewComponent)
-        abort();
-    if (strcmp(mediator->getName(mediator), "testing") != 0)
-        abort();
+    if (mediator->getComponent(mediator) != &viewComponent) abort();
+    if (strcmp(mediator->getName(mediator), "testing") != 0) abort();
 
     struct IMediator *removedMediator = NULL;
     if (view->removeMediator(view, "testing", &removedMediator) != true)

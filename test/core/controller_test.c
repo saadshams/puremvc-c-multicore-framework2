@@ -65,16 +65,13 @@ void testGetInstance() {
 
     // test assertions
     if (controller == NULL) abort();
-    if (controller != puremvc_controller_getInstance(NULL, "ControllerTestKey1"))
-        abort();
+    if (controller != puremvc_controller_getInstance(controllerMap, "ControllerTestKey1")) abort();
 
     struct IController *removedController = NULL;
-    if (puremvc_controller_removeController("ControllerTestKey1", &removedController) != true)
-        abort();
+    if (puremvc_controller_removeController("ControllerTestKey1", &removedController) != true) abort();
 
     struct IView *removedView = NULL;
-    if (puremvc_view_removeView("ControllerTestKey1", &removedView) != true)
-        abort();
+    if (puremvc_view_removeView("ControllerTestKey1", &removedView) != true) abort();
 }
 
 void testRegisterAndExecuteCommand() {
@@ -128,13 +125,10 @@ void testRegisterAndExecuteCommand() {
     if (vo.result != 24) abort();
 
     struct ICommand *(*factory)(void *) = 0;
-    if (controller->removeCommand(controller, "ControllerTest1", &factory) != true)
-        abort();;
+    if (controller->removeCommand(controller, "ControllerTest1", &factory) != true) abort();;
 
-    if (puremvc_controller_removeController("ControllerTestKey2", NULL) != true)
-        abort();;
-    if (puremvc_view_removeView("ControllerTestKey2", NULL) != true)
-        abort();;
+    if (puremvc_controller_removeController("ControllerTestKey2", NULL) != true) abort();
+    if (puremvc_view_removeView("ControllerTestKey2", NULL) != true) abort();;
 }
 
 void testRegisterAndRemoveCommand() {

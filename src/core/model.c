@@ -41,7 +41,7 @@ static bool registerProxy(struct IModel *self, struct IProxy *(*factory)(void *b
             this->proxyMap[i]->proxy->onRemove(this->proxyMap[i]->proxy);
             fprintf(stderr, "\033[0;33m[PureMVC::Model::registerMediator] Warning: Proxy '%s' exists; overridden registration.\033[0m\n", name);
 
-            factory(this->proxyMap[i]->proxy, name, data); // re-registration
+            factory(this->proxyMap[i]->proxy, name, data); // re-initialization
 
             this->proxyMap[i]->proxy->onRegister(this->proxyMap[i]->proxy);
             mutex_unlock(&this->proxyMapMutex);
