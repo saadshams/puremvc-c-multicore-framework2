@@ -14,5 +14,5 @@ struct Observer {
 
     void *context;
 
-    void (*notify)(const void *context, const struct INotification *notification);
+    bool (*notify)(const void *context, const struct INotification *notification);
 };

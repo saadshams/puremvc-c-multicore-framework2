@@ -49,8 +49,10 @@ static struct ObserverTestVar observerTestVar = {0};
  * A function that is used as the observer notification
  * method.
  */
-static void handleNotification(const void *context, const struct INotification *notification) {
+static bool handleNotification(const void *context, const struct INotification *notification) {
+    if (notification == NULL) return false;
     observerTestVar = *(struct ObserverTestVar *) notification->getBody(notification);
+    return true;
 }
 
 /**

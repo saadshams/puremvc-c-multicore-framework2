@@ -71,7 +71,7 @@ static bool registerCommand(struct IController *self, const char *notificationNa
         return false;
     }
 
-    if (this->view->registerObserver(this->view, notificationName, (void (*)(const void *, const struct INotification *)) self->executeCommand, self)) {
+    if (this->view->registerObserver(this->view, notificationName, (bool (*)(const void *context, const struct INotification *notification)) self->executeCommand, self)) {
         this->commandMap[i]->key = notificationName; // registration
         this->commandMap[i]->factory = factory;
         mutex_unlock(&this->commandMapMutex);

@@ -20,12 +20,12 @@ static void setContext(struct IObserver *self, void *notifyContext) {
     this->context = notifyContext;
 }
 
-static void (*getNotify(const struct IObserver *self))(const void *context, const struct INotification *notification) {
+static bool (*getNotify(const struct IObserver *self))(const void *context, const struct INotification *notification) {
     const struct Observer *this = (struct Observer *) self;
     return this->notify;
 }
 
-static void setNotify(struct IObserver *self, void (*notify)(const void *context, const struct INotification *notification)) {
+static void setNotify(struct IObserver *self, bool (*notify)(const void *context, const struct INotification *notification)) {
     struct Observer *this = (struct Observer *) self;
     this->notify = notify;
 }
@@ -46,7 +46,7 @@ size_t puremvc_observer_size() {
     return (sizeof(struct Observer) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
 }
 
-struct IObserver *puremvc_observer_init(void *buffer, void (*notify)(const void *context, const struct INotification *notification), void *context) {
+struct IObserver *puremvc_observer_init(void *buffer, bool (*notify)(const void *context, const struct INotification *notification), void *context) {
     struct Observer *this = (struct Observer *) buffer;
 
     memset(this, 0, sizeof(struct Observer));
