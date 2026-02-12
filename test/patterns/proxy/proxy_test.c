@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
@@ -39,9 +40,10 @@ void testConstructor() {
     const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
 
     // test assertions
-    assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
+    if (strcmp(proxy->getName(proxy), PROXY_NAME) != 0)
+        abort();
 
-    assert(proxy->getData(proxy) == NULL);
+    if (proxy->getData(proxy) != NULL) abort();
 }
 
 /**
@@ -51,10 +53,12 @@ void testNameAccessors() {
     const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), "TestProxy", NULL);
 
     // test assertions
-    assert(strcmp(proxy->getName(proxy), "TestProxy") == 0);
+    if (strcmp(proxy->getName(proxy), "TestProxy") != 0)
+        abort();
 
     const struct IProxy *proxy2 = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
-    assert(strcmp(proxy2->getName(proxy2), PROXY_NAME) == 0);
+    if (strcmp(proxy2->getName(proxy2), PROXY_NAME) != 0)
+        abort();
 }
 
 /**
@@ -67,10 +71,10 @@ void testDataAccessors() {
     const char **data = proxy->getData(proxy);
 
     // test assertions
-    assert(strcmp(*data, "red") == 0);
-    assert(strcmp(*(data + 1), "green") == 0);
-    assert(strcmp(*(data + 2), "blue") == 0);
-    assert(*(data + 3) == NULL);
+    if (strcmp(*data, "red") != 0) abort();
+    if (strcmp(*(data + 1), "green") != 0) abort();
+    if (strcmp(*(data + 2), "blue") != 0) abort();
+    if (*(data + 3) != NULL) abort();
 }
 
 void testDataReassign() {
@@ -83,15 +87,16 @@ void testDataReassign() {
 
     const char **data = proxy->getData(proxy);
 
-    assert(strcmp(*data, "red") == 0);
-    assert(strcmp(*(data + 1), "green") == 0);
-    assert(strcmp(*(data + 2), "blue") == 0);
-    assert(*(data + 3) == NULL);
+    if (strcmp(*data, "red") != 0) abort();
+    if (strcmp(*(data + 1), "green") != 0) abort();
+    if (strcmp(*(data + 2), "blue") != 0) abort();
+    if (*(data + 3) != NULL) abort();
 }
 
 void testNotifier() {
     const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
-    assert(strcmp(proxy->getName(proxy), PROXY_NAME) == 0);
+    if (strcmp(proxy->getName(proxy), PROXY_NAME) != 0)
+        abort();
 
     proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), "testing");
 }

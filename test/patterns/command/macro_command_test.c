@@ -7,6 +7,7 @@
 #include <alloca.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
@@ -40,7 +41,7 @@ void testMacroCommandExecute() {
 
     command->execute(command, notification);
 
-    assert(vo.result1 == 10);
-    assert(vo.result2 == 25);
-    assert(vo.result3 == 125);
+    if (vo.result1 != 10) abort();
+    if (vo.result2 != 25) abort();
+    if (vo.result3 != 125) abort();
 }

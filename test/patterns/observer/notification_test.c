@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
@@ -40,9 +41,12 @@ void testConstructor() {
     const struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "TestNote", NULL, NULL);
 
     // test assertions
-    assert(strcmp(notification->getName(notification), "TestNote") == 0);
-    assert(notification->getBody(notification) == NULL);
-    assert(notification->getType(notification) == NULL);
+    if (strcmp(notification->getName(notification), "TestNote") != 0)
+        abort();
+    if (notification->getBody(notification) != NULL)
+        abort();
+    if (notification->getType(notification) != NULL)
+        abort();
 }
 
 /**
@@ -53,7 +57,8 @@ void testNameAccessors() {
     const struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "TestNote", NULL, NULL);
 
     // test assertions
-    assert(strcmp(notification->getName(notification), "TestNote") == 0);
+    if (strcmp(notification->getName(notification), "TestNote") != 0)
+        abort();
 }
 
 /**
@@ -68,7 +73,8 @@ void testBodyAccessors() {
     notification->setBody(notification, &vo);
 
     // test assertions
-    assert(notification->getBody(notification) == &vo);
+    if (notification->getBody(notification) != &vo)
+        abort();
 }
 
 /**
@@ -78,9 +84,11 @@ void testTypeAccessors() {
     struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "TestNote", NULL, "TestNoteType");
 
     // test assertions
-    assert(strcmp(notification->getType(notification), "TestNoteType") == 0);
+    if (strcmp(notification->getType(notification), "TestNoteType") != 0)
+        abort();
     notification->setType(notification, "TestType2");
-    assert(strcmp(notification->getType(notification), "TestType2") == 0);
+    if (strcmp(notification->getType(notification), "TestType2") != 0)
+        abort();
 }
 
 /** Node Notifications */
@@ -94,5 +102,6 @@ void testToString() {
     printf("%s\n", buffer);
 
     const char *prefix = "TestNote : TestNoteType [body=";
-    assert(strncmp(buffer, prefix, strlen(prefix)) == 0);
+    if (strncmp(buffer, prefix, strlen(prefix)) != 0)
+        abort();
 }

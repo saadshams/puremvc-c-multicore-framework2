@@ -8,6 +8,7 @@
 #include <alloca.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
@@ -59,5 +60,5 @@ void testSimpleCommandExecute() {
     command->execute(command, notification);
 
     // test assertions
-    assert(vo.result == 10);
+    if (vo.result != 10) abort();
 }

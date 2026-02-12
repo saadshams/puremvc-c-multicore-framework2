@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
@@ -37,7 +38,8 @@ void testConstructor() {
     const struct IMediator *mediator = puremvc_mediator_init(alloca(puremvc_mediator_size()), NULL, NULL);
 
     // test assertions
-    assert(strcmp(mediator->getName(mediator), MEDIATOR_NAME) == 0);
+    if (strcmp(mediator->getName(mediator), MEDIATOR_NAME) != 0)
+        abort();
 }
 
 /**
@@ -47,7 +49,8 @@ void testNameAccessor() {
     const struct IMediator *mediator = puremvc_mediator_init(alloca(puremvc_mediator_size()), "TestMediator", NULL);
 
     // test assertions
-    assert(strcmp(mediator->getName(mediator), "TestMediator") == 0);
+    if (strcmp(mediator->getName(mediator), "TestMediator") != 0)
+        abort();
 }
 
 /**
@@ -59,9 +62,10 @@ void testViewAccessor() {
     struct IMediator *mediator = puremvc_mediator_init(alloca(puremvc_mediator_size()), MEDIATOR_NAME, &component);
 
     // test assertions
-    assert(mediator->getComponent(mediator) == &component);
+    if (mediator->getComponent(mediator) != &component)
+        abort();
     mediator->setComponent(mediator, NULL);
-    assert(mediator->getComponent(mediator) == NULL);
+    if (mediator->getComponent(mediator) != NULL) abort();
 }
 
 void testNotifier() {

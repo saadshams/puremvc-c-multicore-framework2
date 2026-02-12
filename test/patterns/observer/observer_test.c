@@ -5,6 +5,7 @@
 #include <alloca.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
@@ -56,8 +57,9 @@ void testObserverConstructor() {
     observer->notifyObserver(observer, notification);
 
     // test assertions
-    assert(observerTestVar.value == 5);
-    assert(&object == observer->getContext(observer));
+    if (observerTestVar.value != 5) abort();
+    if (&object != observer->getContext(observer))
+        abort();
 }
 
 /**
@@ -72,8 +74,10 @@ void testObserverAccessors() {
     observer->setContext(observer, &object);
     observer->setNotify(observer, handleNotification);
 
-    assert(observer->getContext(observer) == &object);
-    assert(observer->getNotify(observer) == handleNotification);
+    if (observer->getContext(observer) != &object)
+        abort();
+    if (observer->getNotify(observer) != handleNotification)
+        abort();
 
     // create a test event, setting a payload value and notify
     // the observer with it. since the observer is this class
@@ -97,6 +101,8 @@ void testCompareNotifyContext() {
     const struct IObserver *observer = puremvc_observer_init(alloca(puremvc_observer_size()), handleNotification, &object);
 
     // test assertions
-    assert(observer->compareNotifyContext(observer, &negTestObj) == false);
-    assert(observer->compareNotifyContext(observer, &object) == true);
+    if (observer->compareNotifyContext(observer, &negTestObj) != false)
+        abort();
+    if (observer->compareNotifyContext(observer, &object) != true)
+        abort();
 }

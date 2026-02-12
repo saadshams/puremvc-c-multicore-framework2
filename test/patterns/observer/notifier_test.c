@@ -7,6 +7,7 @@
 #include <alloca.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
@@ -54,9 +55,10 @@ void testInstance() {
 
     // initialize facade
     notifier->initializeNotifier(notifier, "NotifierTest1");
-    assert(strcmp(notifier->getMultitonKey(notifier), "NotifierTest1") == 0);
+    if (strcmp(notifier->getMultitonKey(notifier), "NotifierTest1") != 0)
+        abort();
 
-    assert(notifier->getFacade(notifier) != NULL);
+    if (notifier->getFacade(notifier) == NULL) abort();
 
     puremvc_facade_removeFacade("NotifierTest1", NULL);
 }

@@ -53,12 +53,14 @@ void testGetInstance() {
     struct IFacade *facade = puremvc_facade_getInstance(instanceMap, "FacadeTestKey1");
 
     // test assertions
-    assert(facade != NULL);
-    assert(facade == puremvc_facade_getInstance(instanceMap, "FacadeTestKey1"));
+    if (facade == NULL) abort();
+    if (facade != puremvc_facade_getInstance(instanceMap, "FacadeTestKey1"))
+        abort();
 
     struct IFacade *removedFacade = NULL;
-    assert(puremvc_facade_removeFacade("FacadeTestKey1", &removedFacade) == true);
-    assert(instanceMap[0]->key == NULL);
+    if (puremvc_facade_removeFacade("FacadeTestKey1", &removedFacade) != true)
+        abort();
+    if (instanceMap[0]->key != NULL) abort();
 }
 
 void testRegisterCommandAndSendNotification() {
@@ -97,7 +99,8 @@ void testRegisterCommandAndSendNotification() {
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey2");
     facade->initializeFacade(facade, model, view, controller);
 
-    assert(facade->registerCommand(facade, "FacadeTestNote", test_facade_command) == true);
+    if (facade->registerCommand(facade, "FacadeTestNote", test_facade_command) != true)
+        abort();
 
     // Send notification. The Command associated with the event
     // (FacadeTestCommand) will be invoked, and will multiply
@@ -106,13 +109,15 @@ void testRegisterCommandAndSendNotification() {
     facade->sendNotification(facade, "FacadeTestNote", &vo, NULL);
 
     // test assertions
-    assert(vo.result == 64);
+    if (vo.result != 64) abort();
 
     struct ICommand *(*factory)(void *) = 0;
-    assert(facade->removeCommand(facade, "FacadeTestNote", &factory) == true);
+    if (facade->removeCommand(facade, "FacadeTestNote", &factory) != true)
+        abort();
 
     struct IFacade *removedFacade = NULL;
-    assert(puremvc_facade_removeFacade("FacadeTestKey2", &removedFacade) == true);
+    if (puremvc_facade_removeFacade("FacadeTestKey2", &removedFacade) != true)
+        abort();
 }
 
 void testRegisterAndRemoveCommandAndSendNotification() {
@@ -135,8 +140,10 @@ void testRegisterAndRemoveCommandAndSendNotification() {
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey3");
     facade->initializeFacade(facade, NULL, view, controller);
 
-    assert(facade->registerCommand(facade, "FacadeTestNote", test_facade_command) == true);
-    assert(facade->removeCommand(facade, "FacadeTestNote", NULL) == true);
+    if (facade->registerCommand(facade, "FacadeTestNote", test_facade_command) != true)
+        abort();
+    if (facade->removeCommand(facade, "FacadeTestNote", NULL) != true)
+        abort();
 
     // Send notification. The Command associated with the event
     // (FacadeTestCommand) will NOT be invoked, and will NOT multiply
@@ -145,10 +152,11 @@ void testRegisterAndRemoveCommandAndSendNotification() {
     facade->sendNotification(facade, "FacadeTestNote", &vo, NULL);
 
     // test assertions
-    assert(vo.result == 0);
+    if (vo.result != 0) abort();
 
     struct IFacade *removedFacade = NULL;
-    assert(puremvc_facade_removeFacade("FacadeTestKey3", &removedFacade) == true);
+    if (puremvc_facade_removeFacade("FacadeTestKey3", &removedFacade) != true)
+        abort();
 }
 
 void testRegisterAndRetrieveProxy() {
@@ -164,11 +172,12 @@ void testRegisterAndRetrieveProxy() {
 
     static char *colors[] = { "red", "green", "blue", NULL};
 
-    assert(facade->registerProxy(facade, puremvc_proxy_init, "colors", colors) == true);
+    if (facade->registerProxy(facade, puremvc_proxy_init, "colors", colors) != true)
+        abort();
     const struct IProxy *proxy = facade->retrieveProxy(facade, "colors");
 
     // test assertions
-    assert(proxy != NULL);
+    if (proxy == NULL) abort();
 
     // retrieve data from proxy
     // const char **data = proxy->getData(proxy);
@@ -238,23 +247,29 @@ void testRegisterRetrieveAndRemoveMediator() {
 
     // register a mediator, remove it, then try to retrieve it
     struct Object {int x;} object;
-    assert(facade->registerMediator(facade, puremvc_mediator_init, MEDIATOR_NAME, &object) == true);
+    if (facade->registerMediator(facade, puremvc_mediator_init, MEDIATOR_NAME, &object) != true)
+        abort();
 
     // retrieve the mediator
-    assert(facade->retrieveMediator(facade, MEDIATOR_NAME) != NULL);
+    if (facade->retrieveMediator(facade, MEDIATOR_NAME) == NULL)
+        abort();
 
     // remove the mediator
     struct IMediator *removedMediator = NULL;
-    assert(facade->removeMediator(facade, MEDIATOR_NAME, &removedMediator) == true);
+    if (facade->removeMediator(facade, MEDIATOR_NAME, &removedMediator) != true)
+        abort();
 
     // assert that we have removed the appropriate mediator
-    assert(strcmp(removedMediator->getName(removedMediator), MEDIATOR_NAME) == 0);
+    if (strcmp(removedMediator->getName(removedMediator), MEDIATOR_NAME) != 0)
+        abort();
 
     // assert that the mediator is no longer retrievable
-    assert(facade->retrieveMediator(facade, MEDIATOR_NAME) == NULL);
+    if (facade->retrieveMediator(facade, MEDIATOR_NAME) != NULL)
+        abort();
 
     struct IFacade *removedFacade = NULL;
-    assert(puremvc_facade_removeFacade("FacadeTestKey6", &removedFacade) == true);
+    if (puremvc_facade_removeFacade("FacadeTestKey6", &removedFacade) != true)
+        abort();
 }
 
 void testHasProxy() {
@@ -270,16 +285,21 @@ void testHasProxy() {
     static int sizes[] = { 7, 13, 21, 0 }; // 0 is the sentinel
 
     // register a Proxy
-    assert(facade->registerProxy(facade, puremvc_proxy_init, "hasProxyTest", sizes) == true);
+    if (facade->registerProxy(facade, puremvc_proxy_init, "hasProxyTest", sizes) != true)
+        abort();
 
     // assert that the model.hasProxy method returns true
     // for that new name
-    assert(facade->hasProxy(facade, "hasProxyTest") == true);
+    if (facade->hasProxy(facade, "hasProxyTest") != true)
+        abort();
 
-    assert(facade->removeProxy(facade, "hasProxyTest", NULL) == true);;
-    assert(facade->hasProxy(facade, "hasProxyTest") == false);
+    if (facade->removeProxy(facade, "hasProxyTest", NULL) != true)
+        abort();;
+    if (facade->hasProxy(facade, "hasProxyTest") != false)
+        abort();
 
-    assert(puremvc_facade_removeFacade("FacadeTestKey7", NULL) == true);
+    if (puremvc_facade_removeFacade("FacadeTestKey7", NULL) != true)
+        abort();
 }
 
 void testHasMediator() {
@@ -294,18 +314,23 @@ void testHasMediator() {
 
     // register a Mediator
     struct Object {int x;} object;
-    assert(facade->registerMediator(facade, puremvc_mediator_init, "facadeHasMediatorTest", &object) == true);
+    if (facade->registerMediator(facade, puremvc_mediator_init, "facadeHasMediatorTest", &object) != true)
+        abort();
 
     // assert that the facade.hasMediator method returns true
     // for that mediator name
-    assert(facade->hasMediator(facade, "facadeHasMediatorTest") == true);
+    if (facade->hasMediator(facade, "facadeHasMediatorTest") != true)
+        abort();
 
-    assert(facade->removeMediator(facade, "facadeHasMediatorTest", NULL) == true);
+    if (facade->removeMediator(facade, "facadeHasMediatorTest", NULL) != true)
+        abort();
 
     // assert that the facade.hasMediator method returns false
     // for that mediator name
-    assert(facade->hasMediator(facade, "facadeHasMediatorTest") == false);
-    assert(puremvc_facade_removeFacade("FacadeTestKey8", NULL) == true);
+    if (facade->hasMediator(facade, "facadeHasMediatorTest") != false)
+        abort();
+    if (puremvc_facade_removeFacade("FacadeTestKey8", NULL) != true)
+        abort();
 }
 
 void testHasCommand() {
@@ -327,20 +352,25 @@ void testHasCommand() {
     facade->initializeFacade(facade, NULL, view, controller);
 
     // register the ControllerTestCommand to handle 'hasCommandTest' notes
-    assert(facade->registerCommand(facade, "facadeHasCommandTest", test_facade_command) == true);
+    if (facade->registerCommand(facade, "facadeHasCommandTest", test_facade_command) != true)
+        abort();
 
     // test that hasCommand returns true for hasCommandTest notifications
-    assert(facade->hasCommand(facade, "facadeHasCommandTest") == true);
+    if (facade->hasCommand(facade, "facadeHasCommandTest") != true)
+        abort();
 
     // Remove the Command from the Controller
     struct ICommand *(*removedCommand)(void *) = 0;
-    assert(facade->removeCommand(facade, "facadeHasCommandTest", &removedCommand) == true);
-    assert(removedCommand == test_facade_command);
+    if (facade->removeCommand(facade, "facadeHasCommandTest", &removedCommand) != true)
+        abort();
+    if (removedCommand != test_facade_command) abort();
 
     // test that hasCommand returns false for hasCommandTest notifications
-    assert(facade->hasCommand(facade, "facadeHasCommandTest") == false);
+    if (facade->hasCommand(facade, "facadeHasCommandTest") != false)
+        abort();
 
-    assert(puremvc_facade_removeFacade("FacadeTestKey10", NULL) == true);
+    if (puremvc_facade_removeFacade("FacadeTestKey10", NULL) != true)
+        abort();
 }
 
 void testHasCoreAndRemoveCore() {
@@ -349,18 +379,21 @@ void testHasCoreAndRemoveCore() {
     facade->initializeFacade(facade, NULL, NULL, NULL);
 
     // assert that the Facade.hasCore method returns false first
-    assert(puremvc_facade_hasCore("unregistered") == false);
+    if (puremvc_facade_hasCore("unregistered") != false)
+        abort();
 
     // register a Core
     puremvc_facade_getInstance(facadeMap, "FacadeTestKey10");
 
-    assert(puremvc_facade_hasCore("FacadeTestKey10") == true);
+    if (puremvc_facade_hasCore("FacadeTestKey10") != true)
+        abort();
 
     // remove the Core
     puremvc_facade_removeFacade("FacadeTestKey10", NULL);
 
     // assert that the Facade.hasCore method returns false now that the core has been removed.
-    assert(puremvc_facade_hasCore("FacadeTestKey10") == false);
+    if (puremvc_facade_hasCore("FacadeTestKey10") != false)
+        abort();
 }
 
 void testFacadeMapShiftLeft() {
@@ -372,64 +405,91 @@ void testFacadeMapShiftLeft() {
         NULL
     };
 
-    assert(puremvc_facade_getInstance(instanceMap, "facade0") != NULL);
-    assert(strcmp(instanceMap[0]->key, "facade0") == 0);
+    if (puremvc_facade_getInstance(instanceMap, "facade0") == NULL)
+
+        abort();
+    if (strcmp(instanceMap[0]->key, "facade0") != 0)
+        abort();
     const char **key0 = (const char **)((char *) instanceMap[0]->facade + sizeof(struct IFacade));
-    assert(strcmp(*key0, "facade0") == 0);
-    assert(puremvc_facade_hasCore("facade0") == true);
+    if (strcmp(*key0, "facade0") != 0) abort();
+    if (puremvc_facade_hasCore("facade0") != true)
+        abort();
 
-    assert(puremvc_facade_getInstance(instanceMap, "facade1") != NULL);
-    assert(strcmp(instanceMap[1]->key, "facade1") == 0);
+    if (puremvc_facade_getInstance(instanceMap, "facade1") == NULL)
+        abort();
+    if (strcmp(instanceMap[1]->key, "facade1") != 0)
+        abort();
     const char **key1 = (const char **)((char *) instanceMap[1]->facade + sizeof(struct IFacade));
-    assert(strcmp(*key1, "facade1") == 0);
-    assert(puremvc_facade_hasCore("facade1") == true);
+    if (strcmp(*key1, "facade1") != 0) abort();
+    if (puremvc_facade_hasCore("facade1") != true)
+        abort();
 
-    assert(puremvc_facade_getInstance(instanceMap, "facade2") != NULL);
-    assert(strcmp(instanceMap[2]->key, "facade2") == 0);
+    if (puremvc_facade_getInstance(instanceMap, "facade2") == NULL)
+        abort();
+    if (strcmp(instanceMap[2]->key, "facade2") != 0)
+        abort();
     const char **key2 = (const char **)((char *) instanceMap[2]->facade + sizeof(struct IFacade));
-    assert(strcmp(*key2, "facade2") == 0);
-    assert(puremvc_facade_hasCore("facade2") == true);
+    if (strcmp(*key2, "facade2") != 0) abort();
+    if (puremvc_facade_hasCore("facade2") != true)
+        abort();
 
-    assert(puremvc_facade_getInstance(instanceMap, "facade3") != NULL);
-    assert(strcmp(instanceMap[3]->key, "facade3") == 0);
+    if (puremvc_facade_getInstance(instanceMap, "facade3") == NULL)
+        abort();
+    if (strcmp(instanceMap[3]->key, "facade3") != 0)
+        abort();
     const char **key3 = (const char **)((char *) instanceMap[3]->facade + sizeof(struct IFacade));
-    assert(strcmp(*key3, "facade3") == 0);
-    assert(puremvc_facade_hasCore("facade3") == true);
+    if (strcmp(*key3, "facade3") != 0) abort();
+    if (puremvc_facade_hasCore("facade3") != true)
+        abort();
 
     // remove
     struct IFacade *facade1 = NULL; // remove middle1, remaining 0, 2, 3
-    assert(puremvc_facade_removeFacade("facade1", &facade1) == true);
-    assert(strcmp(instanceMap[0]->key, "facade0") == 0);
-    assert(strcmp(instanceMap[1]->key, "facade2") == 0);
-    assert(strcmp(instanceMap[2]->key, "facade3") == 0);
-    assert(instanceMap[3]->key == NULL);
-    assert(instanceMap[4] == NULL);
-    assert(puremvc_facade_hasCore("facade1") == false);
+    if (puremvc_facade_removeFacade("facade1", &facade1) != true)
+        abort();
+    if (strcmp(instanceMap[0]->key, "facade0") != 0)
+        abort();
+    if (strcmp(instanceMap[1]->key, "facade2") != 0)
+        abort();
+    if (strcmp(instanceMap[2]->key, "facade3") != 0)
+        abort();
+    if (instanceMap[3]->key != NULL) abort();
+    if (instanceMap[4] != NULL) abort();
+    if (puremvc_facade_hasCore("facade1") != false)
+        abort();
 
     struct IFacade *facade3 = NULL; // remove last3, remaining 0, 2
-    assert(puremvc_facade_removeFacade("facade3", &facade3) == true);
-    assert(strcmp(instanceMap[0]->key, "facade0") == 0);
-    assert(strcmp(instanceMap[1]->key, "facade2") == 0);
-    assert(instanceMap[2]->key == NULL);
-    assert(instanceMap[3]->key == NULL);
-    assert(instanceMap[4] == NULL);
-    assert(puremvc_facade_hasCore("facade3") == false);
+    if (puremvc_facade_removeFacade("facade3", &facade3) != true)
+        abort();
+    if (strcmp(instanceMap[0]->key, "facade0") != 0)
+        abort();
+    if (strcmp(instanceMap[1]->key, "facade2") != 0)
+        abort();
+    if (instanceMap[2]->key != NULL) abort();
+    if (instanceMap[3]->key != NULL) abort();
+    if (instanceMap[4] != NULL) abort();
+    if (puremvc_facade_hasCore("facade3") != false)
+        abort();
 
     struct IFacade *facade0 = NULL; // remove first, remaining 2
-    assert(puremvc_facade_removeFacade("facade0", &facade0) == true);
-    assert(strcmp(instanceMap[0]->key, "facade2") == 0);
-    assert(instanceMap[1]->key == NULL);
-    assert(instanceMap[2]->key == NULL);
-    assert(instanceMap[3]->key == NULL);
-    assert(instanceMap[4] == NULL);
-    assert(puremvc_facade_hasCore("facade0") == false);
+    if (puremvc_facade_removeFacade("facade0", &facade0) != true)
+        abort();
+    if (strcmp(instanceMap[0]->key, "facade2") != 0)
+        abort();
+    if (instanceMap[1]->key != NULL) abort();
+    if (instanceMap[2]->key != NULL) abort();
+    if (instanceMap[3]->key != NULL) abort();
+    if (instanceMap[4] != NULL) abort();
+    if (puremvc_facade_hasCore("facade0") != false)
+        abort();
 
     struct IFacade *facade2 = NULL; // remove remaining
-    assert(puremvc_facade_removeFacade("facade2", &facade2) == true);
-    assert(instanceMap[0]->key == NULL);
-    assert(instanceMap[1]->key == NULL);
-    assert(instanceMap[2]->key == NULL);
-    assert(instanceMap[3]->key == NULL);
-    assert(instanceMap[4] == NULL);
-    assert(puremvc_facade_hasCore("facade2") == false);
+    if (puremvc_facade_removeFacade("facade2", &facade2) != true)
+        abort();
+    if (instanceMap[0]->key != NULL) abort();
+    if (instanceMap[1]->key != NULL) abort();
+    if (instanceMap[2]->key != NULL) abort();
+    if (instanceMap[3]->key != NULL) abort();
+    if (instanceMap[4] != NULL) abort();
+    if (puremvc_facade_hasCore("facade2") != false)
+        abort();
 }
