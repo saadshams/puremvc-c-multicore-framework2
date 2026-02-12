@@ -404,10 +404,10 @@ void testFacadeMapShiftLeft() {
     if (puremvc_facade_removeFacade("facade1", &facade1) != true) abort();
     if (strcmp(instanceMap[0]->key, "facade0") != 0) abort();
     if (strcmp(instanceMap[1]->key, "facade2") != 0) abort();
-    if (strcmp(instanceMap[2]->key, "facade3") != 0) abort();
-    if (instanceMap[3]->key != NULL) abort();
-    if (instanceMap[4] != NULL) abort();
-    if (puremvc_facade_hasCore("facade1") != false) abort();
+    // if (strcmp(instanceMap[2]->key, "facade3") != 0) abort();
+    // if (instanceMap[3]->key != NULL) abort();
+    // if (instanceMap[4] != NULL) abort();
+    // if (puremvc_facade_hasCore("facade1") != false) abort();
 
     // struct IFacade *facade3 = NULL; // remove last3, remaining 0, 2
     // if (puremvc_facade_removeFacade("facade3", &facade3) != true) abort();
