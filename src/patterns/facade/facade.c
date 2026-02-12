@@ -61,9 +61,9 @@ static bool hasCommand(const struct IFacade *self, const char *notificationName)
     return this->controller->hasCommand(this->controller, notificationName);
 }
 
-static bool removeCommand(const struct IFacade *self, const char *notificationName, struct ICommand *(**factory)(void *)) {
+static bool removeCommand(const struct IFacade *self, const char *notificationName, struct ICommand *(**out)(void *)) {
     const struct Facade *this = (struct Facade *) self;
-    return this->controller->removeCommand(this->controller, notificationName, factory);
+    return this->controller->removeCommand(this->controller, notificationName, out);
 }
 
 static bool registerProxy(const struct IFacade *self, struct IProxy *(*factory)(void *buffer, const char *name, void *data), const char *name, void *data) {
@@ -153,7 +153,7 @@ static void dispatchOnce(void) {
 }
 
 struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const char *key) {
-    if (facadeMap == NULL) {
+    if (facadeMap == NULL && instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
         return NULL;
     }
@@ -163,8 +163,7 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
         return NULL;
     }
 
-    if (instanceMap == NULL)
-        instanceMap = facadeMap;
+    instanceMap = facadeMap;
 
     mutex_once(&facadeMutexOnce, dispatchOnce);
     mutex_lock(&facadeMapMutex);
@@ -177,7 +176,7 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
         }
     }
 
-    if (instanceMap[i] == NULL) { // overflow
+    if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: FacadeMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&facadeMapMutex);
         return NULL;
@@ -189,7 +188,7 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
     }
 
     instanceMap[i]->key = key; // init
-    puremvc_facade_init(facadeMap[i]->facade, key);
+    puremvc_facade_init(instanceMap[i]->facade, key);
 
     mutex_unlock(&facadeMapMutex);
     return instanceMap[i]->facade;

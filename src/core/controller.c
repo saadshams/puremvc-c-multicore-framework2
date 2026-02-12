@@ -170,8 +170,7 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
         return NULL;
     }
 
-    if (instanceMap == NULL)
-        instanceMap = controllerMap;
+    instanceMap = controllerMap;
 
     mutex_once(&controllerMutexOnce, dispatchOnce);
     mutex_lock(&controllerMapMutex);
@@ -184,7 +183,7 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
         }
     }
 
-    if (instanceMap[i] == NULL) { // overflow
+    if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::Controller::getInstance] FATAL: ControllerMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&controllerMapMutex);
         return NULL;

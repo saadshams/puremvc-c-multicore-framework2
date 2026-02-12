@@ -34,7 +34,7 @@ int main() {
     printf("\033[1;36m================================================\033[0m\n\n");
 
     test("testGetInstance", testGetInstance);
-    // test("testRegisterAndNotifyObserver", testRegisterAndNotifyObserver);
+    // test("testRegisterAndNotifyObserver", testRegisterAndNotifyObserver); //
     test("testRegisterAndRetrieveMediator", testRegisterAndRetrieveMediator);
     test("testHasMediator", testHasMediator);
     test("testRegisterAndRemoveMediator", testRegisterAndRemoveMediator);
@@ -50,8 +50,8 @@ int main() {
     test("testGarbageStorageForMediator", testGarbageStorageForMediator);
     test("testObserverMapShiftLeft", testObserverMapShiftLeft);
     test("testObserverShiftLeft", testObserverShiftLeft);
-    // test("testMediatorMapShiftLeft", testMediatorMapShiftLeft);
-    // test("testViewMapShiftLeft", testViewMapShiftLeft);
+    test("testMediatorMapShiftLeft", testMediatorMapShiftLeft);
+    test("testViewMapShiftLeft", testViewMapShiftLeft);
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;

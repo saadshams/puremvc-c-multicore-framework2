@@ -49,6 +49,6 @@ size_t puremvc_model_size();
 
 struct IModel *puremvc_model_init(void *buffer, const char *key);
 
-struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key);
+struct IModel *puremvc_model_getInstance(struct ModelMap *volatile *modelMap, const char *key);
 
 bool puremvc_model_removeModel(const char *key, struct IModel **out);

@@ -49,7 +49,7 @@ struct IFacade {
     
     bool (*hasCommand)(const struct IFacade *self, const char *notificationName);
 
-    bool (*removeCommand)(const struct IFacade *self, const char *notificationName, struct ICommand *(**factory)(void *buffer));
+    bool (*removeCommand)(const struct IFacade *self, const char *notificationName, struct ICommand *(**out)(void *buffer));
 
     bool (*registerProxy)(const struct IFacade *self, struct IProxy *(*factory)(void *buffer, const char *name, void *data), const char *name, void *data);
 

@@ -23,8 +23,8 @@ int main() {
     printf("\033[1;36m[SUITE] %s\033[0m\n", "NotifierTest");
     printf("\033[1;36m================================================\033[0m\n\n");
 
-    // test("testInstance", testInstance);
-    // test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification);
+    test("testInstance", testInstance);
+    // test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification); //
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     return 0;
@@ -54,32 +54,32 @@ void testInstance() {
 
     // initialize facade
     notifier->initializeNotifier(notifier, "NotifierTest1");
-    // notifier->getFacade(notifier);
+    assert(strcmp(notifier->getMultitonKey(notifier), "NotifierTest1") == 0);
 
-    // assert(notifier->getFacade(notifier) != NULL);
+    assert(notifier->getFacade(notifier) != NULL);
 
-    // puremvc_facade_removeFacade("NotifierTest1");
+    puremvc_facade_removeFacade("NotifierTest1", NULL);
 }
 
-// void testRegisterCommandAndSendNotification() {
-//     // create a notifier
-//     struct Notifier notifier = puremvc_notifier();
-//
-//     // initialize facade
-//     notifier.initializeNotifier(&notifier, "NotifierTest2");
-//
-//     struct Object temp = {4};
-//
-//     // get facade instance
-//     struct IFacade *facade = notifier.getFacade(&notifier);
-//
-//     // register a command and send notification
-//     facade->registerCommand(facade, "TestNote", command);
-//     notifier.sendNotification(&notifier, "TestNote", &temp, NULL);
-//
-//     // assert result
-//     assert(temp.result == 16);
-//
-//     facade->removeCommand(facade, "TestNote");
-//     puremvc_facade_removeFacade("NotifierTest2");
-// }
+void testRegisterCommandAndSendNotification() {
+    // create a notifier
+    struct INotifier *notifier = puremvc_notifier_init(alloca(puremvc_notifier_size()));
+
+    // initialize facade
+    notifier->initializeNotifier(notifier, "NotifierTest2");
+
+    struct Object temp = {4};
+
+    // get facade instance
+    // const struct IFacade *facade = notifier->getFacade(notifier);
+
+    // register a command and send notification
+    // assert(facade->registerCommand(facade, "TestNote", command) == 0);
+    // notifier->sendNotification(notifier, "TestNote", &temp, NULL);
+
+    // assert result
+    // assert(temp.result == 16);
+
+    // facade->removeCommand(facade, "TestNote", NULL);
+    // puremvc_facade_removeFacade("NotifierTest2", NULL);
+}

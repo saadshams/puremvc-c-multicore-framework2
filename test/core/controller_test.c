@@ -26,13 +26,13 @@ int main() {
     printf("\033[1;36m================================================\033[0m\n\n");
 
     test("testGetInstance", testGetInstance);
-    // test("testRegisterAndExecuteCommand", testRegisterAndExecuteCommand);
-    // test("testRegisterAndRemoveCommand", testRegisterAndRemoveCommand);
-    // test("testHasCommand", testHasCommand);
-    // test("testReregisterAndExecuteCommand", testReregisterAndExecuteCommand);
-    // test("testRegisterAndUpdateCommand", testRegisterAndUpdateCommand);
-    // test("testRemoveController", testRemoveController);
-    // test("testCommandMapShiftLeft", testCommandMapShiftLeft);
+    test("testRegisterAndExecuteCommand", testRegisterAndExecuteCommand);
+    test("testRegisterAndRemoveCommand", testRegisterAndRemoveCommand);
+    test("testHasCommand", testHasCommand);
+    // test("testReregisterAndExecuteCommand", testReregisterAndExecuteCommand); //
+    test("testRegisterAndUpdateCommand", testRegisterAndUpdateCommand);
+    test("testRemoveController", testRemoveController);
+    test("testCommandMapShiftLeft", testCommandMapShiftLeft);
     test("TestControllerMapShiftLeft", TestControllerMapShiftLeft);
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");

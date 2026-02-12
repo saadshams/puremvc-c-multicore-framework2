@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Dependencies
-RUN apt-get update && apt-get install -y build-essential gcc g++ clang cmake git curl zip tar && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y build-essential gcc g++ clang cmake git curl zip tar gdb && rm -rf /var/lib/apt/lists/*
 
 # Install VCPKG
 RUN git clone https://github.com/microsoft/vcpkg.git /opt/vcpkg && /opt/vcpkg/bootstrap-vcpkg.sh
@@ -30,8 +30,12 @@ RUN mkdir -p build && \
     cmake -S . -B build \
       -DBUILD_TESTS=ON \
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+      -DCMAKE_C_FLAGS="-fsanitize=address -g" \
       -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake && \
     cmake --build build --parallel $(nproc)
+
+# Enable ASAN_OPTIONS to get better stack traces in Docker logs
+ENV ASAN_OPTIONS=symbolize=1:debug=true:check_initialization_order=true:detect_stack_use_after_return=true
 
 # Run tests
 CMD ["bash", "-c", "ctest --test-dir build -C ${CMAKE_BUILD_TYPE} --output-on-failure"]

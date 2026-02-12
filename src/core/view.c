@@ -308,8 +308,7 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
         return NULL;
     }
 
-    if (instanceMap == NULL)
-        instanceMap = viewMap;
+    instanceMap = viewMap;
 
     mutex_once(&viewMutexOnce, dispatchOnce);
     mutex_lock(&viewMapMutex);
@@ -322,7 +321,7 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
         }
     }
 
-    if (instanceMap[i] == NULL) { // overflow
+    if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: ViewMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&viewMapMutex);
         return NULL;

@@ -38,10 +38,15 @@ static bool registerProxy(struct IModel *self, struct IProxy *(*factory)(void *b
     size_t i = 0;
     for (; this->proxyMap[i] != NULL && this->proxyMap[i]->key != NULL; i++) { // find existing
         if (this->proxyMap[i]->key == name || strcmp(this->proxyMap[i]->key, name) == 0) { // match
-            this->proxyMap[i]->proxy->onRemove(this->proxyMap[i]->proxy);
+            self->removeProxy(self, name, NULL);
+            // this->proxyMap[i]->proxy->onRemove(this->proxyMap[i]->proxy);
             fprintf(stderr, "\033[0;33m[PureMVC::Model::registerMediator] Warning: Proxy '%s' exists; overridden registration\033[0m.\n", name);
 
-            factory(this->proxyMap[i]->proxy, name, data); // re-registration
+            // factory(this->proxyMap[i]->proxy, name, data); // re-registration
+            struct IProxy *oldProxy = this->proxyMap[i]->proxy;
+            puremvc_proxy_init(oldProxy, name, data); // reinitialize all function pointers
+
+            this->proxyMap[i]->proxy->onRegister(this->proxyMap[i]->proxy);
             mutex_unlock(&this->proxyMapMutex);
             return true;
         }
@@ -149,7 +154,7 @@ static void dispatchOnce(void) {
     mutex_init(&modelMapMutex);
 }
 
-struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key) {
+struct IModel *puremvc_model_getInstance(struct ModelMap *volatile *modelMap, const char *key) {
     if (modelMap == NULL && instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] FATAL: Missing ModelMap storage; skipping registration.\033[0m\n");
         return NULL;
@@ -169,8 +174,7 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
         // fputs("\033[0m\n", stderr);       // 4. Terminal: "Back to normal colors," then Newline.
     }
 
-    if (instanceMap == NULL)
-        instanceMap = modelMap;
+    instanceMap = modelMap;
 
     mutex_once(&modelMutexOnce, dispatchOnce);
     mutex_lock(&modelMapMutex);
@@ -183,7 +187,7 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
         }
     }
 
-    if (instanceMap[i] == NULL) { // overflow
+    if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] FATAL: ModelMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         // fputs("\033[0;31m[PureMVC::Model::getInstance] FATAL: Missing Model storage; skipping registration.\033[0m\n", stderr);
         mutex_unlock(&modelMapMutex);
