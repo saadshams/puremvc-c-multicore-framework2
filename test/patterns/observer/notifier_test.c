@@ -5,7 +5,6 @@
 #include "puremvc/i_command.h"
 
 #include <alloca.h>
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,8 +55,7 @@ void testInstance() {
 
     // initialize facade
     notifier->initializeNotifier(notifier, "NotifierTest1");
-    if (strcmp(notifier->getMultitonKey(notifier), "NotifierTest1") != 0)
-        abort();
+    if (strcmp(notifier->getMultitonKey(notifier), "NotifierTest1") != 0) abort();
 
     if (notifier->getFacade(notifier) == NULL) abort();
 

@@ -5,7 +5,6 @@
 #include "puremvc/i_notification.h"
 
 #include <alloca.h>
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 

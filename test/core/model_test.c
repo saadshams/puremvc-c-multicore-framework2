@@ -4,7 +4,6 @@
 #include "model_test_proxy.h"
 
 #include <alloca.h>
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -50,14 +49,11 @@ void testGetInstance() {
 
     // test assertions
     if (model == NULL) abort();
-    if (model != puremvc_model_getInstance(instanceMap, "ModelTestKey1"))
-        abort();
-    if (strcmp(instanceMap[0]->key, "ModelTestKey1") != 0)
-        abort();
+    if (model != puremvc_model_getInstance(instanceMap, "ModelTestKey1")) abort();
+    if (strcmp(instanceMap[0]->key, "ModelTestKey1") != 0) abort();
 
     struct IModel *removedModel = NULL;
-    if (puremvc_model_removeModel("ModelTestKey1", &removedModel) != true)
-        abort();
+    if (puremvc_model_removeModel("ModelTestKey1", &removedModel) != true) abort();
     if (instanceMap[0]->key != NULL) abort();
 }
 
@@ -92,13 +88,11 @@ void testRegisterAndRetrieveProxy() {
 
     struct IProxy *removedProxy = NULL;
     model->removeProxy(model, "colors", &removedProxy);
-    if (strcmp(removedProxy->getName(removedProxy), "colors") != 0)
-        abort();
+    if (strcmp(removedProxy->getName(removedProxy), "colors") != 0) abort();
 
     model->retrieveProxy(model, "colors");
 
-    if (puremvc_model_removeModel("ModelTestKey2", NULL) != true)
-        abort();
+    if (puremvc_model_removeModel("ModelTestKey2", NULL) != true) abort();
     model = NULL;
 }
 
@@ -128,14 +122,12 @@ void testHasProxy() {
     // remove the proxy
     struct IProxy *removedProxy = NULL;
     model->removeProxy(model, "aces", &removedProxy);
-    if (strcmp(removedProxy->getName(removedProxy), "aces") != 0)
-        abort();
+    if (strcmp(removedProxy->getName(removedProxy), "aces") != 0) abort();
 
     // assert that the model->hasProxy method returns false for that proxy name
     if (model->hasProxy(model, "aces") != false) abort();
 
-    if (puremvc_model_removeModel("ModelTestKey3", NULL) != true)
-        abort();
+    if (puremvc_model_removeModel("ModelTestKey3", NULL) != true) abort();
 }
 
 void testRegisterAndRemoveProxy() {
@@ -163,15 +155,12 @@ void testRegisterAndRemoveProxy() {
     model->removeProxy(model, "sizes", &removedProxy);
 
     // assert that we removed the appropriate proxy
-    if (strcmp(removedProxy->getName(removedProxy), "sizes") != 0)
-        abort();
+    if (strcmp(removedProxy->getName(removedProxy), "sizes") != 0) abort();
 
     // ensure that the proxy is no longer retrievable from the model
-    if (model->retrieveProxy(model, "sizes") != NULL)
-        abort();
+    if (model->retrieveProxy(model, "sizes") != NULL) abort();
 
-    if (puremvc_model_removeModel("ModelTestKey4", NULL) != true)
-        abort();
+    if (puremvc_model_removeModel("ModelTestKey4", NULL) != true) abort();
     model = NULL;
 }
 
@@ -195,21 +184,17 @@ void testOnRegisterAndOnRemove() {
 
     // assert that onRegister was called, and the proxy responded by setting its data accordingly
     const struct IProxy *proxy = model->retrieveProxy(model, "ModelTestProxy");
-    if (strcmp(proxy->getData(proxy), ON_REGISTER_CALLED) != 0)
-        abort();
+    if (strcmp(proxy->getData(proxy), ON_REGISTER_CALLED) != 0) abort();
 
     // Remove the proxy
     struct IProxy *removedProxy = NULL;
     model->removeProxy(model, "ModelTestProxy", &removedProxy);
-    if (strcmp(removedProxy->getName(removedProxy), "ModelTestProxy") != 0)
-        abort();
+    if (strcmp(removedProxy->getName(removedProxy), "ModelTestProxy") != 0) abort();
 
     // assert that onRemove was called, and the proxy responded by setting its data accordingly
-    if (strcmp(removedProxy->getData(removedProxy), ON_REMOVE_CALLED) != 0)
-        abort();
+    if (strcmp(removedProxy->getData(removedProxy), ON_REMOVE_CALLED) != 0) abort();
 
-    if (puremvc_model_removeModel("ModelTestKey5", NULL) != true)
-        abort();
+    if (puremvc_model_removeModel("ModelTestKey5", NULL) != true) abort();
     model = NULL;
 }
 
@@ -222,22 +207,18 @@ void testRemoveModel() {
     // Get a Multiton Model instance
     puremvc_model_getInstance(instanceMap, "ModelTestKey6");
 
-    if (strcmp(instanceMap[0]->key, "ModelTestKey6") != 0)
-        abort();
+    if (strcmp(instanceMap[0]->key, "ModelTestKey6") != 0) abort();
 
     // remove the model
-    if (puremvc_model_removeModel("ModelTestKey6", NULL) != true)
-        abort();
+    if (puremvc_model_removeModel("ModelTestKey6", NULL) != true) abort();
     if (instanceMap[0]->key != NULL) abort();
 
     // re-create the model without throwing an exception
     puremvc_model_getInstance(instanceMap, "ModelTestKey6");
-    if (strcmp(instanceMap[0]->key, "ModelTestKey6") != 0)
-        abort();
+    if (strcmp(instanceMap[0]->key, "ModelTestKey6") != 0) abort();
 
     // try removing again
-    if (puremvc_model_removeModel("ModelTestKey6", NULL) != true)
-        abort();;
+    if (puremvc_model_removeModel("ModelTestKey6", NULL) != true) abort();;
     if (instanceMap[0]->key != NULL) abort();
 }
 
@@ -299,22 +280,19 @@ void testRegisterAndReplaceProxy2() {
     model->initializeModel(model, proxyMap);
 
     int *sizes = (int []) {1, 0};
-    if (model->registerProxy(model, puremvc_proxy_init, "sizes", sizes) != true)
-        abort();
+    if (model->registerProxy(model, puremvc_proxy_init, "sizes", sizes) != true) abort();
 
     // replace with another proxy
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
     // static const char *colors[] = {"red", "green", "blue", NULL};
-    if (model->registerProxy(model, puremvc_proxy_init, "sizes", colors) != true)
-        abort();
+    if (model->registerProxy(model, puremvc_proxy_init, "sizes", colors) != true) abort();
 
     // try to retrieve the replaced proxy
     const struct IProxy *proxy = model->retrieveProxy(model, "sizes");
 
     // test assertions
     if (proxy == NULL) abort();
-    if (strcmp(proxy->getName(proxy), "sizes") != 0)
-        abort();
+    if (strcmp(proxy->getName(proxy), "sizes") != 0) abort();
 
     const char **data = proxy->getData(proxy); // fails on Release, passes on Debug
     if (data != colors) abort();
@@ -324,13 +302,10 @@ void testRegisterAndReplaceProxy2() {
 
     struct IProxy *removedProxy = NULL;
     model->removeProxy(model, "sizes", &removedProxy);
-    if (strcmp(removedProxy->getName(removedProxy), "sizes") != 0)
-        abort();
+    if (strcmp(removedProxy->getName(removedProxy), "sizes") != 0) abort();
 
-    if (model->retrieveProxy(model, "sizes") != NULL)
-        abort();
-    if (puremvc_model_removeModel("ModelTestKey9", NULL) != true)
-        abort();
+    if (model->retrieveProxy(model, "sizes") != NULL) abort();
+    if (puremvc_model_removeModel("ModelTestKey9", NULL) != true) abort();
 }
 
 void testProxyMapShiftLeft() {
@@ -355,74 +330,57 @@ void testProxyMapShiftLeft() {
     struct ProxyMap **actualMap = *ppp;
 
     // Register four proxies and verify that each is correctly associated to their dictionaries
-    if (model->registerProxy(model, puremvc_proxy_init, "proxy0", NULL) != true)
-        abort();
+    if (model->registerProxy(model, puremvc_proxy_init, "proxy0", NULL) != true) abort();
     const struct IProxy *proxy0 = actualMap[0]->proxy;
     if (strcmp(actualMap[0]->key, "proxy0") != 0) abort();
-    if (strcmp(proxy0->getName(proxy0), "proxy0") != 0)
-        abort();
+    if (strcmp(proxy0->getName(proxy0), "proxy0") != 0) abort();
 
-    if (model->registerProxy(model, puremvc_proxy_init, "proxy1", NULL) != true)
-        abort();
+    if (model->registerProxy(model, puremvc_proxy_init, "proxy1", NULL) != true) abort();
     const struct IProxy *proxy1 = actualMap[1]->proxy;
     if (strcmp(actualMap[1]->key, "proxy1") != 0) abort();
-    if (strcmp(proxy1->getName(proxy1), "proxy1") != 0)
-        abort();
+    if (strcmp(proxy1->getName(proxy1), "proxy1") != 0) abort();
 
-    if (model->registerProxy(model, puremvc_proxy_init, "proxy2", NULL) != true)
-        abort();
+    if (model->registerProxy(model, puremvc_proxy_init, "proxy2", NULL) != true) abort();
     const struct IProxy *proxy2 = actualMap[2]->proxy;
     if (strcmp(actualMap[2]->key, "proxy2") != 0) abort();
-    if (strcmp(proxy2->getName(proxy2), "proxy2") != 0)
-        abort();
+    if (strcmp(proxy2->getName(proxy2), "proxy2") != 0) abort();
 
-    if (model->registerProxy(model, puremvc_proxy_init, "proxy3", NULL) != true)
-        abort();
+    if (model->registerProxy(model, puremvc_proxy_init, "proxy3", NULL) != true) abort();
     const struct IProxy *proxy3 = actualMap[3]->proxy;
     if (strcmp(actualMap[3]->key, "proxy3") != 0) abort();
-    if (strcmp(proxy3->getName(proxy3), "proxy3") != 0)
-        abort();
+    if (strcmp(proxy3->getName(proxy3), "proxy3") != 0) abort();
 
     // Remove the second proxy (middle) and verify that remaining proxies 0, 2, 3 are shifted correctly
     struct IProxy *removedProxy1 = NULL;
-    if (model->removeProxy(model, "proxy1", &removedProxy1) != true)
-        abort();
-    if (strcmp(removedProxy1->getName(removedProxy1), "proxy1") != 0)
-        abort();
+    if (model->removeProxy(model, "proxy1", &removedProxy1) != true) abort();
+    if (strcmp(removedProxy1->getName(removedProxy1), "proxy1") != 0) abort();
     if (strcmp(actualMap[0]->key, "proxy0") != 0) abort();
     if (strcmp(actualMap[1]->key, "proxy2") != 0) abort();
     if (strcmp(actualMap[2]->key, "proxy3") != 0) abort();
 
     // Remove the last proxy and verify the remaining 0, 2 stay in place
     struct IProxy *removedProxy3 = NULL;
-    if (model->removeProxy(model, "proxy3", &removedProxy3) != true)
-        abort();;
-    if (strcmp(removedProxy3->getName(removedProxy3), "proxy3") != 0)
-        abort();
+    if (model->removeProxy(model, "proxy3", &removedProxy3) != true) abort();;
+    if (strcmp(removedProxy3->getName(removedProxy3), "proxy3") != 0) abort();
     if (strcmp(actualMap[0]->key, "proxy0") != 0) abort();
     if (strcmp(actualMap[1]->key, "proxy2") != 0) abort();
 
     // Remove the first proxy and verify that subsequent proxy 2 shift left
     struct IProxy *removedProxy0 = NULL;
-    if (model->removeProxy(model, "proxy0", &removedProxy0) != true)
-        abort();;
-    if (strcmp(removedProxy0->getName(removedProxy0), "proxy0") != 0)
-        abort();
+    if (model->removeProxy(model, "proxy0", &removedProxy0) != true) abort();;
+    if (strcmp(removedProxy0->getName(removedProxy0), "proxy0") != 0) abort();
     if (strcmp(actualMap[0]->key, "proxy2") != 0) abort();
 
     // Remove the remaining proxy3 and confirm that the dictionary is NULL
     struct IProxy *removedProxy2 = NULL;
-    if (model->removeProxy(model, "proxy2", &removedProxy2) != true)
-        abort();;
-    if (strcmp(removedProxy2->getName(removedProxy2), "proxy2") != 0)
-        abort();
+    if (model->removeProxy(model, "proxy2", &removedProxy2) != true) abort();;
+    if (strcmp(removedProxy2->getName(removedProxy2), "proxy2") != 0) abort();
     if (actualMap[0]->key != NULL) abort(); // proxyMap is empty
     if (actualMap[1]->key != NULL) abort();
     if (actualMap[2]->key != NULL) abort();
     if (actualMap[3]->key != NULL) abort();
 
-    if (puremvc_model_removeModel("ModelTestKey10", NULL) != true)
-        abort();;
+    if (puremvc_model_removeModel("ModelTestKey10", NULL) != true) abort();;
     model = NULL;
 }
 
@@ -436,71 +394,53 @@ void TestModelMapShiftLeft() {
     };
 
     // create 4 instances
-    if (puremvc_model_getInstance(instanceMap, "model0") == NULL)
-        abort();
-    if (strcmp(instanceMap[0]->key, "model0") != 0)
-        abort();
+    if (puremvc_model_getInstance(instanceMap, "model0") == NULL) abort();
+    if (strcmp(instanceMap[0]->key, "model0") != 0) abort();
     const char **key0 = (const char **)((char *) instanceMap[0]->model + sizeof(struct IModel));
     if (strcmp(*key0, "model0") != 0) abort();
 
-    if (puremvc_model_getInstance(instanceMap, "model1") == NULL)
-        abort();
-    if (strcmp(instanceMap[1]->key, "model1") != 0)
-        abort();
+    if (puremvc_model_getInstance(instanceMap, "model1") == NULL) abort();
+    if (strcmp(instanceMap[1]->key, "model1") != 0) abort();
     const char **key1 = (const char **)((char *) instanceMap[1]->model + sizeof(struct IModel));
     if (strcmp(*key1, "model1") != 0) abort();
 
-    if (puremvc_model_getInstance(instanceMap, "model2") == NULL)
-        abort();
-    if (strcmp(instanceMap[2]->key, "model2") != 0)
-        abort();
+    if (puremvc_model_getInstance(instanceMap, "model2") == NULL) abort();
+    if (strcmp(instanceMap[2]->key, "model2") != 0) abort();
     const char **key2 = (const char **)((char *) instanceMap[2]->model + sizeof(struct IModel));
     if (strcmp(*key2, "model2") != 0) abort();
 
-    if (puremvc_model_getInstance(instanceMap, "model3") == NULL)
-        abort();
-    if (strcmp(instanceMap[3]->key, "model3") != 0)
-        abort();
+    if (puremvc_model_getInstance(instanceMap, "model3") == NULL) abort();
+    if (strcmp(instanceMap[3]->key, "model3") != 0) abort();
     const char **key3 = (const char **)((char *) instanceMap[3]->model + sizeof(struct IModel));
     if (strcmp(*key3, "model3") != 0) abort();
 
     // remove
     struct IModel *model1 = NULL; // remove middle1, remaining 0, 2, 3
-    if (puremvc_model_removeModel("model1", &model1) != true)
-        abort();
-    if (strcmp(instanceMap[0]->key, "model0") != 0)
-        abort();
-    if (strcmp(instanceMap[1]->key, "model2") != 0)
-        abort();
-    if (strcmp(instanceMap[2]->key, "model3") != 0)
-        abort();
+    if (puremvc_model_removeModel("model1", &model1) != true) abort();
+    if (strcmp(instanceMap[0]->key, "model0") != 0) abort();
+    if (strcmp(instanceMap[1]->key, "model2") != 0) abort();
+    if (strcmp(instanceMap[2]->key, "model3") != 0) abort();
     if (instanceMap[3]->key != NULL) abort();
     if (instanceMap[4] != NULL) abort();
 
     struct IModel *model3 = NULL; // remove last3, remaining 0, 2
-    if (puremvc_model_removeModel("model3", &model3) != true)
-        abort();
-    if (strcmp(instanceMap[0]->key, "model0") != 0)
-        abort();
-    if (strcmp(instanceMap[1]->key, "model2") != 0)
-        abort();
+    if (puremvc_model_removeModel("model3", &model3) != true) abort();
+    if (strcmp(instanceMap[0]->key, "model0") != 0) abort();
+    if (strcmp(instanceMap[1]->key, "model2") != 0) abort();
     if (instanceMap[2]->key != NULL) abort();
     if (instanceMap[3]->key != NULL) abort();
     if (instanceMap[4] != NULL) abort();
 
     struct IModel *model0 = NULL; // remove first, remaining 2
-    if (puremvc_model_removeModel("model0", &model0) != true)
-        abort();
-    if (strcmp(instanceMap[0]->key, "model2") != 0)
-        abort();
+    if (puremvc_model_removeModel("model0", &model0) != true) abort();
+    if (strcmp(instanceMap[0]->key, "model2") != 0) abort();
     if (instanceMap[1]->key != NULL) abort();
     if (instanceMap[2]->key != NULL) abort();
     if (instanceMap[3]->key != NULL) abort();
     if (instanceMap[4] != NULL) abort();
 
     struct IModel *model2 = NULL; // remove remaining
-    if (puremvc_model_removeModel("model2", &model2) != true)
-        abort();
+    if (puremvc_model_removeModel("model2", &model2) != true) abort();
     if (instanceMap[0]->key != NULL) abort();
     if (instanceMap[1]->key != NULL) abort();
     if (instanceMap[2]->key != NULL) abort();

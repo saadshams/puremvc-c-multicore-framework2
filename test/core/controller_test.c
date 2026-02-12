@@ -6,7 +6,6 @@
 #include "puremvc/i_view.h"
 
 #include <alloca.h>
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -184,8 +183,7 @@ void testRegisterAndRemoveCommand() {
     vo.result = 0;
 
     // Remove the Command from the Controller
-    if (controller->removeCommand(controller, "ControllerRemoveTest", NULL) != true)
-        abort();;
+    if (controller->removeCommand(controller, "ControllerRemoveTest", NULL) != true) abort();;
 
     // Tell the controller to execute the Command associated with the
     // note. This time, it should not be registered, and our vo result
@@ -194,10 +192,8 @@ void testRegisterAndRemoveCommand() {
 
     // test assertions
     if (vo.result != 0) abort();
-    if (puremvc_controller_removeController("ControllerTestKey3", NULL) != true)
-        abort();;
-    if (puremvc_view_removeView("ControllerTestKey3", NULL) != true)
-        abort();
+    if (puremvc_controller_removeController("ControllerTestKey3", NULL) != true) abort();;
+    if (puremvc_view_removeView("ControllerTestKey3", NULL) != true) abort();
 }
 
 void testHasCommand() {
@@ -231,21 +227,16 @@ void testHasCommand() {
     // test that hasCommand returns true for hasCommandTest notifications
     if (controller->registerCommand(controller, "hasCommandTest", test_controller_command_init) != true)
         abort();;
-    if (controller->hasCommand(controller, "hasCommandTest") != true)
-        abort();
+    if (controller->hasCommand(controller, "hasCommandTest") != true) abort();
 
     // Remove the Command from the Controller
-    if (controller->removeCommand(controller, "hasCommandTest", NULL) != true)
-        abort();;
+    if (controller->removeCommand(controller, "hasCommandTest", NULL) != true) abort();;
 
     // test that hasCommand returns false for hasCommandTest notifications
-    if (controller->hasCommand(controller, "hasCommandTest") != false)
-        abort();
+    if (controller->hasCommand(controller, "hasCommandTest") != false) abort();
 
-    if (puremvc_controller_removeController("ControllerTestKey4", NULL) != true)
-        abort();;
-    if (puremvc_view_removeView("ControllerTestKey4", NULL) != true)
-        abort();;
+    if (puremvc_controller_removeController("ControllerTestKey4", NULL) != true) abort();;
+    if (puremvc_view_removeView("ControllerTestKey4", NULL) != true) abort();;
 }
 
 void testReregisterAndExecuteCommand() {
@@ -283,8 +274,7 @@ void testReregisterAndExecuteCommand() {
         abort();
 
     // Remove the Command from the Controller
-    if (controller->removeCommand(controller, "ControllerTest2", NULL) != true)
-        abort();
+    if (controller->removeCommand(controller, "ControllerTest2", NULL) != true) abort();
 
     // Re-register the Command with the Controller
     if (controller->registerCommand(controller, "ControllerTest2", test_controller_command2_init) != true)
@@ -308,12 +298,9 @@ void testReregisterAndExecuteCommand() {
     // if the command is executed twice the value will be 48
     if (vo.result != 48) abort();
 
-    if (controller->removeCommand(controller, "ControllerTest2", NULL) != true)
-        abort();
-    if (puremvc_controller_removeController("ControllerTestKey5", NULL) != true)
-        abort();
-    if (puremvc_view_removeView("ControllerTestKey5", NULL) != true)
-        abort();;
+    if (controller->removeCommand(controller, "ControllerTest2", NULL) != true) abort();
+    if (puremvc_controller_removeController("ControllerTestKey5", NULL) != true) abort();
+    if (puremvc_view_removeView("ControllerTestKey5", NULL) != true) abort();;
 }
 
 void testRegisterAndUpdateCommand() {
@@ -363,12 +350,9 @@ void testRegisterAndUpdateCommand() {
     // second command result
     if (vo.result != 34) abort();
 
-    if (controller->removeCommand(controller, "ControllerTest2", NULL) != true)
-        abort();;
-    if (puremvc_controller_removeController("ControllerTestKey6", NULL) != true)
-        abort();;
-    if (puremvc_view_removeView("ControllerTestKey6", NULL) != true)
-        abort();;
+    if (controller->removeCommand(controller, "ControllerTest2", NULL) != true) abort();;
+    if (puremvc_controller_removeController("ControllerTestKey6", NULL) != true) abort();;
+    if (puremvc_view_removeView("ControllerTestKey6", NULL) != true) abort();;
 }
 
 void testRemoveController() {
@@ -391,16 +375,13 @@ void testRemoveController() {
         abort();
 
     // remove the controller
-    if (puremvc_controller_removeController("ControllerTestKey6", NULL) != true)
-        abort();
+    if (puremvc_controller_removeController("ControllerTestKey6", NULL) != true) abort();
 
     // trying removing again will return false
-    if (puremvc_controller_removeController("ControllerTestKey6", NULL) != false)
-        abort();;
+    if (puremvc_controller_removeController("ControllerTestKey6", NULL) != false) abort();;
 
     // view doesn't exist to begin with
-    if (puremvc_view_removeView("ControllerTestKey6", NULL) != false)
-        abort();;
+    if (puremvc_view_removeView("ControllerTestKey6", NULL) != false) abort();;
 }
 
 void testCommandMapShiftLeft() {
@@ -449,82 +430,59 @@ void testCommandMapShiftLeft() {
     controller->executeCommand(controller, notification0);
 
     // Register four commands and verify that each is correctly associated to their dictionaries and observers
-    if (controller->registerCommand(controller, "command0", puremvc_simple_command_init) != true)
-        abort();;
+    if (controller->registerCommand(controller, "command0", puremvc_simple_command_init) != true) abort();;
     if (strcmp(cmdMap[0]->key, "command0") != 0) abort();
-    if (cmdMap[0]->factory != puremvc_simple_command_init)
-        abort();
+    if(cmdMap[0]->factory != puremvc_simple_command_init) abort();
     if (strcmp(obsMap[0]->key, "command0") != 0) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != controller)
-        abort();
+    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != controller) abort();
 
-    if (controller->registerCommand(controller, "command1", puremvc_simple_command_init) != true)
-        abort();
+    if (controller->registerCommand(controller, "command1", puremvc_simple_command_init) != true) abort();
     if (strcmp(cmdMap[1]->key, "command1") != 0) abort();
-    if (cmdMap[1]->factory != puremvc_simple_command_init)
-        abort();
+    if(cmdMap[1]->factory != puremvc_simple_command_init) abort();
     if (strcmp(obsMap[1]->key, "command1") != 0) abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != controller)
-        abort();
+    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != controller) abort();
 
     if (controller->registerCommand(controller, "command2", puremvc_simple_command_init) != true)
 
         abort();
     if (strcmp(cmdMap[2]->key, "command2") != 0) abort();
-    if (cmdMap[2]->factory != puremvc_simple_command_init)
-        abort();
+    if(cmdMap[2]->factory != puremvc_simple_command_init) abort();
     if (strcmp(obsMap[2]->key, "command2") != 0) abort();
-    if (obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) != controller)
-        abort();
+    if (obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) != controller) abort();
 
-    if (controller->registerCommand(controller, "command3", puremvc_simple_command_init) != true)
-        abort();
+    if (controller->registerCommand(controller, "command3", puremvc_simple_command_init) != true) abort();
     if (strcmp(cmdMap[3]->key, "command3") != 0) abort();
-    if (cmdMap[3]->factory != puremvc_simple_command_init)
-        abort();
+    if(cmdMap[3]->factory != puremvc_simple_command_init) abort();
     if (strcmp(obsMap[3]->key, "command3") != 0) abort();
-    if (obsMap[3]->observers[0]->getContext(obsMap[3]->observers[0]) != controller)
-        abort();
+    if (obsMap[3]->observers[0]->getContext(obsMap[3]->observers[0]) != controller) abort();
 
     // Remove the second command1 (middle) and verify that remaining commands 2, 3 and observers shifted correctly
-    if (controller->removeCommand(controller, "command1", NULL) != true)
-        abort();
+    if (controller->removeCommand(controller, "command1", NULL) != true) abort();
     if (strcmp(cmdMap[0]->key, "command0") != 0) abort();
-    if (cmdMap[0]->factory != puremvc_simple_command_init)
-        abort();
+    if(cmdMap[0]->factory != puremvc_simple_command_init) abort();
     if (strcmp(obsMap[1]->key, "command2") != 0) abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != controller)
-        abort();
+    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != controller) abort();
     if (strcmp(obsMap[2]->key, "command3") != 0) abort();
-    if (obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) != controller)
-        abort();
+    if (obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) != controller) abort();
 
     // // Remove the last command3 and verify the remaining command 0, 2 stay in place
-    if (controller->removeCommand(controller, "command3", NULL) != true)
-        abort();
+    if (controller->removeCommand(controller, "command3", NULL) != true) abort();
     if (strcmp(cmdMap[0]->key, "command0") != 0) abort();
-    if (cmdMap[0]->factory != puremvc_simple_command_init)
-        abort();
+    if(cmdMap[0]->factory != puremvc_simple_command_init) abort();
     if (strcmp(obsMap[1]->key, "command2") != 0) abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != controller)
-        abort();
+    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != controller) abort();
 
     // Remove the first command0 and verify that subsequent command2 shift left
-    if (controller->removeCommand(controller, "command0", NULL) != true)
-        abort();
+    if (controller->removeCommand(controller, "command0", NULL) != true) abort();
     if (strcmp(cmdMap[0]->key, "command2") != 0) abort();
-    if (cmdMap[0]->factory != puremvc_simple_command_init)
-        abort();
+    if(cmdMap[0]->factory != puremvc_simple_command_init) abort();
 
     // Remove all remaining mediators and confirm that the dictionary key is cleared
-    if (controller->removeCommand(controller, "command2", NULL) != true)
-        abort();
+    if (controller->removeCommand(controller, "command2", NULL) != true) abort();
     if (cmdMap[0]->key != NULL) abort();
 
-    if (puremvc_controller_removeController("ControllerTestKey8", NULL) != true)
-        abort();
-    if (puremvc_view_removeView("ControllerTestKey8", NULL) != true)
-        abort();
+    if (puremvc_controller_removeController("ControllerTestKey8", NULL) != true) abort();
+    if (puremvc_view_removeView("ControllerTestKey8", NULL) != true) abort();
 }
 
 void TestControllerMapShiftLeft() {
@@ -536,14 +494,10 @@ void TestControllerMapShiftLeft() {
         NULL
     };
 
-    if (puremvc_view_getInstance(viewMap, "controller0") == NULL)
-        abort(); // Controller dependencies
-    if (puremvc_view_getInstance(viewMap, "controller1") == NULL)
-        abort();
-    if (puremvc_view_getInstance(viewMap, "controller2") == NULL)
-        abort();
-    if (puremvc_view_getInstance(viewMap, "controller3") == NULL)
-        abort();
+    if (puremvc_view_getInstance(viewMap, "controller0") == NULL) abort(); // Controller dependencies
+    if (puremvc_view_getInstance(viewMap, "controller1") == NULL) abort();
+    if (puremvc_view_getInstance(viewMap, "controller2") == NULL) abort();
+    if (puremvc_view_getInstance(viewMap, "controller3") == NULL) abort();
 
     struct ControllerMap **instanceMap = (struct ControllerMap *[]) {
         &(struct ControllerMap){ .controller = alloca(puremvc_controller_size() ) },
@@ -554,67 +508,51 @@ void TestControllerMapShiftLeft() {
     };
 
     // create 4 instances
-    if (puremvc_controller_getInstance(instanceMap, "controller0") == NULL)
-        abort();
-    if (strcmp(instanceMap[0]->key, "controller0") != 0)
-        abort();
+    if (puremvc_controller_getInstance(instanceMap, "controller0") == NULL) abort();
+    if (strcmp(instanceMap[0]->key, "controller0") != 0) abort();
     const char **key0 = (const char **)((char *) instanceMap[0]->controller + sizeof(struct IController));
     if (strcmp(*key0, "controller0") != 0) abort();
 
-    if (puremvc_controller_getInstance(instanceMap, "controller1") == NULL)
-        abort();
-    if (strcmp(instanceMap[1]->key, "controller1") != 0)
-        abort();
+    if (puremvc_controller_getInstance(instanceMap, "controller1") == NULL) abort();
+    if (strcmp(instanceMap[1]->key, "controller1") != 0) abort();
     const char **key1 = (const char **)((char *) instanceMap[1]->controller + sizeof(struct IController));
     if (strcmp(*key1, "controller1") != 0) abort();
 
-    if (puremvc_controller_getInstance(instanceMap, "controller2") == NULL)
-        abort();
+    if (puremvc_controller_getInstance(instanceMap, "controller2") == NULL) abort();
     const char **key2 = (const char **)((char *) instanceMap[2]->controller + sizeof(struct IController));
     if (strcmp(*key2, "controller2") != 0) abort();
 
-    if (puremvc_controller_getInstance(instanceMap, "controller3") == NULL)
-        abort();
+    if (puremvc_controller_getInstance(instanceMap, "controller3") == NULL) abort();
     const char **key3 = (const char **)((char *) instanceMap[3]->controller + sizeof(struct IController));
     if (strcmp(*key3, "controller3") != 0) abort();
 
     // remove
     struct IController *controller1 = NULL; // remove middle controller1, remaining 0, 2, 3
-    if (puremvc_controller_removeController("controller1", &controller1) != true)
-        abort();
-    if (strcmp(instanceMap[0]->key, "controller0") != 0)
-        abort();
-    if (strcmp(instanceMap[1]->key, "controller2") != 0)
-        abort();
-    if (strcmp(instanceMap[2]->key, "controller3") != 0)
-        abort();
+    if (puremvc_controller_removeController("controller1", &controller1) != true) abort();
+    if (strcmp(instanceMap[0]->key, "controller0") != 0) abort();
+    if (strcmp(instanceMap[1]->key, "controller2") != 0) abort();
+    if (strcmp(instanceMap[2]->key, "controller3") != 0) abort();
     if (instanceMap[3]->key != NULL) abort();
     if (instanceMap[4] != NULL) abort();
 
     struct IController *controller3 = NULL; // remove last, remaining 0, 2
-    if (puremvc_controller_removeController("controller3", &controller3) != true)
-        abort();
-    if (strcmp(instanceMap[0]->key, "controller0") != 0)
-        abort();
-    if (strcmp(instanceMap[1]->key, "controller2") != 0)
-        abort();
+    if (puremvc_controller_removeController("controller3", &controller3) != true) abort();
+    if (strcmp(instanceMap[0]->key, "controller0") != 0) abort();
+    if (strcmp(instanceMap[1]->key, "controller2") != 0) abort();
     if (instanceMap[2]->key != NULL) abort();
     if (instanceMap[3]->key != NULL) abort();
     if (instanceMap[4] != NULL) abort();
 
     struct IController *controller0 = NULL; // remove first, remaining 2
-    if (puremvc_controller_removeController("controller0", &controller0) != true)
-        abort();
-    if (strcmp(instanceMap[0]->key, "controller2") != 0)
-        abort();
+    if (puremvc_controller_removeController("controller0", &controller0) != true) abort();
+    if (strcmp(instanceMap[0]->key, "controller2") != 0) abort();
     if (instanceMap[1]->key != NULL) abort();
     if (instanceMap[2]->key != NULL) abort();
     if (instanceMap[3]->key != NULL) abort();
     if (instanceMap[4] != NULL) abort();
 
     struct IController *controller2 = NULL; // remove remaining
-    if (puremvc_controller_removeController("controller2", &controller2) != true)
-        abort();
+    if (puremvc_controller_removeController("controller2", &controller2) != true) abort();
     if (instanceMap[0]->key != NULL) abort();
     if (instanceMap[1]->key != NULL) abort();
     if (instanceMap[2]->key != NULL) abort();

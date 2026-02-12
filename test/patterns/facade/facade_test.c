@@ -5,7 +5,6 @@
 #include "puremvc/i_facade.h"
 #include "puremvc/i_observer.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -54,12 +53,10 @@ void testGetInstance() {
 
     // test assertions
     if (facade == NULL) abort();
-    if (facade != puremvc_facade_getInstance(instanceMap, "FacadeTestKey1"))
-        abort();
+    if (facade != puremvc_facade_getInstance(instanceMap, "FacadeTestKey1")) abort();
 
     struct IFacade *removedFacade = NULL;
-    if (puremvc_facade_removeFacade("FacadeTestKey1", &removedFacade) != true)
-        abort();
+    if (puremvc_facade_removeFacade("FacadeTestKey1", &removedFacade) != true) abort();
     if (instanceMap[0]->key != NULL) abort();
 }
 
@@ -99,8 +96,7 @@ void testRegisterCommandAndSendNotification() {
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey2");
     facade->initializeFacade(facade, model, view, controller);
 
-    if (facade->registerCommand(facade, "FacadeTestNote", test_facade_command) != true)
-        abort();
+    if (facade->registerCommand(facade, "FacadeTestNote", test_facade_command) != true) abort();
 
     // Send notification. The Command associated with the event
     // (FacadeTestCommand) will be invoked, and will multiply
@@ -112,12 +108,10 @@ void testRegisterCommandAndSendNotification() {
     if (vo.result != 64) abort();
 
     struct ICommand *(*factory)(void *) = 0;
-    if (facade->removeCommand(facade, "FacadeTestNote", &factory) != true)
-        abort();
+    if (facade->removeCommand(facade, "FacadeTestNote", &factory) != true) abort();
 
     struct IFacade *removedFacade = NULL;
-    if (puremvc_facade_removeFacade("FacadeTestKey2", &removedFacade) != true)
-        abort();
+    if (puremvc_facade_removeFacade("FacadeTestKey2", &removedFacade) != true) abort();
 }
 
 void testRegisterAndRemoveCommandAndSendNotification() {
@@ -140,10 +134,8 @@ void testRegisterAndRemoveCommandAndSendNotification() {
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey3");
     facade->initializeFacade(facade, NULL, view, controller);
 
-    if (facade->registerCommand(facade, "FacadeTestNote", test_facade_command) != true)
-        abort();
-    if (facade->removeCommand(facade, "FacadeTestNote", NULL) != true)
-        abort();
+    if (facade->registerCommand(facade, "FacadeTestNote", test_facade_command) != true) abort();
+    if (facade->removeCommand(facade, "FacadeTestNote", NULL) != true) abort();
 
     // Send notification. The Command associated with the event
     // (FacadeTestCommand) will NOT be invoked, and will NOT multiply
@@ -155,8 +147,7 @@ void testRegisterAndRemoveCommandAndSendNotification() {
     if (vo.result != 0) abort();
 
     struct IFacade *removedFacade = NULL;
-    if (puremvc_facade_removeFacade("FacadeTestKey3", &removedFacade) != true)
-        abort();
+    if (puremvc_facade_removeFacade("FacadeTestKey3", &removedFacade) != true) abort();
 }
 
 void testRegisterAndRetrieveProxy() {
@@ -172,8 +163,7 @@ void testRegisterAndRetrieveProxy() {
 
     static char *colors[] = { "red", "green", "blue", NULL};
 
-    if (facade->registerProxy(facade, puremvc_proxy_init, "colors", colors) != true)
-        abort();
+    if (facade->registerProxy(facade, puremvc_proxy_init, "colors", colors) != true) abort();
     const struct IProxy *proxy = facade->retrieveProxy(facade, "colors");
 
     // test assertions
@@ -247,29 +237,23 @@ void testRegisterRetrieveAndRemoveMediator() {
 
     // register a mediator, remove it, then try to retrieve it
     struct Object {int x;} object;
-    if (facade->registerMediator(facade, puremvc_mediator_init, MEDIATOR_NAME, &object) != true)
-        abort();
+    if (facade->registerMediator(facade, puremvc_mediator_init, MEDIATOR_NAME, &object) != true) abort();
 
     // retrieve the mediator
-    if (facade->retrieveMediator(facade, MEDIATOR_NAME) == NULL)
-        abort();
+    if (facade->retrieveMediator(facade, MEDIATOR_NAME) == NULL) abort();
 
     // remove the mediator
     struct IMediator *removedMediator = NULL;
-    if (facade->removeMediator(facade, MEDIATOR_NAME, &removedMediator) != true)
-        abort();
+    if (facade->removeMediator(facade, MEDIATOR_NAME, &removedMediator) != true) abort();
 
     // assert that we have removed the appropriate mediator
-    if (strcmp(removedMediator->getName(removedMediator), MEDIATOR_NAME) != 0)
-        abort();
+    if (strcmp(removedMediator->getName(removedMediator), MEDIATOR_NAME) != 0) abort();
 
     // assert that the mediator is no longer retrievable
-    if (facade->retrieveMediator(facade, MEDIATOR_NAME) != NULL)
-        abort();
+    if (facade->retrieveMediator(facade, MEDIATOR_NAME) != NULL) abort();
 
     struct IFacade *removedFacade = NULL;
-    if (puremvc_facade_removeFacade("FacadeTestKey6", &removedFacade) != true)
-        abort();
+    if (puremvc_facade_removeFacade("FacadeTestKey6", &removedFacade) != true) abort();
 }
 
 void testHasProxy() {
@@ -285,21 +269,16 @@ void testHasProxy() {
     static int sizes[] = { 7, 13, 21, 0 }; // 0 is the sentinel
 
     // register a Proxy
-    if (facade->registerProxy(facade, puremvc_proxy_init, "hasProxyTest", sizes) != true)
-        abort();
+    if (facade->registerProxy(facade, puremvc_proxy_init, "hasProxyTest", sizes) != true) abort();
 
     // assert that the model.hasProxy method returns true
     // for that new name
-    if (facade->hasProxy(facade, "hasProxyTest") != true)
-        abort();
+    if (facade->hasProxy(facade, "hasProxyTest") != true) abort();
 
-    if (facade->removeProxy(facade, "hasProxyTest", NULL) != true)
-        abort();;
-    if (facade->hasProxy(facade, "hasProxyTest") != false)
-        abort();
+    if (facade->removeProxy(facade, "hasProxyTest", NULL) != true) abort();;
+    if (facade->hasProxy(facade, "hasProxyTest") != false) abort();
 
-    if (puremvc_facade_removeFacade("FacadeTestKey7", NULL) != true)
-        abort();
+    if (puremvc_facade_removeFacade("FacadeTestKey7", NULL) != true) abort();
 }
 
 void testHasMediator() {
@@ -319,18 +298,14 @@ void testHasMediator() {
 
     // assert that the facade.hasMediator method returns true
     // for that mediator name
-    if (facade->hasMediator(facade, "facadeHasMediatorTest") != true)
-        abort();
+    if (facade->hasMediator(facade, "facadeHasMediatorTest") != true) abort();
 
-    if (facade->removeMediator(facade, "facadeHasMediatorTest", NULL) != true)
-        abort();
+    if (facade->removeMediator(facade, "facadeHasMediatorTest", NULL) != true) abort();
 
     // assert that the facade.hasMediator method returns false
     // for that mediator name
-    if (facade->hasMediator(facade, "facadeHasMediatorTest") != false)
-        abort();
-    if (puremvc_facade_removeFacade("FacadeTestKey8", NULL) != true)
-        abort();
+    if (facade->hasMediator(facade, "facadeHasMediatorTest") != false) abort();
+    if (puremvc_facade_removeFacade("FacadeTestKey8", NULL) != true) abort();
 }
 
 void testHasCommand() {
@@ -352,25 +327,20 @@ void testHasCommand() {
     facade->initializeFacade(facade, NULL, view, controller);
 
     // register the ControllerTestCommand to handle 'hasCommandTest' notes
-    if (facade->registerCommand(facade, "facadeHasCommandTest", test_facade_command) != true)
-        abort();
+    if (facade->registerCommand(facade, "facadeHasCommandTest", test_facade_command) != true) abort();
 
     // test that hasCommand returns true for hasCommandTest notifications
-    if (facade->hasCommand(facade, "facadeHasCommandTest") != true)
-        abort();
+    if (facade->hasCommand(facade, "facadeHasCommandTest") != true) abort();
 
     // Remove the Command from the Controller
     struct ICommand *(*removedCommand)(void *) = 0;
-    if (facade->removeCommand(facade, "facadeHasCommandTest", &removedCommand) != true)
-        abort();
+    if (facade->removeCommand(facade, "facadeHasCommandTest", &removedCommand) != true) abort();
     if (removedCommand != test_facade_command) abort();
 
     // test that hasCommand returns false for hasCommandTest notifications
-    if (facade->hasCommand(facade, "facadeHasCommandTest") != false)
-        abort();
+    if (facade->hasCommand(facade, "facadeHasCommandTest") != false) abort();
 
-    if (puremvc_facade_removeFacade("FacadeTestKey10", NULL) != true)
-        abort();
+    if (puremvc_facade_removeFacade("FacadeTestKey10", NULL) != true) abort();
 }
 
 void testHasCoreAndRemoveCore() {
@@ -379,21 +349,18 @@ void testHasCoreAndRemoveCore() {
     facade->initializeFacade(facade, NULL, NULL, NULL);
 
     // assert that the Facade.hasCore method returns false first
-    if (puremvc_facade_hasCore("unregistered") != false)
-        abort();
+    if (puremvc_facade_hasCore("unregistered") != false) abort();
 
     // register a Core
     puremvc_facade_getInstance(facadeMap, "FacadeTestKey10");
 
-    if (puremvc_facade_hasCore("FacadeTestKey10") != true)
-        abort();
+    if (puremvc_facade_hasCore("FacadeTestKey10") != true) abort();
 
     // remove the Core
     puremvc_facade_removeFacade("FacadeTestKey10", NULL);
 
     // assert that the Facade.hasCore method returns false now that the core has been removed.
-    if (puremvc_facade_hasCore("FacadeTestKey10") != false)
-        abort();
+    if (puremvc_facade_hasCore("FacadeTestKey10") != false) abort();
 }
 
 void testFacadeMapShiftLeft() {
@@ -408,88 +375,63 @@ void testFacadeMapShiftLeft() {
     if (puremvc_facade_getInstance(instanceMap, "facade0") == NULL)
 
         abort();
-    if (strcmp(instanceMap[0]->key, "facade0") != 0)
-        abort();
+    if (strcmp(instanceMap[0]->key, "facade0") != 0) abort();
     const char **key0 = (const char **)((char *) instanceMap[0]->facade + sizeof(struct IFacade));
     if (strcmp(*key0, "facade0") != 0) abort();
-    if (puremvc_facade_hasCore("facade0") != true)
-        abort();
+    if (puremvc_facade_hasCore("facade0") != true) abort();
 
-    if (puremvc_facade_getInstance(instanceMap, "facade1") == NULL)
-        abort();
-    if (strcmp(instanceMap[1]->key, "facade1") != 0)
-        abort();
+    if (puremvc_facade_getInstance(instanceMap, "facade1") == NULL) abort();
+    if (strcmp(instanceMap[1]->key, "facade1") != 0) abort();
     const char **key1 = (const char **)((char *) instanceMap[1]->facade + sizeof(struct IFacade));
     if (strcmp(*key1, "facade1") != 0) abort();
-    if (puremvc_facade_hasCore("facade1") != true)
-        abort();
+    if (puremvc_facade_hasCore("facade1") != true) abort();
 
-    if (puremvc_facade_getInstance(instanceMap, "facade2") == NULL)
-        abort();
-    if (strcmp(instanceMap[2]->key, "facade2") != 0)
-        abort();
+    if (puremvc_facade_getInstance(instanceMap, "facade2") == NULL) abort();
+    if (strcmp(instanceMap[2]->key, "facade2") != 0) abort();
     const char **key2 = (const char **)((char *) instanceMap[2]->facade + sizeof(struct IFacade));
     if (strcmp(*key2, "facade2") != 0) abort();
-    if (puremvc_facade_hasCore("facade2") != true)
-        abort();
+    if (puremvc_facade_hasCore("facade2") != true) abort();
 
-    if (puremvc_facade_getInstance(instanceMap, "facade3") == NULL)
-        abort();
-    if (strcmp(instanceMap[3]->key, "facade3") != 0)
-        abort();
+    if (puremvc_facade_getInstance(instanceMap, "facade3") == NULL) abort();
+    if (strcmp(instanceMap[3]->key, "facade3") != 0) abort();
     const char **key3 = (const char **)((char *) instanceMap[3]->facade + sizeof(struct IFacade));
     if (strcmp(*key3, "facade3") != 0) abort();
-    if (puremvc_facade_hasCore("facade3") != true)
-        abort();
+    if (puremvc_facade_hasCore("facade3") != true) abort();
 
     // remove
     struct IFacade *facade1 = NULL; // remove middle1, remaining 0, 2, 3
-    if (puremvc_facade_removeFacade("facade1", &facade1) != true)
-        abort();
-    if (strcmp(instanceMap[0]->key, "facade0") != 0)
-        abort();
-    if (strcmp(instanceMap[1]->key, "facade2") != 0)
-        abort();
-    if (strcmp(instanceMap[2]->key, "facade3") != 0)
-        abort();
+    if (puremvc_facade_removeFacade("facade1", &facade1) != true) abort();
+    if (strcmp(instanceMap[0]->key, "facade0") != 0) abort();
+    if (strcmp(instanceMap[1]->key, "facade2") != 0) abort();
+    if (strcmp(instanceMap[2]->key, "facade3") != 0) abort();
     if (instanceMap[3]->key != NULL) abort();
     if (instanceMap[4] != NULL) abort();
-    if (puremvc_facade_hasCore("facade1") != false)
-        abort();
+    if (puremvc_facade_hasCore("facade1") != false) abort();
 
     struct IFacade *facade3 = NULL; // remove last3, remaining 0, 2
-    if (puremvc_facade_removeFacade("facade3", &facade3) != true)
-        abort();
-    if (strcmp(instanceMap[0]->key, "facade0") != 0)
-        abort();
-    if (strcmp(instanceMap[1]->key, "facade2") != 0)
-        abort();
+    if (puremvc_facade_removeFacade("facade3", &facade3) != true) abort();
+    if (strcmp(instanceMap[0]->key, "facade0") != 0) abort();
+    if (strcmp(instanceMap[1]->key, "facade2") != 0) abort();
     if (instanceMap[2]->key != NULL) abort();
     if (instanceMap[3]->key != NULL) abort();
     if (instanceMap[4] != NULL) abort();
-    if (puremvc_facade_hasCore("facade3") != false)
-        abort();
+    if (puremvc_facade_hasCore("facade3") != false) abort();
 
     struct IFacade *facade0 = NULL; // remove first, remaining 2
-    if (puremvc_facade_removeFacade("facade0", &facade0) != true)
-        abort();
-    if (strcmp(instanceMap[0]->key, "facade2") != 0)
-        abort();
+    if (puremvc_facade_removeFacade("facade0", &facade0) != true) abort();
+    if (strcmp(instanceMap[0]->key, "facade2") != 0) abort();
     if (instanceMap[1]->key != NULL) abort();
     if (instanceMap[2]->key != NULL) abort();
     if (instanceMap[3]->key != NULL) abort();
     if (instanceMap[4] != NULL) abort();
-    if (puremvc_facade_hasCore("facade0") != false)
-        abort();
+    if (puremvc_facade_hasCore("facade0") != false) abort();
 
     struct IFacade *facade2 = NULL; // remove remaining
-    if (puremvc_facade_removeFacade("facade2", &facade2) != true)
-        abort();
+    if (puremvc_facade_removeFacade("facade2", &facade2) != true) abort();
     if (instanceMap[0]->key != NULL) abort();
     if (instanceMap[1]->key != NULL) abort();
     if (instanceMap[2]->key != NULL) abort();
     if (instanceMap[3]->key != NULL) abort();
     if (instanceMap[4] != NULL) abort();
-    if (puremvc_facade_hasCore("facade2") != false)
-        abort();
+    if (puremvc_facade_hasCore("facade2") != false) abort();
 }

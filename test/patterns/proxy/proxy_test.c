@@ -3,7 +3,6 @@
 #include "puremvc/i_proxy.h"
 
 #include <alloca.h>
-#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,8 +39,7 @@ void testConstructor() {
     const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
 
     // test assertions
-    if (strcmp(proxy->getName(proxy), PROXY_NAME) != 0)
-        abort();
+    if (strcmp(proxy->getName(proxy), PROXY_NAME) != 0) abort();
 
     if (proxy->getData(proxy) != NULL) abort();
 }
@@ -53,12 +51,10 @@ void testNameAccessors() {
     const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), "TestProxy", NULL);
 
     // test assertions
-    if (strcmp(proxy->getName(proxy), "TestProxy") != 0)
-        abort();
+    if (strcmp(proxy->getName(proxy), "TestProxy") != 0) abort();
 
     const struct IProxy *proxy2 = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
-    if (strcmp(proxy2->getName(proxy2), PROXY_NAME) != 0)
-        abort();
+    if (strcmp(proxy2->getName(proxy2), PROXY_NAME) != 0) abort();
 }
 
 /**
@@ -95,8 +91,7 @@ void testDataReassign() {
 
 void testNotifier() {
     const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
-    if (strcmp(proxy->getName(proxy), PROXY_NAME) != 0)
-        abort();
+    if (strcmp(proxy->getName(proxy), PROXY_NAME) != 0) abort();
 
     proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), "testing");
 }

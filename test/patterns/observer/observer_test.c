@@ -3,7 +3,6 @@
 #include "puremvc/i_notification.h"
 
 #include <alloca.h>
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -58,8 +57,7 @@ void testObserverConstructor() {
 
     // test assertions
     if (observerTestVar.value != 5) abort();
-    if (&object != observer->getContext(observer))
-        abort();
+    if (&object != observer->getContext(observer)) abort();
 }
 
 /**
@@ -74,10 +72,8 @@ void testObserverAccessors() {
     observer->setContext(observer, &object);
     observer->setNotify(observer, handleNotification);
 
-    if (observer->getContext(observer) != &object)
-        abort();
-    if (observer->getNotify(observer) != handleNotification)
-        abort();
+    if (observer->getContext(observer) != &object) abort();
+    if (observer->getNotify(observer) != handleNotification) abort();
 
     // create a test event, setting a payload value and notify
     // the observer with it. since the observer is this class
@@ -101,8 +97,6 @@ void testCompareNotifyContext() {
     const struct IObserver *observer = puremvc_observer_init(alloca(puremvc_observer_size()), handleNotification, &object);
 
     // test assertions
-    if (observer->compareNotifyContext(observer, &negTestObj) != false)
-        abort();
-    if (observer->compareNotifyContext(observer, &object) != true)
-        abort();
+    if (observer->compareNotifyContext(observer, &negTestObj) != false) abort();
+    if (observer->compareNotifyContext(observer, &object) != true) abort();
 }

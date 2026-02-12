@@ -2,7 +2,6 @@
 #include "puremvc/i_mediator.h"
 
 #include <alloca.h>
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -38,8 +37,7 @@ void testConstructor() {
     const struct IMediator *mediator = puremvc_mediator_init(alloca(puremvc_mediator_size()), NULL, NULL);
 
     // test assertions
-    if (strcmp(mediator->getName(mediator), MEDIATOR_NAME) != 0)
-        abort();
+    if (strcmp(mediator->getName(mediator), MEDIATOR_NAME) != 0) abort();
 }
 
 /**
@@ -49,8 +47,7 @@ void testNameAccessor() {
     const struct IMediator *mediator = puremvc_mediator_init(alloca(puremvc_mediator_size()), "TestMediator", NULL);
 
     // test assertions
-    if (strcmp(mediator->getName(mediator), "TestMediator") != 0)
-        abort();
+    if (strcmp(mediator->getName(mediator), "TestMediator") != 0) abort();
 }
 
 /**
@@ -62,8 +59,7 @@ void testViewAccessor() {
     struct IMediator *mediator = puremvc_mediator_init(alloca(puremvc_mediator_size()), MEDIATOR_NAME, &component);
 
     // test assertions
-    if (mediator->getComponent(mediator) != &component)
-        abort();
+    if (mediator->getComponent(mediator) != &component) abort();
     mediator->setComponent(mediator, NULL);
     if (mediator->getComponent(mediator) != NULL) abort();
 }
