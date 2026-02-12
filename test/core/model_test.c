@@ -271,8 +271,8 @@ void testRegisterAndReplaceProxy() {
         NULL
     };
 
-    struct ProxyMap **proxyMap = (struct ProxyMap *[]){
-        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) },
+    struct ProxyMap **proxyMap = (struct ProxyMap *[]) {
+        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size() )},
         NULL
     };
 
@@ -283,8 +283,8 @@ void testRegisterAndReplaceProxy() {
     assert(model->registerProxy(model, puremvc_proxy_init, "sizes", NULL) == true);
 
     // replace with another proxy
-    // const char **colors = (const char *[]) {"red", "green", "blue", NULL};
-    static const char *colors[] = {"red", "green", "blue", NULL};
+    const char **colors = (const char *[]) {"red", "green", "blue", NULL};
+    // static const char *colors[] = {"red", "green", "blue", NULL};
     assert(model->registerProxy(model, puremvc_proxy_init, "sizes", colors) == true);
 
     // try to retrieve the replaced proxy
@@ -294,18 +294,18 @@ void testRegisterAndReplaceProxy() {
     assert(proxy != NULL);
     assert(strcmp(proxy->getName(proxy), "sizes") == 0);
 
-    // const char **data = proxy->getData(proxy); // fails on Release, passes on Debug
-    // assert(data == colors);
-    // assert(strcmp(*data, "red") == 0);
-    // assert(strcmp(*(data + 1), "green") == 0);
-    // assert(strcmp(*(data + 2), "blue") == 0);
+    const char **data = proxy->getData(proxy); // fails on Release, passes on Debug
+    assert(data == colors);
+    assert(strcmp(*data, "red") == 0);
+    assert(strcmp(*(data + 1), "green") == 0);
+    assert(strcmp(*(data + 2), "blue") == 0);
 
-    // struct IProxy *removedProxy = NULL;
-    // model->removeProxy(model, "sizes", &removedProxy);
-    // assert(strcmp(removedProxy->getName(removedProxy), "sizes") == 0);
+    struct IProxy *removedProxy = NULL;
+    model->removeProxy(model, "sizes", &removedProxy);
+    assert(strcmp(removedProxy->getName(removedProxy), "sizes") == 0);
 
-    // assert(model->retrieveProxy(model, "sizes") == NULL);
-    // assert(puremvc_model_removeModel("ModelTestKey9", NULL) == true);
+    assert(model->retrieveProxy(model, "sizes") == NULL);
+    assert(puremvc_model_removeModel("ModelTestKey9", NULL) == true);
 }
 
 void testProxyMapShiftLeft() {
