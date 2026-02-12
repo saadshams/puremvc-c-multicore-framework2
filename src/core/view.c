@@ -128,7 +128,7 @@ bool removeObserver(struct IView *self, const char *notificationName, const void
             // todo why swap
             if (index == 0) { // Since no entries were shifted left, the current observerMap is empty (key check in the for loop has an effect)
                 this->observerMap[i]->key = NULL; // remove
-                for (size_t j = i; this->observerMap[j + 1] != NULL && this->observerMap[j + 1]->key != NULL; j++) { // shift observerMap left
+                for (j = i; this->observerMap[j + 1] != NULL && this->observerMap[j + 1]->key != NULL; j++) { // shift observerMap left
                     struct ObserverMap *temp = this->observerMap[j];
                     this->observerMap[j] = this->observerMap[j + 1];
                     this->observerMap[j + 1] = temp;
