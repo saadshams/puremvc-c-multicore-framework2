@@ -29,7 +29,7 @@ int main() {
     // test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
     // test("testOnRegisterAndOnRemove", testOnRegisterAndOnRemove);
     // test("testRemoveModel", testRemoveModel);
-    test("testRegisterAndReplaceProxy2", testRegisterAndReplaceProxy); //
+    test("testRegisterAndReplaceProxy", testRegisterAndReplaceProxy); //
     // test("testProxyMapShiftLeft", testProxyMapShiftLeft);
     // test("testProxyMapShiftLeft", testProxyMapShiftLeft);
 
@@ -222,19 +222,19 @@ void testRemoveModel() {
     assert(instanceMap[0]->key == NULL);
 }
 
-void testRegisterAndReplaceProxy2() {
+void testRegisterAndReplaceProxy() {
     // 1. Explicitly named buffers
     // 1. Use volatile pointers to force the compiler to keep them in memory
-    void *volatile m_buf = alloca(puremvc_model_size());
-    void *volatile p_buf = alloca(puremvc_proxy_size());
+    void *volatile model_buffer = alloca(puremvc_model_size());
+    void *volatile proxy_buffer = alloca(puremvc_proxy_size());
 
     // FORCE the compiler to treat this memory as "used" immediately
-    memset(m_buf, 0, puremvc_model_size());
-    memset(p_buf, 0, puremvc_proxy_size());
+    // memset(model_buffer, 0, puremvc_model_size());
+    // memset(proxy_buffer, 0, puremvc_proxy_size());
 
     // 2. Named Slots (Do NOT use anonymous compound literals)
-    struct ModelMap model_slot = { .key = "ModelTestKey9", .model = m_buf };
-    struct ProxyMap proxy_slot = { .proxy = p_buf }; // key set later by register
+    struct ModelMap model_slot = { .model = model_buffer };
+    struct ProxyMap proxy_slot = { .proxy = proxy_buffer }; // key set later by register
 
     // 3. Named Maps
     struct ModelMap *instanceMap[] = { &model_slot, NULL };
@@ -251,7 +251,7 @@ void testRegisterAndReplaceProxy2() {
 
     // Replace with static data
     static const char *colors[] = {"red", "green", "blue", NULL};
-    model->registerProxy(model, puremvc_proxy_init, "sizes", (void*)colors);
+    model->registerProxy(model, puremvc_proxy_init, "sizes", (void *) colors);
 
     // 5. Explicit Retrieval Verification
     const struct IProxy *retrieved = model->retrieveProxy(model, "sizes");
@@ -265,7 +265,7 @@ void testRegisterAndReplaceProxy2() {
     }
 }
 
-void testRegisterAndReplaceProxy() {
+void testRegisterAndReplaceProxy2() {
     struct ModelMap **instanceMap = (struct ModelMap *[]) {
         &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
         NULL
