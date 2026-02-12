@@ -29,8 +29,8 @@ int main() {
     test("testGetInstance", testGetInstance);
     test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification);
     test("testRegisterAndRemoveCommandAndSendNotification", testRegisterAndRemoveCommandAndSendNotification);
-    test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy); //
-    test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy); //
+    test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy);
+    test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
     test("testRegisterRetrieveAndRemoveMediator", testRegisterRetrieveAndRemoveMediator);
     test("testHasProxy", testHasProxy);
     test("testHasMediator", testHasMediator);
@@ -186,43 +186,43 @@ void testRegisterAndRetrieveProxy() {
 }
 
 void testRegisterAndRemoveProxy() {
-    // struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
-    // struct ProxyMap **proxyMap = (struct ProxyMap *[]) { &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) }, NULL };
-    // struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey5");
-    // model->initializeModel(model, proxyMap);
-    //
-    // // register a proxy, remove it, then try to retrieve it
-    // struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
-    // struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey5");
-    // facade->initializeFacade(facade, model, NULL, NULL);
-    //
-    // static int sizes[] = { 7, 13, 21, 0 }; // 0 is the sentinel
-    // assert(facade->registerProxy(facade, puremvc_proxy_init, "sizes", sizes) == true);;
-    //
-    // const struct IProxy *proxy = facade->retrieveProxy(facade, "sizes");
-    //
-    // // 1. Retrieve as the raw pointer (void * becomes int *)
-    // int *data = proxy->getData(proxy);
-    //
-    // // 2. Test assertions
-    // assert(data != NULL);
-    // assert(data[0] == 7);
-    // assert(data[1] == 13);
-    // assert(data[2] == 21);
-    // assert(data[3] == 0); // Checking the sentinel
-    //
-    // // remove the proxy
-    // struct IProxy *removedProxy = NULL;
-    // assert(facade->removeProxy(facade, "sizes", &removedProxy) == true);
-    //
-    // // assert that we removed the appropriate proxy
-    // assert(strcmp(removedProxy->getName(removedProxy), "sizes") == 0);
-    //
-    // // test assertions - make sure we can no longer retrieve the proxy from the model
-    // assert(facade->retrieveProxy(facade, "sizes") == NULL);
-    //
-    // struct IFacade *removedFacade = NULL;
-    // assert(puremvc_facade_removeFacade("FacadeTestKey5", &removedFacade) == true);
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct ProxyMap **proxyMap = (struct ProxyMap *[]) { &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) }, NULL };
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey5");
+    model->initializeModel(model, proxyMap);
+
+    // register a proxy, remove it, then try to retrieve it
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey5");
+    facade->initializeFacade(facade, model, NULL, NULL);
+
+    static int sizes[] = { 7, 13, 21, 0 }; // 0 is the sentinel
+    if (facade->registerProxy(facade, puremvc_proxy_init, "sizes", sizes) == false) abort();
+
+    const struct IProxy *proxy = facade->retrieveProxy(facade, "sizes");
+
+    // 1. Retrieve as the raw pointer (void * becomes int *)
+    int *data = proxy->getData(proxy);
+
+    // 2. Test assertions
+    if (data != NULL);
+    if (data[0] == 7);
+    if (data[1] == 13);
+    if (data[2] == 21);
+    if (data[3] == 0); // Checking the sentinel
+
+    // remove the proxy
+    struct IProxy *removedProxy = NULL;
+    if (facade->removeProxy(facade, "sizes", &removedProxy) == false) abort();
+
+    // assert that we removed the appropriate proxy
+    if (strcmp(removedProxy->getName(removedProxy), "sizes") != 0) abort();
+
+    // test assertions - make sure we can no longer retrieve the proxy from the model
+    if (facade->retrieveProxy(facade, "sizes") != NULL) abort();
+
+    struct IFacade *removedFacade = NULL;
+    if (puremvc_facade_removeFacade("FacadeTestKey5", &removedFacade) == false) abort();
 }
 
 void testRegisterRetrieveAndRemoveMediator() {
