@@ -8,11 +8,8 @@
 #include <stdlib.h>
 
 static void beforeAll() {}
-
 static void beforeEach() {}
-
 static void afterEach() {}
-
 static void afterAll() {}
 
 static void test(const char *name, void (*callback)(void)) {
