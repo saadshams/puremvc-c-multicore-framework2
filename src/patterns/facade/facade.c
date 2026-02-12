@@ -252,3 +252,9 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
 
     return true;
 }
+
+void puremvc_facade_reset() {
+    mutex_lock(&facadeMapMutex);
+    instanceMap = NULL;
+    mutex_unlock(&facadeMapMutex);
+}

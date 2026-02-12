@@ -375,3 +375,9 @@ bool puremvc_view_removeView(const char *key, struct IView **out) {
 
     return true;
 }
+
+void puremvc_view_reset() {
+    mutex_lock(&viewMapMutex);
+    instanceMap = NULL;
+    mutex_unlock(&viewMapMutex);
+}
