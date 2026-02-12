@@ -15,7 +15,6 @@
 
 static struct IFacade *getFacade(const struct INotifier *self) {
     struct IFacade *facade = puremvc_facade_getInstance(NULL, self->getMultitonKey(self));
-    facade->initializeFacade(facade, NULL, NULL, NULL);
     return facade;
 }
 
