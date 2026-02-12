@@ -226,7 +226,7 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
     mutex_once(&facadeMutexOnce, dispatchOnce);
     mutex_lock(&facadeMapMutex);
 
-    // puremvc_model_removeModel(key, NULL);
+    puremvc_model_removeModel(key, NULL);
     // puremvc_view_removeView(key, NULL);
     // puremvc_controller_removeController(key, NULL);
 
