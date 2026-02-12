@@ -15,7 +15,6 @@
 #include "puremvc/i_view.h"
 #include "puremvc/i_notification.h"
 
-#include <alloca.h>
 #include <stdio.h>
 #include <string.h>
 

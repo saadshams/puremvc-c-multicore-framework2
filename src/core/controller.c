@@ -13,7 +13,6 @@
 #include "puremvc/i_controller.h"
 #include "puremvc/i_command.h"
 
-#include <alloca.h>
 #include <stdio.h>
 #include <string.h>
 
