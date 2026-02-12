@@ -6,8 +6,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
-
 #include <malloc.h>
+
 #define alloca _alloca // MSVC sometimes prefers _alloca, this maps the standard name to it
 
 typedef struct { CRITICAL_SECTION cs; } Mutex;

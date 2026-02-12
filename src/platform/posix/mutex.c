@@ -1,7 +1,7 @@
+#include "puremvc/platform.h"
+
 #include <pthread.h>
 #include <stdlib.h>
-
-#include "puremvc/platform.h"
 
 void mutex_init(Mutex *mutex) {
     pthread_rwlock_init(&mutex->rwlock, NULL);
