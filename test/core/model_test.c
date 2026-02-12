@@ -43,7 +43,7 @@ int main() {
     test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
     test("testOnRegisterAndOnRemove", testOnRegisterAndOnRemove);
     test("testRemoveModel", testRemoveModel);
-    test("testRegisterAndReplaceProxy", testRegisterAndReplaceProxy); //
+    test("testRegisterAndReplaceProxy", testRegisterAndReplaceProxy);
     test("testProxyMapShiftLeft", testProxyMapShiftLeft);
     test("testProxyMapShiftLeft", testProxyMapShiftLeft);
 

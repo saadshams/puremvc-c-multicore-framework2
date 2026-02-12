@@ -48,7 +48,7 @@ int main() {
     printf("\033[1;36m================================================\033[0m\n\n");
 
     test("testGetInstance", testGetInstance);
-    test("testRegisterAndNotifyObserver", testRegisterAndNotifyObserver); //
+    test("testRegisterAndNotifyObserver", testRegisterAndNotifyObserver);
     test("testRegisterAndRetrieveMediator", testRegisterAndRetrieveMediator);
     test("testHasMediator", testHasMediator);
     test("testRegisterAndRemoveMediator", testRegisterAndRemoveMediator);
