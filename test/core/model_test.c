@@ -112,9 +112,9 @@ void testHasProxy() {
         NULL
     };
 
-    // alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
+    alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) {
-        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) }, // (struct IProxy *) buffer
+        &(struct ProxyMap){ .proxy = (struct IProxy *) buffer }, // (struct IProxy *) buffer
         NULL
     };
 
