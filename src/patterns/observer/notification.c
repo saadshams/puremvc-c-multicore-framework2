@@ -12,12 +12,12 @@
 #include <string.h>
 
 static const char *getName(const struct INotification *self) {
-    const struct Notification *this = (struct Notification *) self;
+    const struct Notification *this = (const struct Notification *) self;
     return this->name;
 }
 
 static const void *getBody(const struct INotification *self) {
-    const struct Notification *this = (struct Notification *) self;
+    const struct Notification *this = (const struct Notification *) self;
     return this->body;
 }
 
@@ -27,7 +27,7 @@ static void setBody(struct INotification *self, void *body) {
 }
 
 static const char *getType(const struct INotification *self) {
-    const struct Notification *this = (struct Notification *) self;
+    const struct Notification *this = (const struct Notification *) self;
     return this->type;
 }
 
@@ -42,7 +42,7 @@ static void setType(struct INotification *self, const char *type) {
 }
 
 void toString(const struct INotification *self, char *buffer, size_t buffer_size) {
-    const struct Notification *this = (struct Notification *) self;
+    const struct Notification *this = (const struct Notification *) self;
     int len = snprintf(buffer, buffer_size, "%s : %s [body=%p]", this->name, this->type, this->body);
     if (len < 0 || (size_t) len >= buffer_size)
         fprintf(stderr, "\033[0;33m[PureMVC::Notification::toString] Warning: Buffer Truncated: (Required: %d, Available: %zu).\033[0m\n", len, buffer_size);

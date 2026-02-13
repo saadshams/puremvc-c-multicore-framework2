@@ -11,7 +11,7 @@
 #include <string.h>
 
 static void *getContext(const struct IObserver *self) {
-    const struct Observer *this = (struct Observer *) self;
+    const struct Observer *this = (const struct Observer *) self;
     return this->context;
 }
 
@@ -21,7 +21,7 @@ static void setContext(struct IObserver *self, void *notifyContext) {
 }
 
 static bool (*getNotify(const struct IObserver *self))(const void *context, const struct INotification *notification) {
-    const struct Observer *this = (struct Observer *) self;
+    const struct Observer *this = (const struct Observer *) self;
     return this->notify;
 }
 
@@ -31,13 +31,13 @@ static void setNotify(struct IObserver *self, bool (*notify)(const void *context
 }
 
 static void notifyObserver(const struct IObserver *self, const struct INotification *notification) {
-    const struct Observer *this = (struct Observer *) self;
+    const struct Observer *this = (const struct Observer *) self;
     if (this->notify == NULL && this->context == NULL) return;
     this->notify(this->context, notification);
 }
 
 static bool compareNotifyContext(const struct IObserver *self, const void *context) {
-    const struct Observer *this = (struct Observer *) self;
+    const struct Observer *this = (const struct Observer *) self;
     if (this->context == NULL || context == NULL) return false;
     return this->context == context;
 }
