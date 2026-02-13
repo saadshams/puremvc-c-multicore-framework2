@@ -21,11 +21,11 @@
 static void beforeAll() {}
 
 static void beforeEach() {
-    puremvc_view_reset();
+    // puremvc_view_reset();
 }
 
 static void afterEach() {
-    puremvc_view_reset();
+    // puremvc_view_reset();
 }
 
 static void afterAll() {}

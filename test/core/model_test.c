@@ -11,11 +11,11 @@
 static void beforeAll() {}
 
 static void beforeEach() {
-    puremvc_model_reset();
+    // puremvc_model_reset();
 }
 
 static void afterEach() {
-    puremvc_model_reset();
+    // puremvc_model_reset();
 }
 
 static void afterAll() {}
