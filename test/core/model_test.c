@@ -38,7 +38,7 @@ int main() {
     test("testOnRegisterAndOnRemove", testOnRegisterAndOnRemove);
     test("testRemoveModel", testRemoveModel);
     test("testRegisterAndReplaceProxy", testRegisterAndReplaceProxy);
-    // test("testProxyMapShiftLeft", testProxyMapShiftLeft);
+    test("testProxyMapShiftLeft", testProxyMapShiftLeft);
     test("TestModelMapShiftLeft", TestModelMapShiftLeft);
     afterAll();
 
@@ -292,8 +292,8 @@ void testProxyMapShiftLeft() {
     struct IModel *model = puremvc_model_getInstance(instanceMap, "ModelTestKey10");
     model->initializeModel(model, proxyMap);
 
-    size_t offset = sizeof(struct IModel) + sizeof(const char *);
-    struct ProxyMap ***ppp = (struct ProxyMap ***)((char *) model + offset);
+    size_t offset = sizeof(struct IModel) + KEY_SIZE;  // skip base + multitonKey
+    struct ProxyMap ***ppp = (struct ProxyMap ***)((char *)model + offset);
     struct ProxyMap **actualMap = *ppp;
 
     // Register four proxies and verify that each is correctly associated to their dictionaries

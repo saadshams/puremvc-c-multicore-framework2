@@ -12,7 +12,8 @@
 struct Notification {
     struct INotification base;
 
-    const char *name;
     void *body;
-    const char *type;
+
+    char name[KEY_SIZE];
+    char type[KEY_SIZE];
 };

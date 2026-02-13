@@ -10,6 +10,10 @@
 
 #include <stddef.h>
 
+#ifndef NAME_SIZE
+#define KEY_SIZE 32
+#endif
+
 /**
  * @struct INotification
  * @brief Represents a notification in the PureMVC framework.

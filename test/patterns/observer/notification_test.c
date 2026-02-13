@@ -51,7 +51,7 @@ void testConstructor() {
     // test assertions
     if (strcmp(notification->getName(notification), "TestNote") != 0) abort();
     if (notification->getBody(notification) != NULL) abort();
-    if (notification->getType(notification) != NULL) abort();
+    if (notification->getType(notification)[0] != '\0') abort();
 }
 
 /**

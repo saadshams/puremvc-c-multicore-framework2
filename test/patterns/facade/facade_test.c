@@ -50,7 +50,7 @@ int main() {
     test("testHasMediator", testHasMediator);
     test("testHasCommand", testHasCommand);
     test("testHasCoreAndRemoveCore", testHasCoreAndRemoveCore);
-    // test("testFacadeMapShiftLeft", testFacadeMapShiftLeft);
+    test("testFacadeMapShiftLeft", testFacadeMapShiftLeft);
     afterAll();
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
@@ -394,26 +394,26 @@ void testFacadeMapShiftLeft() {
 
     if (puremvc_facade_getInstance(facadeMap, "facade0") == NULL) abort();
     if (strcmp(facadeMap[0]->key, "facade0") != 0) abort();
-    const char **key0 = (const char **)((char *) facadeMap[0]->facade + sizeof(struct IFacade));
-    if (strcmp(*key0, "facade0") != 0) abort();
+    const char *key0 = (char *)facadeMap[0]->facade + sizeof(struct IFacade);
+    if (strcmp(key0, "facade0") != 0) abort();
     if (puremvc_facade_hasCore("facade0") != true) abort();
 
     if (puremvc_facade_getInstance(facadeMap, "facade1") == NULL) abort();
     if (strcmp(facadeMap[1]->key, "facade1") != 0) abort();
-    const char **key1 = (const char **)((char *) facadeMap[1]->facade + sizeof(struct IFacade));
-    if (strcmp(*key1, "facade1") != 0) abort();
+    const char *key1 = (char *)facadeMap[1]->facade + sizeof(struct IFacade);
+    if (strcmp(key1, "facade1") != 0) abort();
     if (puremvc_facade_hasCore("facade1") != true) abort();
 
     if (puremvc_facade_getInstance(facadeMap, "facade2") == NULL) abort();
     if (strcmp(facadeMap[2]->key, "facade2") != 0) abort();
-    const char **key2 = (const char **)((char *) facadeMap[2]->facade + sizeof(struct IFacade));
-    if (strcmp(*key2, "facade2") != 0) abort();
+    const char *key2 = (char *)facadeMap[2]->facade + sizeof(struct IFacade);
+    if (strcmp(key2, "facade2") != 0) abort();
     if (puremvc_facade_hasCore("facade2") != true) abort();
 
     if (puremvc_facade_getInstance(facadeMap, "facade3") == NULL) abort();
     if (strcmp(facadeMap[3]->key, "facade3") != 0) abort();
-    const char **key3 = (const char **)((char *) facadeMap[3]->facade + sizeof(struct IFacade));
-    if (strcmp(*key3, "facade3") != 0) abort();
+    const char *key3 = (char *)facadeMap[3]->facade + sizeof(struct IFacade);
+    if (strcmp(key3, "facade3") != 0) abort();
     if (puremvc_facade_hasCore("facade3") != true) abort();
 
     // remove
@@ -422,7 +422,7 @@ void testFacadeMapShiftLeft() {
     if (strcmp(facadeMap[0]->key, "facade0") != 0) abort();
     if (strcmp(facadeMap[1]->key, "facade2") != 0) abort();
     if (strcmp(facadeMap[2]->key, "facade3") != 0) abort();
-    if (facadeMap[3]->key != NULL) abort();
+    if (facadeMap[3]->key[0] != '\0') abort();
     if (facadeMap[4] != NULL) abort();
     if (puremvc_facade_hasCore("facade1") != false) abort();
 
@@ -430,26 +430,26 @@ void testFacadeMapShiftLeft() {
     if (puremvc_facade_removeFacade("facade3", &facade3) != true) abort();
     if (strcmp(facadeMap[0]->key, "facade0") != 0) abort();
     if (strcmp(facadeMap[1]->key, "facade2") != 0) abort();
-    if (facadeMap[2]->key != NULL) abort();
-    if (facadeMap[3]->key != NULL) abort();
+    if (facadeMap[2]->key[0] != '\0') abort();
+    if (facadeMap[3]->key[0] != '\0') abort();
     if (facadeMap[4] != NULL) abort();
     if (puremvc_facade_hasCore("facade3") != false) abort();
 
     struct IFacade *facade0 = NULL; // remove first, remaining 2
     if (puremvc_facade_removeFacade("facade0", &facade0) != true) abort();
     if (strcmp(facadeMap[0]->key, "facade2") != 0) abort();
-    if (facadeMap[1]->key != NULL) abort();
-    if (facadeMap[2]->key != NULL) abort();
-    if (facadeMap[3]->key != NULL) abort();
+    if (facadeMap[1]->key[0] != '\0') abort();
+    if (facadeMap[2]->key[0] != '\0') abort();
+    if (facadeMap[3]->key[0] != '\0') abort();
     if (facadeMap[4] != NULL) abort();
     if (puremvc_facade_hasCore("facade0") != false) abort();
 
     struct IFacade *facade2 = NULL; // remove remaining
     if (puremvc_facade_removeFacade("facade2", &facade2) != true) abort();
-    if (facadeMap[0]->key != NULL) abort();
-    if (facadeMap[1]->key != NULL) abort();
-    if (facadeMap[2]->key != NULL) abort();
-    if (facadeMap[3]->key != NULL) abort();
+    if (facadeMap[0]->key[0] != '\0') abort();
+    if (facadeMap[1]->key[0] != '\0') abort();
+    if (facadeMap[2]->key[0] != '\0') abort();
+    if (facadeMap[3]->key[0] != '\0') abort();
     if (facadeMap[4] != NULL) abort();
     if (puremvc_facade_hasCore("facade2") != false) abort();
 }

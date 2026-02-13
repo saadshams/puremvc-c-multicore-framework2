@@ -33,7 +33,12 @@ static const char *getType(const struct INotification *self) {
 
 static void setType(struct INotification *self, const char *type) {
     struct Notification *this = (struct Notification *) self;
-    this->type = type;
+
+    int len = snprintf(this->type, KEY_SIZE, "%s", type);
+    if (len >= KEY_SIZE) {
+        this->type[KEY_SIZE - 1] = '\0';
+        fprintf(stderr, "\033[0;31m[PureMVC::Notification::setType] Warning: type truncated: '%s'\033[0m\n", type);
+    }
 }
 
 void toString(const struct INotification *self, char *buffer, size_t buffer_size) {
@@ -59,9 +64,27 @@ struct INotification *puremvc_notification_init(void *buffer, const char *name, 
     this->base.setType = setType;
     this->base.toString = toString;
 
-    this->name = name;
+    if (name != NULL) {
+        int len = snprintf(this->name, KEY_SIZE, "%s", name);
+        if (len >= KEY_SIZE) {
+            fprintf(stderr, "\033[0;31m[PureMVC::Notification::init] Warning: name truncated: '%s'\033[0m\n", type);
+            this->name[KEY_SIZE - 1] = '\0';
+        }
+    } else {
+        memset(this->name, 0, KEY_SIZE);
+    }
+
+    if (type != NULL) {
+        int len = snprintf(this->type, KEY_SIZE, "%s", type);
+        if (len >= KEY_SIZE) {
+            this->type[KEY_SIZE - 1] = '\0';
+            fprintf(stderr, "\033[0;31m[PureMVC::Notification::init] Warning: type truncated: '%s'\033[0m\n", type);
+        }
+    } else {
+        memset(this->type, 0, KEY_SIZE);
+    }
+
     this->body = body;
-    this->type = type;
 
     return (struct INotification *) this;
 }

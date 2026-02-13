@@ -42,8 +42,8 @@ int main() {
     test("testReregisterAndExecuteCommand", testReregisterAndExecuteCommand);
     test("testRegisterAndUpdateCommand", testRegisterAndUpdateCommand);
     test("testRemoveController", testRemoveController);
-    // test("testCommandMapShiftLeft", testCommandMapShiftLeft);
-    // test("TestControllerMapShiftLeft", TestControllerMapShiftLeft);
+    test("testCommandMapShiftLeft", testCommandMapShiftLeft);
+    test("TestControllerMapShiftLeft", TestControllerMapShiftLeft);
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     afterAll();
@@ -423,11 +423,11 @@ void testCommandMapShiftLeft() {
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey8");
     controller->initializeController(controller, view, commandMap);
 
-    size_t offset1 = sizeof(struct IView) + sizeof(const char *);
-    struct ObserverMap ***ppp1 = (struct ObserverMap ***)((char *) view + offset1);
-    struct ObserverMap **obsMap = *ppp1;
+    size_t offset1 = sizeof(struct IView) + KEY_SIZE;  // skip base + multitonKey
+    struct ObserverMap ***ppp = (struct ObserverMap ***)((char *) view + offset1);
+    struct ObserverMap **obsMap = *ppp;
 
-    size_t offset2 = sizeof(struct IController) + sizeof(const char *);
+    size_t offset2 = sizeof(struct IController) + KEY_SIZE;  // skip base + multitonKey
     struct CommandMap ***ppp2 = (struct CommandMap ***)((char *) controller + offset2);
     struct CommandMap **cmdMap = *ppp2;
 
@@ -516,21 +516,23 @@ void TestControllerMapShiftLeft() {
     // create 4 instances
     if (puremvc_controller_getInstance(instanceMap, "controller0") == NULL) abort();
     if (strcmp(instanceMap[0]->key, "controller0") != 0) abort();
-    const char **key0 = (const char **)((char *) instanceMap[0]->controller + sizeof(struct IController));
-    if (strcmp(*key0, "controller0") != 0) abort();
+    const char *key0 = (char *)instanceMap[0]->controller + sizeof(struct IController);
+    if (strcmp(key0, "controller0") != 0) abort();
 
     if (puremvc_controller_getInstance(instanceMap, "controller1") == NULL) abort();
     if (strcmp(instanceMap[1]->key, "controller1") != 0) abort();
-    const char **key1 = (const char **)((char *) instanceMap[1]->controller + sizeof(struct IController));
-    if (strcmp(*key1, "controller1") != 0) abort();
+    const char *key1 = (char *)instanceMap[1]->controller + sizeof(struct IController);
+    if (strcmp(key1, "controller1") != 0) abort();
 
     if (puremvc_controller_getInstance(instanceMap, "controller2") == NULL) abort();
-    const char **key2 = (const char **)((char *) instanceMap[2]->controller + sizeof(struct IController));
-    if (strcmp(*key2, "controller2") != 0) abort();
+    if (strcmp(instanceMap[2]->key, "controller2") != 0) abort();
+    const char *key2 = (char *)instanceMap[2]->controller + sizeof(struct IController);
+    if (strcmp(key2, "controller2") != 0) abort();
 
     if (puremvc_controller_getInstance(instanceMap, "controller3") == NULL) abort();
-    const char **key3 = (const char **)((char *) instanceMap[3]->controller + sizeof(struct IController));
-    if (strcmp(*key3, "controller3") != 0) abort();
+    if (strcmp(instanceMap[3]->key, "controller3") != 0) abort();
+    const char *key3 = (char *)instanceMap[3]->controller + sizeof(struct IController);
+    if (strcmp(key3, "controller3") != 0) abort();
 
     // remove
     struct IController *controller1 = NULL; // remove middle controller1, remaining 0, 2, 3
