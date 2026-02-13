@@ -72,9 +72,9 @@ void testRegisterAndRetrieveProxy() {
         NULL
     };
 
-    alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
+    // alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) {
-        &(struct ProxyMap){ .proxy = (struct IProxy *) buffer },
+        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) },
         NULL
     };
 
@@ -112,9 +112,9 @@ void testHasProxy() {
         NULL
     };
 
-    alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
+    // alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) {
-        &(struct ProxyMap){ .proxy = (struct IProxy *) buffer },
+        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) }, // (struct IProxy *) buffer
         NULL
     };
 
@@ -147,9 +147,9 @@ void testRegisterAndRemoveProxy() {
         NULL
     };
 
-    alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
+    // alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) {
-        &(struct ProxyMap){ .proxy = (struct IProxy *) buffer },
+        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) },
         NULL
     };
 
@@ -182,9 +182,9 @@ void testOnRegisterAndOnRemove() {
         NULL
     };
 
-    alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
+    // alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) {
-        &(struct ProxyMap){ .proxy = (struct IProxy *) buffer },
+        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) },
         NULL
     };
 
@@ -241,9 +241,9 @@ void testRegisterAndReplaceProxy() {
         NULL
     };
 
-    alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
+    // alignas(ALIGNMENT) unsigned char buffer[puremvc_proxy_size()];
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) {
-        &(struct ProxyMap){ .proxy = (struct IProxy *) buffer },
+        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) },
         NULL
     };
 
@@ -286,15 +286,15 @@ void testProxyMapShiftLeft() {
         NULL
     };
 
-    alignas(ALIGNMENT) unsigned char buffer0[puremvc_proxy_size()];
-    alignas(ALIGNMENT) unsigned char buffer1[puremvc_proxy_size()];
-    alignas(ALIGNMENT) unsigned char buffer2[puremvc_proxy_size()];
-    alignas(ALIGNMENT) unsigned char buffer3[puremvc_proxy_size()];
+    // alignas(ALIGNMENT) unsigned char buffer0[puremvc_proxy_size()];
+    // alignas(ALIGNMENT) unsigned char buffer1[puremvc_proxy_size()];
+    // alignas(ALIGNMENT) unsigned char buffer2[puremvc_proxy_size()];
+    // alignas(ALIGNMENT) unsigned char buffer3[puremvc_proxy_size()];
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) {
-        &(struct ProxyMap){ .proxy = (struct IProxy *) buffer0 },
-        &(struct ProxyMap){ .proxy = (struct IProxy *) buffer1 },
-        &(struct ProxyMap){ .proxy = (struct IProxy *) buffer2 },
-        &(struct ProxyMap){ .proxy = (struct IProxy *) buffer3 },
+        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) },
+        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) },
+        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) },
+        &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) },
         NULL
     };
 

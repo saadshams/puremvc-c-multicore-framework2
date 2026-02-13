@@ -13,7 +13,8 @@
 #include "../observer/notifier.h"
 
 struct Proxy {
-    alignas(ALIGNMENT) struct IProxy base; // Ensures the struct starts at an ALIGNMENT boundary (e.g., pointer size)
+    // alignas(ALIGNMENT)
+    struct IProxy base; // Ensures the struct starts at an ALIGNMENT boundary (e.g., pointer size)
 
     char name[KEY_SIZE];
     void *data;
