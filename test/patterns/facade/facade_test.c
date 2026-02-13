@@ -19,13 +19,7 @@ static void beforeEach() {
     puremvc_facade_reset();
 }
 
-static void afterEach() {
-    // puremvc_controller_reset();
-    // puremvc_model_reset();
-    // puremvc_view_reset();
-    // puremvc_facade_reset();
-}
-
+static void afterEach() {}
 static void afterAll() {}
 
 static void test(const char *name, void (*callback)(void)) {
