@@ -12,12 +12,12 @@
 #include <string.h>
 
 static const char *getName(const struct IProxy *self) {
-    const struct Proxy *this = (struct Proxy *) self;
+    const struct Proxy *this = (const struct Proxy *) self;
     return this->name;
 }
 
 static void *getData(const struct IProxy *self) {
-    const struct Proxy *this = (struct Proxy *) self;
+    const struct Proxy *this = (const struct Proxy *) self;
     return this->data;
 }
 
@@ -27,7 +27,7 @@ static void setData(struct IProxy *self, void *data) {
 }
 
 static struct INotifier *getNotifier(const struct IProxy *self) {
-    struct Proxy *this = (struct Proxy *) self;
+    const struct Proxy *this = (const struct Proxy *) self;
     return (struct INotifier *) &this->notifier;
 }
 
@@ -40,7 +40,7 @@ static void onRemove(struct IProxy *self) {
 }
 
 size_t puremvc_proxy_size() {
-    return (sizeof(struct Proxy) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+    return (sizeof(struct Proxy) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 
 struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
@@ -57,9 +57,9 @@ struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
 
     const char *key = name != NULL ? name : PROXY_NAME;
     int len = snprintf(this->name, sizeof(this->name), "%s", key);
-    if (len >= (int) sizeof(this->name)) {
+    if (len < 0 || len >= (int) sizeof(this->name)) {
         memset(this, 0, sizeof(struct Proxy));
-        fprintf(stderr, "\033[0;31m[PureMVC::Proxy::init] Error: Proxy name truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(this->name));
+        fprintf(stderr, "\033[0;31m[PureMVC::Proxy::init] Error: Proxy name truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(this->name) - 1u);
         return NULL;
     }
 

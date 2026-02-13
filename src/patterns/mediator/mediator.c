@@ -12,7 +12,7 @@
 #include <string.h>
 
 static const char *getName(const struct IMediator *self) {
-    const struct Mediator *this = (struct Mediator *) self;
+    const struct Mediator *this = (const struct Mediator *) self;
     return this->name;
 }
 
@@ -22,12 +22,12 @@ static void setComponent(struct IMediator *self, void *component) {
 }
 
 static void *getComponent(const struct IMediator *self) {
-    const struct Mediator *this = (struct Mediator *) self;
+    const struct Mediator *this = (const struct Mediator *) self;
     return this->component;
 }
 
 static struct INotifier *getNotifier(const struct IMediator *self) {
-    struct Mediator *this = (struct Mediator *) self;
+    const struct Mediator *this = (const struct Mediator *) self;
     return (struct INotifier *) &this->notifier;
 }
 
@@ -50,8 +50,8 @@ static void onRemove(struct IMediator *self) {
     (void)self;
 }
 
-size_t puremvc_mediator_size() {
-    return (sizeof(struct Mediator) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+size_t puremvc_mediator_size(void) {
+    return (sizeof(struct Mediator) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 
 struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *component) {
@@ -70,9 +70,9 @@ struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *co
 
     const char *key = name != NULL ? name : MEDIATOR_NAME;
     int len = snprintf(this->name, sizeof(this->name), "%s", key);
-    if (len >= (int) sizeof(this->name)) {
+    if (len < 0 || len >= (int) sizeof(this->name)) {
         memset(this, 0, sizeof(struct Mediator));
-        fprintf(stderr, "\033[0;31m[PureMVC::Mediator::init] Error: Mediator name truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(this->name));
+        fprintf(stderr, "\033[0;31m[PureMVC::Mediator::init] Error: Mediator name truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(this->name) - 1u);
         return NULL;
     }
 

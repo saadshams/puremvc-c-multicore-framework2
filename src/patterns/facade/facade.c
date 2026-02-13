@@ -116,7 +116,7 @@ static void sendNotification(const struct IFacade *self, const char *notificatio
 }
 
 size_t puremvc_facade_size() {
-    return (sizeof(struct Facade) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+    return (sizeof(struct Facade) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 
 struct IFacade *puremvc_facade_init(void *buffer, const char *key) {
@@ -143,7 +143,7 @@ struct IFacade *puremvc_facade_init(void *buffer, const char *key) {
     this->base.sendNotification = sendNotification;
 
     int len = snprintf(this->multitonKey, KEY_SIZE, "%s", key);
-    if (len >= KEY_SIZE) {
+    if (len < 0 || len >= KEY_SIZE) {
         memset(this, 0, sizeof(struct Facade));
         fprintf(stderr, "\033[0;31m[PureMVC::facade::init] Error: Facade multitonKey truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
         return NULL;
@@ -192,7 +192,7 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
     }
 
     int len = snprintf(facade_instanceMap[i]->key, KEY_SIZE, "%s", key); // registration
-    if (len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name
+    if (len < 0 || len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] Error: ModelMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
         memset(facade_instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&facadeMapMutex);

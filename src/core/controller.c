@@ -73,7 +73,7 @@ static bool registerCommand(struct IController *self, const char *notificationNa
 
     if (this->view->registerObserver(this->view, notificationName, (bool (*)(const void *context, const struct INotification *notification)) self->executeCommand, self)) {
         int len = snprintf(this->commandMap[i]->key, KEY_SIZE, "%s", notificationName); // registration
-        if (len >= KEY_SIZE) { // todo reset command
+        if (len < 0 || len >= KEY_SIZE) { // todo reset command
             fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap key truncated: '%s' (max %d chars).\033[0m\n", notificationName, KEY_SIZE);
             memset(this->commandMap[i]->key, 0, KEY_SIZE);
             mutex_unlock(&this->commandMapMutex);
@@ -192,7 +192,7 @@ static bool removeCommand(struct IController *self, const char *notificationName
 }
 
 size_t puremvc_controller_size() {
-    return (sizeof(struct Controller) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+    return (sizeof(struct Controller) + (sizeof(void *) -1u)) & ~(sizeof(void *) - 1u);
 }
 
 static struct IController *puremvc_controller_init(void *buffer, const char *key) {
@@ -209,7 +209,7 @@ static struct IController *puremvc_controller_init(void *buffer, const char *key
     this->base.removeCommand = removeCommand;
 
     int len = snprintf(this->multitonKey, KEY_SIZE, "%s", key);
-    if (len >= KEY_SIZE) {
+    if (len < 0 || len >= KEY_SIZE) {
         memset(this, 0, sizeof(struct Controller));
         fprintf(stderr, "\033[0;31m[PureMVC::View::init] Error: Controller multitonKey truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
         return NULL;
@@ -266,7 +266,7 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
     }
 
     int len = snprintf(controller_instanceMap[i]->key, KEY_SIZE, "%s", key); // registration
-    if (len >= KEY_SIZE) { // todo reset controller
+    if (len < 0 || len >= KEY_SIZE) { // todo reset controller
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ControllerMap key truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
         memset(controller_instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&controllerMapMutex);

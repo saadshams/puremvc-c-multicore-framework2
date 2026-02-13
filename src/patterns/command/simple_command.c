@@ -21,7 +21,7 @@ static bool execute(const struct ICommand *self, struct INotification *notificat
 }
 
 size_t puremvc_simple_command_size() {
-    return (sizeof(struct SimpleCommand) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+    return (sizeof(struct SimpleCommand) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 
 struct ICommand *puremvc_simple_command_init(void *buffer) {

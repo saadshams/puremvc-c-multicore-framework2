@@ -43,7 +43,7 @@ static bool compareNotifyContext(const struct IObserver *self, const void *conte
 }
 
 size_t puremvc_observer_size() {
-    return (sizeof(struct Observer) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+    return (sizeof(struct Observer) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 
 struct IObserver *puremvc_observer_init(void *buffer, bool (*notify)(const void *context, const struct INotification *notification), void *context) {

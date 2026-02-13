@@ -75,7 +75,7 @@ static bool registerProxy(struct IModel *self, struct IProxy *(*factory)(void *b
 
     const char *key = proxy->getName(proxy);
     int len = snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", key); // registration
-    if (len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name, you have to reinit buffer too in this case
+    if (len < 0 || len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name, you have to reinit buffer too in this case
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap key truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
         memset(this->proxyMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&this->proxyMapMutex);
@@ -148,7 +148,7 @@ static bool removeProxy(struct IModel *self, const char *proxyName, struct IProx
 }
 
 size_t puremvc_model_size() {
-    return (sizeof(struct Model) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+    return (sizeof(struct Model) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 
 struct IModel *puremvc_model_init(void *buffer, const char *key) {
@@ -163,7 +163,7 @@ struct IModel *puremvc_model_init(void *buffer, const char *key) {
     this->base.removeProxy = removeProxy;
 
     int len = snprintf(this->multitonKey, KEY_SIZE, "%s", key);
-    if (len >= KEY_SIZE) {
+    if (len < 0 || len >= KEY_SIZE) {
         memset(this, 0, sizeof(struct Model));
         fprintf(stderr, "\033[0;31m[PureMVC::View::init] Error: Model multitonKey truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
         return NULL;
@@ -227,7 +227,7 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
     }
 
     int len = snprintf(model_instanceMap[i]->key, KEY_SIZE, "%s", key); // registration
-    if (len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name
+    if (len < 0 || len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] Error: ModelMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
         memset(model_instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&modelMapMutex);

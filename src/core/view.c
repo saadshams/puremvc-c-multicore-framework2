@@ -73,7 +73,7 @@ static bool registerObserver(struct IView *self, const char *notificationName, b
     puremvc_observer_init(this->observerMap[i]->observers[0], notify, context);
 
     int len = snprintf(this->observerMap[i]->key, KEY_SIZE, "%s", notificationName); // registration (new key)
-    if (len >= KEY_SIZE) { // todo reset proxy
+    if (len < 0 || len >= KEY_SIZE) { // todo reset proxy
         fprintf(stderr, "\033[0;31m[PureMVC::View::registerObserver] Error: ObserverMap key truncated: '%s' (max %d chars).\033[0m\n", notificationName, KEY_SIZE);
         memset(this->observerMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&this->observerMapMutex);
@@ -190,7 +190,7 @@ bool registerMediator(struct IView *self, struct IMediator *(*factory)(void *buf
 
     const char *key = mediator->getName(mediator);
     int len = snprintf(this->mediatorMap[i]->key, KEY_SIZE, "%s", key); // registration
-    if (len >= KEY_SIZE) {
+    if (len < 0 || len >= KEY_SIZE) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap key truncated: '%s' (max %zu chars).\033[0m\n", this->mediatorMap[i]->key, sizeof(key));
         memset(this->mediatorMap[i]->key, 0, KEY_SIZE); /// clear
         puremvc_mediator_init(this->mediatorMap[i]->mediator, NULL, NULL);
@@ -291,7 +291,7 @@ static bool removeMediator(struct IView *self, const char *mediatorName, struct 
 }
 
 size_t puremvc_view_size() {
-    return (sizeof(struct View) + (sizeof(void *) - 1)) & ~(sizeof(void *) - 1);
+    return (sizeof(struct View) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 
 struct IView *puremvc_view_init(void *buffer, const char *key) {
@@ -309,7 +309,7 @@ struct IView *puremvc_view_init(void *buffer, const char *key) {
     this->base.removeMediator = removeMediator;
 
     int len = snprintf(this->multitonKey, KEY_SIZE, "%s", key);
-    if (len >= KEY_SIZE) {
+    if (len < 0 || len >= KEY_SIZE) {
         memset(this, 0, sizeof(struct View));
         fprintf(stderr, "\033[0;31m[PureMVC::View::init] Error: View multitonKey truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
         return NULL;
@@ -368,7 +368,7 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
     }
 
     int len = snprintf(view_instanceMap[i]->key, KEY_SIZE, "%s", key); // init
-    if (len >= KEY_SIZE) { // tod reset view?
+    if (len < 0 || len >= KEY_SIZE) { // tod reset view?
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] Error: ViewMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
         memset(view_instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&viewMapMutex);

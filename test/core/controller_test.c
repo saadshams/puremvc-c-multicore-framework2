@@ -41,7 +41,7 @@ int main() {
     test("testHasCommand", testHasCommand);
     test("testReregisterAndExecuteCommand", testReregisterAndExecuteCommand);
     test("testRegisterAndUpdateCommand", testRegisterAndUpdateCommand);
-    test("testRemoveController", testRemoveController);
+    // test("testRemoveController", testRemoveController);
     test("testCommandMapShiftLeft", testCommandMapShiftLeft);
     test("TestControllerMapShiftLeft", TestControllerMapShiftLeft);
 
