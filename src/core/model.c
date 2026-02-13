@@ -16,7 +16,7 @@
 #include <string.h>
 
 // instanceMap
-static struct ModelMap **instanceMap = NULL;
+static struct ModelMap **model_instanceMap = NULL;
 
 // mutex for modelMap
 static Mutex modelMapMutex;
@@ -154,7 +154,7 @@ static void dispatchOnce(void) {
 }
 
 struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key) {
-    if (modelMap == NULL && instanceMap == NULL) {
+    if (modelMap == NULL && model_instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] FATAL: Missing ModelMap storage; skipping registration.\033[0m\n");
         return NULL;
     }
@@ -173,40 +173,42 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
         // fputs("\033[0m\n", stderr);       // 4. Terminal: "Back to normal colors," then Newline.
     }
 
-    instanceMap = modelMap;
+    model_instanceMap = modelMap;
 
     mutex_once(&modelMutexOnce, dispatchOnce);
     mutex_lock(&modelMapMutex);
 
     size_t i = 0;
-    for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find model
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+    for (; model_instanceMap != NULL && model_instanceMap[i] != NULL && model_instanceMap[i]->key != NULL; i++) { // find model
+        if (model_instanceMap[i]->key == key || strcmp(model_instanceMap[i]->key, key) == 0) {
             mutex_unlock(&modelMapMutex);
-            return instanceMap[i]->model;
+            return model_instanceMap[i]->model;
         }
     }
 
-    if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
+    if (model_instanceMap == NULL || model_instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] FATAL: ModelMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         // fputs("\033[0;31m[PureMVC::Model::getInstance] FATAL: Missing Model storage; skipping registration.\033[0m\n", stderr);
         mutex_unlock(&modelMapMutex);
         return NULL;
     }
 
-    if (instanceMap[i]->model == NULL) {
+    if (model_instanceMap[i]->model == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] FATAL: Missing Model storage; skipping registration.\033[0m\n");
         return NULL;
     }
 
-    instanceMap[i]->key = key; // init
-    puremvc_model_init(instanceMap[i]->model, key);
+    model_instanceMap[i]->key = key; // init
+    puremvc_model_init(model_instanceMap[i]->model, key);
 
     mutex_unlock(&modelMapMutex);
-    return instanceMap[i]->model;
+    return model_instanceMap[i]->model;
 }
 
 bool puremvc_model_removeModel(const char *key, struct IModel **out) {
-    if (instanceMap == NULL) {
+    bool removed = false;
+
+    if (model_instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] FATAL: Missing ModelMap storage; skipping removal.\033[0m\n");
         return false;
     }
@@ -220,17 +222,19 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
     mutex_lock(&modelMapMutex);
 
     size_t index = 0;
-    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find model
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
-            instanceMap[i]->key = NULL; // remove
+    for (size_t i = 0; model_instanceMap[i] != NULL && model_instanceMap[i]->key != NULL; i++) { // find model
+        if (model_instanceMap[i]->key == key || strcmp(model_instanceMap[i]->key, key) == 0) {
+            model_instanceMap[i]->key = NULL; // remove
             if (out != NULL)
-                *out = instanceMap[i]->model;
+                *out = model_instanceMap[i]->model;
+
+            removed = true;
 
             // ((struct Model *) s_modelMap[i]->model)->proxyMap[0]->key // todo remove proxies?
         } else {
             if (index != i) { // shift left
-                *instanceMap[index] = *instanceMap[i];
-                instanceMap[i]->key = NULL;
+                *model_instanceMap[index] = *model_instanceMap[i];
+                model_instanceMap[i]->key = NULL;
             }
             index++;
         }
@@ -238,11 +242,11 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
 
     mutex_unlock(&modelMapMutex);
 
-    return true;
+    return removed;
 }
 
 void puremvc_model_reset() {
     mutex_lock(&modelMapMutex);
-    instanceMap = NULL;
+    model_instanceMap = NULL;
     mutex_unlock(&modelMapMutex);
 }

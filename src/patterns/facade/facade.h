@@ -21,4 +21,3 @@ struct Facade {
     struct IModel *model;
     struct IView *view;
 };
-

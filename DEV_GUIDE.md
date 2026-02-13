@@ -235,3 +235,17 @@ One minor housekeeping tip: In the `fprintf` on the `this->view == NULL` check, 
 * [x] **State Integrity**: Checks `view` and `commandMap` before attempting logic.
 
 **Ready for the next one? Paste the next function when you're ready to review.**
+
+🔥 Important Insight
+
+You don't need one architecture for everything.
+PureMVC was originally designed for GC/heap languages (Java, AS3, etc.).
+You're adapting it to:
+
+* C
+* No heap
+* Deterministic lifetime
+
+So you must split static vs dynamic layers.
+
+That’s not breaking PureMVC — that’s correctly porting it.

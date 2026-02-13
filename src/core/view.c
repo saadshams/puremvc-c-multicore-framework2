@@ -15,7 +15,7 @@
 #include <string.h>
 
 // viewMap
-static struct ViewMap **instanceMap = NULL;
+static struct ViewMap **view_instanceMap = NULL;
 
 // mutex for viewMap
 static Mutex viewMapMutex;
@@ -299,7 +299,7 @@ static void dispatchOnce(void) {
 }
 
 struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key) {
-    if (viewMap == NULL && instanceMap == NULL) {
+    if (viewMap == NULL && view_instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: Missing ViewMap storage; skipping registration.\033[0m\n");
         return NULL;
     }
@@ -309,39 +309,41 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
         return NULL;
     }
 
-    instanceMap = viewMap;
+    view_instanceMap = viewMap;
 
     mutex_once(&viewMutexOnce, dispatchOnce);
     mutex_lock(&viewMapMutex);
 
     size_t i = 0;
-    for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find view
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+    for (; view_instanceMap != NULL && view_instanceMap[i] != NULL && view_instanceMap[i]->key != NULL; i++) { // find view
+        if (view_instanceMap[i]->key == key || strcmp(view_instanceMap[i]->key, key) == 0) {
             mutex_unlock(&viewMapMutex);
-            return instanceMap[i]->view;
+            return view_instanceMap[i]->view;
         }
     }
 
-    if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
+    if (view_instanceMap == NULL || view_instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: ViewMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&viewMapMutex);
         return NULL;
     }
 
-    if (instanceMap[i]->view == NULL) {
+    if (view_instanceMap[i]->view == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: Missing View storage; skipping registration.\033[0m\n");
         return NULL;
     }
 
-    instanceMap[i]->key = key; // init
-    puremvc_view_init(instanceMap[i]->view, key);
+    view_instanceMap[i]->key = key; // init
+    puremvc_view_init(view_instanceMap[i]->view, key);
 
     mutex_unlock(&viewMapMutex);
-    return instanceMap[i]->view;
+    return view_instanceMap[i]->view;
 }
 
 bool puremvc_view_removeView(const char *key, struct IView **out) {
-    if (instanceMap == NULL) {
+    bool removed = false;
+
+    if (view_instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::removeView] FATAL: Missing ViewMap storage; skipping removal.\033[0m\n");
         return false;
     }
@@ -355,15 +357,17 @@ bool puremvc_view_removeView(const char *key, struct IView **out) {
     mutex_lock(&viewMapMutex);
 
     size_t index = 0;
-    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find view
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
-            instanceMap[i]->key = NULL; // remove
+    for (size_t i = 0; view_instanceMap[i] != NULL && view_instanceMap[i]->key != NULL; i++) { // find view
+        if (view_instanceMap[i]->key == key || strcmp(view_instanceMap[i]->key, key) == 0) {
+            view_instanceMap[i]->key = NULL; // remove
             if (out != NULL)
-                *out = instanceMap[i]->view;
+                *out = view_instanceMap[i]->view;
+
+            removed = true;
         } else {
             if (index != i) { // shift left
-                *instanceMap[index] = *instanceMap[i];
-                instanceMap[i]->key = NULL;
+                *view_instanceMap[index] = *view_instanceMap[i];
+                view_instanceMap[i]->key = NULL;
             }
             index++;
         }
@@ -371,11 +375,11 @@ bool puremvc_view_removeView(const char *key, struct IView **out) {
 
     mutex_unlock(&viewMapMutex);
 
-    return true;
+    return removed;
 }
 
 void puremvc_view_reset() {
     mutex_lock(&viewMapMutex);
-    instanceMap = NULL;
+    view_instanceMap = NULL;
     mutex_unlock(&viewMapMutex);
 }

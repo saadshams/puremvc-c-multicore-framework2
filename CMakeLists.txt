@@ -33,7 +33,7 @@ target_include_directories(puremvc
 # Compiler warnings (cross-platform, strict)
 target_compile_options(puremvc
         PRIVATE
-            $<$<C_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Werror>
+            $<$<C_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Werror -fsanitize=address,undefined,leak -fno-omit-frame-pointer>
             $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
 
 # 5️⃣ Install rules

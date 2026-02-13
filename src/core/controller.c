@@ -17,7 +17,7 @@
 #include <string.h>
 
 // instanceMap
-static struct ControllerMap **instanceMap = NULL;
+static struct ControllerMap **controller_instanceMap = NULL;
 
 // mutex for controllerMap
 static Mutex controllerMapMutex;
@@ -219,7 +219,7 @@ static void dispatchOnce(void) {
 }
 
 struct IController *puremvc_controller_getInstance(struct ControllerMap **controllerMap, const char *key) {
-    if (controllerMap == NULL && instanceMap == NULL) {
+    if (controllerMap == NULL && controller_instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Controller::getInstance] ERROR: Missing ControllerMap storage; skipping registration.\033[0m\n");
         return NULL;
     }
@@ -229,40 +229,42 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
         return NULL;
     }
 
-    instanceMap = controllerMap;
+    controller_instanceMap = controllerMap;
     mutex_once(&controllerMutexOnce, dispatchOnce);
 
     mutex_lock(&controllerMapMutex);
 
     size_t i = 0;
-    for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) { // find controller
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+    for (; controller_instanceMap != NULL && controller_instanceMap[i] != NULL && controller_instanceMap[i]->key != NULL; i++) { // find controller
+        if (controller_instanceMap[i]->key == key || strcmp(controller_instanceMap[i]->key, key) == 0) {
             mutex_unlock(&controllerMapMutex);
-            return instanceMap[i]->controller;
+            return controller_instanceMap[i]->controller;
         }
     }
 
-    if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
+    if (controller_instanceMap == NULL || controller_instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::Controller::getInstance] ERROR: ControllerMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&controllerMapMutex);
         return NULL;
     }
 
-    if (instanceMap[i]->controller == NULL) {
+    if (controller_instanceMap[i]->controller == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] ERROR: Missing Controller storage; skipping registration.\033[0m\n");
         mutex_unlock(&controllerMapMutex);
         return NULL;
     }
 
-    instanceMap[i]->key = key; // init
-    puremvc_controller_init(instanceMap[i]->controller, key);
+    controller_instanceMap[i]->key = key; // init
+    puremvc_controller_init(controller_instanceMap[i]->controller, key);
 
     mutex_unlock(&controllerMapMutex);
-    return instanceMap[i]->controller;
+    return controller_instanceMap[i]->controller;
 }
 
 bool puremvc_controller_removeController(const char *key, struct IController **out) {
-    if (instanceMap == NULL) {
+    bool removed = false;
+
+    if (controller_instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Controller::removeController] ERROR: Missing ControllerMap storage; skipping removal.\033[0m\n");
         return false;
     }
@@ -276,15 +278,16 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
     mutex_lock(&controllerMapMutex);
 
     size_t index = 0;
-    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key != NULL; i++) {
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
-            instanceMap[i]->key = NULL; // remove
+    for (size_t i = 0; controller_instanceMap[i] != NULL && controller_instanceMap[i]->key != NULL; i++) {
+        if (controller_instanceMap[i]->key == key || strcmp(controller_instanceMap[i]->key, key) == 0) {
+            controller_instanceMap[i]->key = NULL; // remove
             if (out != NULL)
-                *out = instanceMap[i]->controller;
+                *out = controller_instanceMap[i]->controller;
+            removed = true;
         } else {
             if (index != i) { // shift left
-                *instanceMap[index] = *instanceMap[i];
-                instanceMap[i]->key = NULL;
+                *controller_instanceMap[index] = *controller_instanceMap[i];
+                controller_instanceMap[i]->key = NULL;
             }
             index++;
         }
@@ -292,11 +295,11 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
 
     mutex_unlock(&controllerMapMutex);
 
-    return true;
+    return removed;
 }
 
 void puremvc_controller_reset() {
     mutex_lock(&controllerMapMutex);
-    instanceMap = NULL;
+    controller_instanceMap = NULL;
     mutex_unlock(&controllerMapMutex);
 }

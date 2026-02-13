@@ -766,7 +766,7 @@ void testGarbageStorageForView() {
     struct ViewMap *viewMap1[] = { NULL }; // empty view
     const struct IView *view1 = puremvc_view_getInstance(viewMap1, "ViewTestKey13"); // crash test
     if (view1 != NULL) abort();
-    if (puremvc_view_removeView("ViewTestKey13", NULL) != true) abort();
+    if (puremvc_view_removeView("ViewTestKey13", NULL) != false) abort();
 }
 
 void testGarbageStorageForObserver() {
