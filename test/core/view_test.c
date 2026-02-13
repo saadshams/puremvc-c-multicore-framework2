@@ -56,9 +56,9 @@ int main() {
     test("testGarbageStorageForView", testGarbageStorageForView);
     test("testGarbageStorageForObserver", testGarbageStorageForObserver);
     test("testGarbageStorageForMediator", testGarbageStorageForMediator);
-    // test("testObserverMapShiftLeft", testObserverMapShiftLeft);
-    // test("testObserverShiftLeft", testObserverShiftLeft);
-    // test("testMediatorMapShiftLeft", testMediatorMapShiftLeft);
+    test("testObserverMapShiftLeft", testObserverMapShiftLeft);
+    test("testObserverShiftLeft", testObserverShiftLeft);
+    test("testMediatorMapShiftLeft", testMediatorMapShiftLeft);
     test("testViewMapShiftLeft", testViewMapShiftLeft);
     afterAll();
 
@@ -845,9 +845,9 @@ void testObserverMapShiftLeft() {
 
     struct ViewComponent component0 = {0}, component1 = {0}, component2 = {0}, component3 = {0};
 
-    size_t offset = sizeof(struct IView) + sizeof(const char *);
-    struct ObserverMap ***ppp1 = (struct ObserverMap ***)((char *) view + offset);
-    struct ObserverMap **obsMap = *ppp1;
+    size_t offset = sizeof(struct IView) + KEY_SIZE;  // skip base + multitonKey
+    struct ObserverMap ***ppp = (struct ObserverMap ***)((char *) view + offset);
+    struct ObserverMap **obsMap = *ppp;
 
     // register four observers, check association and remove them
     view->registerObserver(view, "observer0", NULL, (void *) &component0);
@@ -937,9 +937,9 @@ void testObserverShiftLeft() {
     struct IView *view = puremvc_view_getInstance(instanceMap, "ViewTestKey17");
     view->initializeView(view, observerMap, NULL);
 
-    size_t offset = sizeof(struct IView) + sizeof(const char *);
-    struct ObserverMap ***ppp1 = (struct ObserverMap ***)((char *) view + offset);
-    struct ObserverMap **obsMap = *ppp1;
+    size_t offset = sizeof(struct IView) + KEY_SIZE;  // skip base + multitonKey
+    struct ObserverMap ***ppp = (struct ObserverMap ***)((char *) view + offset);
+    struct ObserverMap **obsMap = *ppp;
 
     // register four observers, check association and remove them
     if (view->registerObserver(view, "notification0", NULL, (void *) &context0) != true) abort();
@@ -1037,12 +1037,12 @@ void testMediatorMapShiftLeft() {
     struct IView *view = puremvc_view_getInstance(instanceMap, "ViewTestKey17");
     view->initializeView(view, observerMap, mediatorMap);
 
-    size_t offset1 = sizeof(struct IView) + sizeof(const char *);
-    struct ObserverMap ***ppp1 = (struct ObserverMap ***)((char *) view + offset1);
-    struct ObserverMap **obsMap = *ppp1;
+    size_t offset1 = sizeof(struct IView) + KEY_SIZE;  // skip base + multitonKey
+    struct ObserverMap ***ppp = (struct ObserverMap ***)((char *) view + offset1);
+    struct ObserverMap **obsMap = *ppp;
 
-    size_t offset2 = offset1 + sizeof(struct ObserverMap **);
-    struct MediatorMap ***ppp2 = (struct MediatorMap ***) ((char *) view + offset2);
+    size_t offset2 = offset1 + sizeof(struct ObserverMap **);  // skip base + multitonKey
+    struct MediatorMap ***ppp2 = (struct MediatorMap ***)((char *) view + offset2);
     struct MediatorMap **medMap = *ppp2;
 
     // Register four mediators and verify that each is correctly associated to their observers
