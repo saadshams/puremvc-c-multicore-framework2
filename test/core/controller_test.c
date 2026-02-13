@@ -41,7 +41,7 @@ int main() {
     test("testHasCommand", testHasCommand);
     test("testReregisterAndExecuteCommand", testReregisterAndExecuteCommand);
     test("testRegisterAndUpdateCommand", testRegisterAndUpdateCommand);
-    // test("testRemoveController", testRemoveController);
+    test("testRemoveController", testRemoveController);
     test("testCommandMapShiftLeft", testCommandMapShiftLeft);
     test("TestControllerMapShiftLeft", TestControllerMapShiftLeft);
 
@@ -362,7 +362,13 @@ void testRegisterAndUpdateCommand() {
 }
 
 void testRemoveController() {
-    // NOTE: Successful execution will produce several expected error logs
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) {
+        .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } }, NULL
+    };
+    struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey6");
+    view->initializeView(view, observerMap, NULL);
+
     struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
         &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
         NULL
@@ -372,12 +378,12 @@ void testRemoveController() {
 
     // Get a Multiton Controller instance
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey6");;
-    controller->initializeController(controller, NULL, commandMap);
+    controller->initializeController(controller, view, commandMap);
 
     if (controller == NULL) abort();
 
     // Test command registration when view is unavailable — should return false
-    if (controller->registerCommand(controller, "ControllerTest2", test_controller_command_init) != false)
+    if (controller->registerCommand(controller, "ControllerTest2", test_controller_command_init) != true)
         abort();
 
     // remove the controller
@@ -386,8 +392,7 @@ void testRemoveController() {
     // trying removing again will return false
     if (puremvc_controller_removeController("ControllerTestKey6", NULL) != false) abort();;
 
-    // view doesn't exist to begin with
-    if (puremvc_view_removeView("ControllerTestKey6", NULL) != false) abort();;
+    if (puremvc_view_removeView("ControllerTestKey6", NULL) != true) abort();;
 }
 
 void testCommandMapShiftLeft() {
