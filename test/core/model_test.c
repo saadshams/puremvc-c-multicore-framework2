@@ -9,15 +9,8 @@
 #include <stdlib.h>
 
 static void beforeAll() {}
-
-static void beforeEach() {
-    // puremvc_model_reset();
-}
-
-static void afterEach() {
-    // puremvc_model_reset();
-}
-
+static void beforeEach() {}
+static void afterEach() {}
 static void afterAll() {}
 
 static void test(const char *name, void (*callback)(void)) {

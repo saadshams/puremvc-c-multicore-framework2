@@ -20,10 +20,10 @@ static void beforeEach() {
 }
 
 static void afterEach() {
-    puremvc_controller_reset();
-    puremvc_model_reset();
-    puremvc_view_reset();
-    puremvc_facade_reset();
+    // puremvc_controller_reset();
+    // puremvc_model_reset();
+    // puremvc_view_reset();
+    // puremvc_facade_reset();
 }
 
 static void afterAll() {}
