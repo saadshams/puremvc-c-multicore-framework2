@@ -60,5 +60,3 @@ struct IView *puremvc_view_init(void *buffer, const char *key);
 struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key);
 
 bool puremvc_view_removeView(const char *key, struct IView **out);
-
-void puremvc_view_reset();

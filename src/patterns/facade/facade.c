@@ -239,15 +239,9 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
     mutex_once(&facadeMutexOnce, dispatchOnce);
     mutex_lock(&facadeMapMutex);
 
-    char keyCopy[KEY_SIZE];
-    if (key != NULL) {
-        strncpy(keyCopy, key, KEY_SIZE - 1);
-        keyCopy[KEY_SIZE - 1] = '\0';
-    }
-
-    puremvc_model_removeModel(keyCopy, NULL);
-    puremvc_view_removeView(keyCopy, NULL);
-    puremvc_controller_removeController(keyCopy, NULL);
+    puremvc_model_removeModel(key, NULL);
+    puremvc_view_removeView(key, NULL);
+    puremvc_controller_removeController(key, NULL);
 
     size_t index = 0;
     for (size_t i = 0; facade_instanceMap[i] != NULL && facade_instanceMap[i]->key[0] != '\0'; i++) { // find facade
@@ -269,10 +263,4 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
     mutex_unlock(&facadeMapMutex);
 
     return removed;
-}
-
-void puremvc_facade_reset() {
-    mutex_lock(&facadeMapMutex);
-    facade_instanceMap = NULL;
-    mutex_unlock(&facadeMapMutex);
 }

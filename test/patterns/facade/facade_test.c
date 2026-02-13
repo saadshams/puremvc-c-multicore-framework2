@@ -1,4 +1,6 @@
 #include "facade_test.h"
+#include "../../../src/patterns/facade/facade.h"
+
 #include "facade_test_command.h"
 #include "facade_test_vo.h"
 
@@ -11,14 +13,7 @@
 #include <string.h>
 
 static void beforeAll() {}
-
-static void beforeEach() {
-    // puremvc_controller_reset();
-    // puremvc_model_reset();
-    // puremvc_view_reset();
-    // puremvc_facade_reset();
-}
-
+static void beforeEach() {}
 static void afterEach() {}
 static void afterAll() {}
 
@@ -42,7 +37,7 @@ int main() {
     beforeAll();
     test("testGetInstance", testGetInstance);
     test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification);
-    // test("testRegisterAndRemoveCommandAndSendNotification", testRegisterAndRemoveCommandAndSendNotification);
+    test("testRegisterAndRemoveCommandAndSendNotification", testRegisterAndRemoveCommandAndSendNotification);
     test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy);
     test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
     test("testRegisterRetrieveAndRemoveMediator", testRegisterRetrieveAndRemoveMediator);
@@ -76,35 +71,23 @@ void testGetInstance() {
 }
 
 void testRegisterCommandAndSendNotification() {
-    struct ViewMap **viewMap = (struct ViewMap *[]) {
-        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
-        NULL
-    };
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
     struct ObserverMap **observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) {
         .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } }, NULL
     };
     struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey2");
     view->initializeView(view, observerMap, NULL);
 
-    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
-        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
-        NULL
-    };
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
     struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey2");
     controller->initializeController(controller, view, commandMap);
 
-    struct ModelMap **modelMap = (struct ModelMap *[]) {
-        &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
-        NULL
-    };
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
     struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey2");
     model->initializeModel(model, NULL);
 
-    struct FacadeMap **facadeMap = (struct FacadeMap *[]) {
-        &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
-        NULL
-    };
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL };
 
     // Create the Facade, register the FacadeTestCommand to
     // handle 'FacadeTest' notifications
@@ -143,11 +126,15 @@ void testRegisterAndRemoveCommandAndSendNotification() {
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey3");
     controller->initializeController(controller, view, commandMap);
 
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL }; // extra to prevent memory aliasing
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey3");
+    model->initializeModel(model, NULL);
+
     // Create the Facade, register the FacadeTestCommand to
     // handle 'FacadeTest' events
-    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL };
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .key = "", .facade = alloca(puremvc_facade_size()) }, NULL };
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey3");
-    facade->initializeFacade(facade, NULL, view, controller);
+    facade->initializeFacade(facade, model, view, controller);
 
     if (facade->registerCommand(facade, "FacadeTestNote", test_facade_command) != true) abort();
     if (facade->removeCommand(facade, "FacadeTestNote", NULL) != true) abort();
@@ -166,15 +153,21 @@ void testRegisterAndRemoveCommandAndSendNotification() {
 }
 
 void testRegisterAndRetrieveProxy() {
-    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap) { .model = alloca(puremvc_model_size()) }, NULL };
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) { &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) }, NULL };
     struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey4");
     model->initializeModel(model, proxyMap);
 
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap){ .controller = alloca(puremvc_controller_size())}, NULL };
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey4");
+
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey4"); // extra to prevent memory aliasing
+
     // register a facade and retrieve it.
-    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap) { .facade = alloca(puremvc_facade_size()) }, NULL};
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey4");
-    facade->initializeFacade(facade, model, NULL, NULL);
+    facade->initializeFacade(facade, model, view, controller);
 
     static char *colors[] = { "red", "green", "blue", NULL};
 
@@ -201,15 +194,21 @@ void testRegisterAndRetrieveProxy() {
 }
 
 void testRegisterAndRemoveProxy() {
-    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap) { .model = alloca(puremvc_model_size()) }, NULL };
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) { &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) }, NULL };
     struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey5");
     model->initializeModel(model, proxyMap);
 
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey5");
+
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]){ &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey5"); // extra to prevent memory aliasing
+
     // register a proxy, remove it, then try to retrieve it
-    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap) { .facade = alloca(puremvc_facade_size()) }, NULL};
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey5");
-    facade->initializeFacade(facade, model, NULL, NULL);
+    facade->initializeFacade(facade, model, view, controller);
 
     static int sizes[] = { 7, 13, 21, 0 }; // 0 is the sentinel
     if (facade->registerProxy(facade, puremvc_proxy_init, "sizes", sizes) == false) abort();
@@ -246,9 +245,15 @@ void testRegisterRetrieveAndRemoveMediator() {
     struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey6");
     view->initializeView(view, NULL, mediatorMap);
 
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]){ &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey6");
+
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey6");
+
     struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey6");
-    facade->initializeFacade(facade, NULL, view, NULL);
+    facade->initializeFacade(facade, model, view, controller);
 
     // register a mediator, remove it, then try to retrieve it
     struct Object {int x;} object;
@@ -277,9 +282,15 @@ void testHasProxy() {
     struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey7");
     model->initializeModel(model, proxyMap);
 
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]){ &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey7");
+
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey7");
+
     struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey7");
-    facade->initializeFacade(facade, model, NULL, NULL);
+    facade->initializeFacade(facade, model, view, controller); // controller extra to preven memory aliasing
 
     static int sizes[] = { 7, 13, 21, 0 }; // 0 is the sentinel
 
@@ -302,9 +313,15 @@ void testHasMediator() {
     struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey8");
     view->initializeView(view, NULL, mediatorMap);
 
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]){ &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey8");
+
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey8");
+
     struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL};
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey8");
-    facade->initializeFacade(facade, NULL, view, NULL);
+    facade->initializeFacade(facade, model, view, controller);
 
     // register a Mediator
     struct Object {int x;} object;
@@ -329,21 +346,20 @@ void testHasCommand() {
         .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } },
         NULL
     };
-
     struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey9");
     view->initializeView(view, observerMap, NULL);
 
-    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap){
-        .controller = alloca(puremvc_controller_size()) },
-        NULL
-    };
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap) { .controller = alloca(puremvc_controller_size()) }, NULL };
     struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey9");
     controller->initializeController(controller, view, commandMap);
 
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey9");
+
     struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL };
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey9");
-    facade->initializeFacade(facade, NULL, view, controller);
+    facade->initializeFacade(facade, model, view, controller);
 
     // register the ControllerTestCommand to handle 'hasCommandTest' notes
     if (facade->registerCommand(facade, "facadeHasCommandTest", test_facade_command) != true) abort();
@@ -363,10 +379,18 @@ void testHasCommand() {
 }
 
 void testHasCoreAndRemoveCore() {
-    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL };
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey10");
 
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap) { .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey10");
+
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey10");
+
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL };
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey10");
-    facade->initializeFacade(facade, NULL, NULL, NULL);
+    facade->initializeFacade(facade, model, view, controller);
 
     // assert that the Facade.hasCore method returns false first
     if (puremvc_facade_hasCore("unregistered") != false) abort();
@@ -384,6 +408,15 @@ void testHasCoreAndRemoveCore() {
 }
 
 void testFacadeMapShiftLeft() {
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey10");
+
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap) { .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey10");
+
+    struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap){ .model = alloca(puremvc_model_size()) }, NULL };
+    struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey10");
+
     struct FacadeMap **facadeMap = (struct FacadeMap *[]) { // facadeMap with 4 slots for the instance
         &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
         &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },

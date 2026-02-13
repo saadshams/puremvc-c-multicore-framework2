@@ -30,11 +30,7 @@
 struct FacadeMap {
     char key[KEY_SIZE];
 
-    struct IFacade *facade; // reference pointer (not a base)
-
-    struct ModelMap **modelMap;
-    struct ViewMap **viewMap;
-    struct ControllerMap **controllerMap;
+    struct IFacade *facade; // pointer (not base)
 };
 
 struct IFacade {
@@ -82,5 +78,3 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
 bool puremvc_facade_hasCore(const char *key);
 
 bool puremvc_facade_removeFacade(const char *key, struct IFacade **out);
-
-void puremvc_facade_reset();

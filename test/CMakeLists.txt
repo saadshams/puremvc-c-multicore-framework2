@@ -31,11 +31,11 @@ add_executable(MacroCommandTest patterns/command/macro_command_test.c
 target_link_libraries(MacroCommandTest PRIVATE puremvc)
 add_test(NAME PureMVC.MacroCommandTest COMMAND MacroCommandTest)
 
-#add_executable(FacadeTest patterns/facade/facade_test.c
-#        patterns/facade/facade_test_command.c)
-#target_link_libraries(FacadeTest PRIVATE puremvc)
-#add_test(NAME PureMVC.FacadeTest COMMAND FacadeTest)
-#
+add_executable(FacadeTest patterns/facade/facade_test.c
+        patterns/facade/facade_test_command.c)
+target_link_libraries(FacadeTest PRIVATE puremvc)
+add_test(NAME PureMVC.FacadeTest COMMAND FacadeTest)
+
 add_executable(MediatorTest patterns/mediator/mediator_test.c)
 target_link_libraries(MediatorTest PRIVATE puremvc)
 add_test(NAME PureMVC.MediatorTest COMMAND MediatorTest)

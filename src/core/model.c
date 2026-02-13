@@ -279,9 +279,3 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
 
     return removed;
 }
-
-void puremvc_model_reset() {
-    mutex_lock(&modelMapMutex);
-    model_instanceMap = NULL;
-    mutex_unlock(&modelMapMutex);
-}

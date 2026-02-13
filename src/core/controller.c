@@ -315,9 +315,3 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
 
     return removed;
 }
-
-void puremvc_controller_reset() {
-    mutex_lock(&controllerMapMutex);
-    controller_instanceMap = NULL;
-    mutex_unlock(&controllerMapMutex);
-}
