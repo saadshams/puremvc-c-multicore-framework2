@@ -16,7 +16,7 @@
 struct Facade {
     struct IFacade base;
 
-    const char *multitonKey;
+    char multitonKey[KEY_SIZE];
     struct IController *controller;
     struct IModel *model;
     struct IView *view;

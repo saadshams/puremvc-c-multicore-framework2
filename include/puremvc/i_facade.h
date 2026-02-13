@@ -28,8 +28,9 @@
  */
 
 struct FacadeMap {
-    const char *key;
-    struct IFacade *facade;
+    char key[KEY_SIZE];
+
+    struct IFacade *facade; // reference pointer (not a base)
 
     struct ModelMap **modelMap;
     struct ViewMap **viewMap;

@@ -55,7 +55,14 @@ struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
     this->base.onRegister = onRegister;
     this->base.onRemove = onRemove;
 
-    this->name = name != NULL ? name : PROXY_NAME;
+    const char *key = name != NULL ? name : PROXY_NAME;
+    int len = snprintf(this->name, sizeof(this->name), "%s", key);
+    if (len >= (int) sizeof(this->name)) {
+        memset(this, 0, sizeof(struct Proxy));
+        fprintf(stderr, "\033[0;31m[PureMVC::Proxy::init] Error: Proxy name truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(this->name));
+        return NULL;
+    }
+
     this->data = data;
 
     puremvc_notifier_init((struct INotifier *) &this->notifier);

@@ -15,6 +15,10 @@
 
 #define MEDIATOR_NAME "mediator"
 
+#ifndef NAME_SIZE
+#define KEY_SIZE 32
+#endif
+
 /**
  * @struct IMediator
  * @brief Represents a mediator in the PureMVC framework.

@@ -13,7 +13,7 @@
 struct View {
     struct IView base; // headers
 
-    const char *multitonKey; // pointers
+    char multitonKey[KEY_SIZE];  // pointers
     struct ObserverMap **observerMap;
     struct MediatorMap **mediatorMap;
 

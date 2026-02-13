@@ -14,17 +14,17 @@
 #include <stdbool.h>
 
 struct ViewMap {
-    const char *key;
+    char key[KEY_SIZE];
     struct IView *view;
 };
 
 struct MediatorMap {
-    const char *key;
+    char key[KEY_SIZE];
     struct IMediator *mediator;
 };
 
 struct ObserverMap {
-    const char *key;
+    char key[KEY_SIZE];
     struct IObserver **observers;
 };
 

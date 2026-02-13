@@ -4,6 +4,10 @@
  */
 #pragma once
 
+#ifndef NAME_SIZE
+#define NAME_SIZE 32
+#endif
+
 #include "platform.h"
 
 #include "i_controller.h"

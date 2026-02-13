@@ -68,7 +68,14 @@ struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *co
     this->base.onRegister = onRegister;
     this->base.onRemove = onRemove;
 
-    this->name = name != NULL ? name : MEDIATOR_NAME;
+    const char *key = name != NULL ? name : MEDIATOR_NAME;
+    int len = snprintf(this->name, sizeof(this->name), "%s", key);
+    if (len >= (int) sizeof(this->name)) {
+        memset(this, 0, sizeof(struct Mediator));
+        fprintf(stderr, "\033[0;31m[PureMVC::Mediator::init] Error: Mediator name truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(this->name));
+        return NULL;
+    }
+
     this->component = component;
 
     puremvc_notifier_init((struct INotifier *) &this->notifier);

@@ -9,12 +9,12 @@
 #pragma once
 
 #include "puremvc/i_proxy.h"
-#include "../observer//notifier.h"
+#include "../observer/notifier.h"
 
 struct Proxy {
     struct IProxy base;
 
-    const char *name;
+    char name[KEY_SIZE];
     void *data;
 
     struct Notifier notifier;

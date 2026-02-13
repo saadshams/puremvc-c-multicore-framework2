@@ -14,12 +14,12 @@
 #include "i_view.h"
 
 struct ControllerMap {
-    const char *key;
+    char key[KEY_SIZE];
     struct IController *controller;
 };
 
 struct CommandMap {
-    const char *key;
+    char key[KEY_SIZE];
     struct ICommand *(*factory)(void *);
 };
 

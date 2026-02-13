@@ -142,7 +142,12 @@ struct IFacade *puremvc_facade_init(void *buffer, const char *key) {
     this->base.notifyObservers = notifyObservers;
     this->base.sendNotification = sendNotification;
 
-    this->multitonKey = key;
+    int len = snprintf(this->multitonKey, KEY_SIZE, "%s", key);
+    if (len >= KEY_SIZE) {
+        memset(this, 0, sizeof(struct Facade));
+        fprintf(stderr, "\033[0;31m[PureMVC::facade::init] Error: Facade multitonKey truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
+        return NULL;
+    }
 
     return (struct IFacade *) this;
 }
@@ -168,7 +173,7 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
     mutex_lock(&facadeMapMutex);
 
     size_t i = 0;
-    for (; facade_instanceMap[i] != NULL && facade_instanceMap[i]->key != NULL; i++) { // find facade
+    for (; facade_instanceMap[i] != NULL && facade_instanceMap[i]->key[0] != '\0'; i++) { // find facade
         if (facade_instanceMap[i]->key == key || strcmp(facade_instanceMap[i]->key, key) == 0) {
             mutex_unlock(&facadeMapMutex);
             return facade_instanceMap[i]->facade;
@@ -186,7 +191,14 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
         return NULL;
     }
 
-    facade_instanceMap[i]->key = key; // init
+    int len = snprintf(facade_instanceMap[i]->key, KEY_SIZE, "%s", key); // registration
+    if (len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] Error: ModelMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
+        memset(facade_instanceMap[i]->key, 0, KEY_SIZE);
+        mutex_unlock(&facadeMapMutex);
+        return false;
+    }
+
     puremvc_facade_init(facade_instanceMap[i]->facade, key);
 
     mutex_unlock(&facadeMapMutex);
@@ -201,7 +213,7 @@ bool puremvc_facade_hasCore(const char *key) {
 
     mutex_lock_shared(&facadeMapMutex);
     bool exists = false;
-    for (size_t i = 0; facade_instanceMap[i] != NULL && facade_instanceMap[i]->key != NULL; i++) {
+    for (size_t i = 0; facade_instanceMap[i] != NULL && facade_instanceMap[i]->key[0] != '\0'; i++) {
         if (facade_instanceMap[i]->key == key || strcmp(facade_instanceMap[i]->key, key) == 0) {
             exists = true;
             break;
@@ -227,22 +239,28 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
     mutex_once(&facadeMutexOnce, dispatchOnce);
     mutex_lock(&facadeMapMutex);
 
-    puremvc_model_removeModel(key, NULL);
-    puremvc_view_removeView(key, NULL);
-    puremvc_controller_removeController(key, NULL);
+    char keyCopy[KEY_SIZE];
+    if (key != NULL) {
+        strncpy(keyCopy, key, KEY_SIZE - 1);
+        keyCopy[KEY_SIZE - 1] = '\0';
+    }
+
+    puremvc_model_removeModel(keyCopy, NULL);
+    puremvc_view_removeView(keyCopy, NULL);
+    puremvc_controller_removeController(keyCopy, NULL);
 
     size_t index = 0;
-    for (size_t i = 0; facade_instanceMap[i] != NULL && facade_instanceMap[i]->key != NULL; i++) { // find facade
+    for (size_t i = 0; facade_instanceMap[i] != NULL && facade_instanceMap[i]->key[0] != '\0'; i++) { // find facade
         if (facade_instanceMap[i]->key == key || strcmp(facade_instanceMap[i]->key, key) == 0) {
-            facade_instanceMap[i]->key = NULL; // remove
+            memset(facade_instanceMap[i]->key, 0, KEY_SIZE); // remove
             if (out != NULL)
                 *out = facade_instanceMap[i]->facade;
 
             removed = true;
         } else {
-            if (index != i) { // shift left
-                *facade_instanceMap[index] = *facade_instanceMap[i];
-                facade_instanceMap[i]->key = NULL;
+            if (index != i) { // shift left (Gap-free array)
+                *facade_instanceMap[index] = *facade_instanceMap[i]; // shift left first
+                memset(facade_instanceMap[i]->key, 0, KEY_SIZE); // remove
             }
             index++;
         }

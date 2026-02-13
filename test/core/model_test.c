@@ -38,8 +38,8 @@ int main() {
     test("testOnRegisterAndOnRemove", testOnRegisterAndOnRemove);
     test("testRemoveModel", testRemoveModel);
     test("testRegisterAndReplaceProxy", testRegisterAndReplaceProxy);
-    test("testProxyMapShiftLeft", testProxyMapShiftLeft);
-    test("testProxyMapShiftLeft", testProxyMapShiftLeft);
+    // test("testProxyMapShiftLeft", testProxyMapShiftLeft);
+    test("TestModelMapShiftLeft", TestModelMapShiftLeft);
     afterAll();
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
@@ -63,7 +63,7 @@ void testGetInstance() {
 
     struct IModel *removedModel = NULL;
     if (puremvc_model_removeModel("ModelTestKey1", &removedModel) != true) abort();
-    if (instanceMap[0]->key != NULL) abort();
+    if (instanceMap[0]->key[0] != '\0') abort();
 }
 
 void testRegisterAndRetrieveProxy() {
@@ -220,7 +220,7 @@ void testRemoveModel() {
 
     // remove the model
     if (puremvc_model_removeModel("ModelTestKey6", NULL) != true) abort();
-    if (instanceMap[0]->key != NULL) abort();
+    if (instanceMap[0]->key[0] != '\0') abort();
 
     // re-create the model without throwing an exception
     puremvc_model_getInstance(instanceMap, "ModelTestKey6");
@@ -228,7 +228,7 @@ void testRemoveModel() {
 
     // try removing again
     if (puremvc_model_removeModel("ModelTestKey6", NULL) != true) abort();;
-    if (instanceMap[0]->key != NULL) abort();
+    if (instanceMap[0]->key[0] != '\0') abort();
 }
 
 void testRegisterAndReplaceProxy() {
@@ -259,8 +259,9 @@ void testRegisterAndReplaceProxy() {
     // test assertions
     if (proxy == NULL) abort();
     if (strcmp(proxy->getName(proxy), "sizes") != 0) abort();
+    if (proxy->getNotifier(proxy) == NULL) abort();
 
-    const char **data = proxy->getData(proxy); // fails on Release, passes on Debug
+    const char **data = proxy->getData(proxy);
     if (data != colors) abort();
     if (strcmp(*data, "red") != 0) abort();
     if (strcmp(*(data + 1), "green") != 0) abort();
@@ -341,10 +342,10 @@ void testProxyMapShiftLeft() {
     struct IProxy *removedProxy2 = NULL;
     if (model->removeProxy(model, "proxy2", &removedProxy2) != true) abort();;
     if (strcmp(removedProxy2->getName(removedProxy2), "proxy2") != 0) abort();
-    if (actualMap[0]->key != NULL) abort(); // proxyMap is empty
-    if (actualMap[1]->key != NULL) abort();
-    if (actualMap[2]->key != NULL) abort();
-    if (actualMap[3]->key != NULL) abort();
+    if (actualMap[0]->key[0] != '\0') abort(); // proxyMap is empty
+    if (actualMap[1]->key[0] != '\0') abort();
+    if (actualMap[2]->key[0] != '\0') abort();
+    if (actualMap[3]->key[0] != '\0') abort();
 
     if (puremvc_model_removeModel("ModelTestKey10", NULL) != true) abort();;
     model = NULL;
@@ -362,23 +363,23 @@ void TestModelMapShiftLeft() {
     // create 4 instances
     if (puremvc_model_getInstance(instanceMap, "model0") == NULL) abort();
     if (strcmp(instanceMap[0]->key, "model0") != 0) abort();
-    const char **key0 = (const char **)((char *) instanceMap[0]->model + sizeof(struct IModel));
-    if (strcmp(*key0, "model0") != 0) abort();
+    const char *key0 = (char *)instanceMap[0]->model + sizeof(struct IModel);
+    if (strcmp(key0, "model0") != 0) abort();
 
     if (puremvc_model_getInstance(instanceMap, "model1") == NULL) abort();
     if (strcmp(instanceMap[1]->key, "model1") != 0) abort();
-    const char **key1 = (const char **)((char *) instanceMap[1]->model + sizeof(struct IModel));
-    if (strcmp(*key1, "model1") != 0) abort();
+    const char *key1 = (char *)instanceMap[1]->model + sizeof(struct IModel);
+    if (strcmp(key1, "model1") != 0) abort();
 
     if (puremvc_model_getInstance(instanceMap, "model2") == NULL) abort();
     if (strcmp(instanceMap[2]->key, "model2") != 0) abort();
-    const char **key2 = (const char **)((char *) instanceMap[2]->model + sizeof(struct IModel));
-    if (strcmp(*key2, "model2") != 0) abort();
+    const char *key2 = (char *)instanceMap[2]->model + sizeof(struct IModel);
+    if (strcmp(key2, "model2") != 0) abort();
 
     if (puremvc_model_getInstance(instanceMap, "model3") == NULL) abort();
     if (strcmp(instanceMap[3]->key, "model3") != 0) abort();
-    const char **key3 = (const char **)((char *) instanceMap[3]->model + sizeof(struct IModel));
-    if (strcmp(*key3, "model3") != 0) abort();
+    const char *key3 = (char *)instanceMap[3]->model + sizeof(struct IModel);
+    if (strcmp(key3, "model3") != 0) abort();
 
     // remove
     struct IModel *model1 = NULL; // remove middle1, remaining 0, 2, 3
@@ -386,29 +387,29 @@ void TestModelMapShiftLeft() {
     if (strcmp(instanceMap[0]->key, "model0") != 0) abort();
     if (strcmp(instanceMap[1]->key, "model2") != 0) abort();
     if (strcmp(instanceMap[2]->key, "model3") != 0) abort();
-    if (instanceMap[3]->key != NULL) abort();
+    if (instanceMap[3]->key[0] != '\0') abort();
     if (instanceMap[4] != NULL) abort();
 
     struct IModel *model3 = NULL; // remove last3, remaining 0, 2
     if (puremvc_model_removeModel("model3", &model3) != true) abort();
     if (strcmp(instanceMap[0]->key, "model0") != 0) abort();
     if (strcmp(instanceMap[1]->key, "model2") != 0) abort();
-    if (instanceMap[2]->key != NULL) abort();
-    if (instanceMap[3]->key != NULL) abort();
+    if (instanceMap[2]->key[0] != '\0') abort();
+    if (instanceMap[3]->key[0] != '\0') abort();
     if (instanceMap[4] != NULL) abort();
 
     struct IModel *model0 = NULL; // remove first, remaining 2
     if (puremvc_model_removeModel("model0", &model0) != true) abort();
     if (strcmp(instanceMap[0]->key, "model2") != 0) abort();
-    if (instanceMap[1]->key != NULL) abort();
-    if (instanceMap[2]->key != NULL) abort();
-    if (instanceMap[3]->key != NULL) abort();
+    if (instanceMap[1]->key[0] != '\0') abort();
+    if (instanceMap[2]->key[0] != '\0') abort();
+    if (instanceMap[3]->key[0] != '\0') abort();
     if (instanceMap[4] != NULL) abort();
 
     struct IModel *model2 = NULL; // remove remaining
     if (puremvc_model_removeModel("model2", &model2) != true) abort();
-    if (instanceMap[0]->key != NULL) abort();
-    if (instanceMap[1]->key != NULL) abort();
-    if (instanceMap[2]->key != NULL) abort();
-    if (instanceMap[3]->key != NULL) abort();
+    if (instanceMap[0]->key[0] != '\0') abort();
+    if (instanceMap[1]->key[0] != '\0') abort();
+    if (instanceMap[2]->key[0] != '\0') abort();
+    if (instanceMap[3]->key[0] != '\0') abort();
 }

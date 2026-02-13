@@ -13,7 +13,7 @@
 struct Model {
     struct IModel base;
 
-    const char *multitonKey;
+    char multitonKey[KEY_SIZE];
     struct ProxyMap **proxyMap;
 
     Mutex proxyMapMutex;

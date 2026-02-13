@@ -13,12 +13,12 @@
 #include <stdbool.h>
 
 struct ModelMap {
-    const char *key;
+    char key[KEY_SIZE];
     struct IModel *model;
 };
 
 struct ProxyMap {
-    const char *key;
+    char key[KEY_SIZE];
     struct IProxy *proxy;
 };
 
