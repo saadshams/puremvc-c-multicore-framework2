@@ -16,15 +16,6 @@ typedef struct { CRITICAL_SECTION cs; } Mutex;
 typedef INIT_ONCE MutexOnce;
 #define MUTEX_ONCE_INIT INIT_ONCE_STATIC_INIT
 
-#else
-#define _GNU_SOURCE
-#include <pthread.h>
-#include <alloca.h>
-
-typedef struct { pthread_rwlock_t rwlock; } Mutex;
-typedef pthread_once_t MutexOnce;
-#define MUTEX_ONCE_INIT PTHREAD_ONCE_INIT
-
 // Alignment Shim (The UBSan Fix)
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
     #include <stdalign.h>
@@ -44,6 +35,14 @@ typedef pthread_once_t MutexOnce;
 // Alignment to pointer size (8 bytes on 64-bit, 4 on 32-bit)
 #define ALIGNMENT sizeof(void *)
 
+#else
+#define _GNU_SOURCE
+#include <pthread.h>
+#include <alloca.h>
+
+typedef struct { pthread_rwlock_t rwlock; } Mutex;
+typedef pthread_once_t MutexOnce;
+#define MUTEX_ONCE_INIT PTHREAD_ONCE_INIT
 #endif
 
 // Mutex Function Prototypes

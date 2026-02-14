@@ -15,7 +15,7 @@ static void beforeEach() {}
 static void afterEach() {}
 static void afterAll() {}
 
-static void test(const char *name, void (*callback)(void)) {
+static void test(const char *name, void (*callback)()) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
@@ -55,8 +55,8 @@ static bool execute(const struct ICommand *self, struct INotification *notificat
     return true;
 }
 
-static struct ICommand *notifier_command() {
-    struct ICommand *command = puremvc_simple_command_init(alloca(puremvc_simple_command_size()));
+static struct ICommand *notifier_command(void *buffer) {
+    struct ICommand *command = puremvc_simple_command_init(buffer);
     command->execute = execute;
     return command;
 }

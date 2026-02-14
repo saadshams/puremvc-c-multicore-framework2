@@ -40,7 +40,6 @@ static BOOL CALLBACK _mutex_win_once_wrapper(PINIT_ONCE InitOnce, PVOID Paramete
 }
 
 int mutex_once(MutexOnce *once, void (*callback)(void)) {
-    if (mutex == NULL) return -1;
     InitOnceExecuteOnce(once, _mutex_win_once_wrapper, (PVOID)callback, NULL);
     return 0;
 }
