@@ -18,27 +18,12 @@
 #include <stdio.h>
 #include <string.h>
 
-// instanceMap
+// instanceMap (global)
 static struct FacadeMap **instanceMap = NULL;
 
-// mutex for facadeMap
+// mutex for facadeMap (global)
 static Mutex facadeMapMutex;
 static MutexOnce facadeMutexOnce = MUTEX_ONCE_INIT;
-
-static struct IModel *getModel(const struct IFacade *self) {
-    const struct Facade *this = (const struct Facade *) self;
-    return this->model;
-}
-
-static struct IView *getView(const struct IFacade *self) {
-    const struct Facade *this = (const struct Facade *) self;
-    return this->view;
-}
-
-static struct IController *getController(const struct IFacade *self) {
-    const struct Facade *this = (const struct Facade *) self;
-    return this->controller;
-}
 
 static void initializeFacade(struct IFacade *self, struct IModel *model, struct IView *view, struct IController *controller) {
     if (self == NULL) return;
@@ -139,9 +124,6 @@ struct IFacade *puremvc_facade_init(void *buffer, const char *key) {
 
     memset(this, 0, sizeof(struct Facade));
 
-    this->base.getController = getController;
-    this->base.getModel = getModel;
-    this->base.getView = getView;
     this->base.initializeFacade = initializeFacade;
     this->base.initializeController = initializeController;
     this->base.initializeModel = initializeModel;
@@ -192,7 +174,7 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
 
     size_t i = 0;
     for (; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find facade
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+        if (strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&facadeMapMutex);
             return instanceMap[i]->facade;
         }
@@ -214,10 +196,12 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] Error: ModelMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
         memset(instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&facadeMapMutex);
-        return false;
+        return NULL;
     }
 
     puremvc_facade_init(instanceMap[i]->facade, key);
+    printf("Facade Storing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->facade);
+    fflush(stdout);
 
     mutex_unlock(&facadeMapMutex);
     return instanceMap[i]->facade;
@@ -257,13 +241,12 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
     mutex_once(&facadeMutexOnce, dispatchOnce);
     mutex_lock(&facadeMapMutex);
 
-    puremvc_model_removeModel(key, NULL);
-    puremvc_view_removeView(key, NULL);
-    puremvc_controller_removeController(key, NULL);
-
-    size_t index = 0;
-    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find facade
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+    size_t i = 0, index = 0;
+    for (; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find facade
+        if (strcmp(instanceMap[i]->key, key) == 0) {
+            puremvc_model_removeModel(key, NULL);
+            puremvc_view_removeView(key, NULL);
+            puremvc_controller_removeController(key, NULL);
             memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             if (out != NULL)
                 *out = instanceMap[i]->facade;
@@ -277,6 +260,8 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
             index++;
         }
     }
+
+    if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
 
     mutex_unlock(&facadeMapMutex);
 

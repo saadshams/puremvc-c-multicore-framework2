@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Dependencies
-RUN apt-get update && apt-get install -y build-essential gcc g++ clang cmake git curl zip tar gdb && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y build-essential gcc g++ clang cmake git curl zip tar gdb gdbserver && rm -rf /var/lib/apt/lists/*
 
 # Install VCPKG
 RUN git clone https://github.com/microsoft/vcpkg.git /opt/vcpkg && /opt/vcpkg/bootstrap-vcpkg.sh

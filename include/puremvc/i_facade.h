@@ -34,12 +34,6 @@ struct FacadeMap {
 };
 
 struct IFacade {
-    struct IModel *(*getModel)(const struct IFacade *self);
-
-    struct IView *(*getView)(const struct IFacade *self);
-
-    struct IController *(*getController)(const struct IFacade *self);
-
     void (*initializeFacade)(struct IFacade *self, struct IModel *model, struct IView *view, struct IController *controller);
     
     void (*initializeController)(struct IFacade *self, struct IController *controller);

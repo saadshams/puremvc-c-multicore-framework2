@@ -34,6 +34,8 @@ struct ProxyMap {
  * concurrent environments.
  */
 struct IModel {
+    const char *(*getMultitonKey)(const struct IModel *self);
+
     void (*initializeModel)(struct IModel *self, struct ProxyMap **proxyMap);
 
     bool (*registerProxy)(struct IModel *self, struct IProxy *(*factory)(void *buffer, const char *name, void *data), const char *name, void *data);

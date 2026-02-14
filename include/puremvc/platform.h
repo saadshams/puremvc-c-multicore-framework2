@@ -32,13 +32,11 @@ typedef INIT_ONCE MutexOnce;
     #endif
 #endif
 
-// Alignment to pointer size (8 bytes on 64-bit, 4 on 32-bit)
-#define ALIGNMENT sizeof(void *)
-
 #else
 #define _GNU_SOURCE
 #include <pthread.h>
 #include <alloca.h>
+#include <stdalign.h>
 
 typedef struct { pthread_rwlock_t rwlock; } Mutex;
 typedef pthread_once_t MutexOnce;
@@ -53,3 +51,6 @@ int mutex_unlock(Mutex *mutex);
 int mutex_destroy(Mutex *mutex);
 
 int mutex_once(MutexOnce *once, void (*callback)(void));
+
+// Alignment to pointer size (8 bytes on 64-bit, 4 on 32-bit)
+#define ALIGNMENT sizeof(void *)

@@ -14,10 +14,10 @@
 #include <stdio.h>
 #include <string.h>
 
-// instanceMap
+// instanceMap (global)
 static struct ViewMap **instanceMap = NULL;
 
-// mutex for viewMap
+// mutex for viewMap (global)
 static Mutex viewMapMutex;
 static MutexOnce viewMutexOnce = MUTEX_ONCE_INIT;
 
@@ -350,7 +350,7 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
 
     size_t i = 0;
     for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find view
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+        if (strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&viewMapMutex);
             return instanceMap[i]->view;
         }
@@ -372,10 +372,12 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] Error: ViewMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
         memset(instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&viewMapMutex);
-        return false;
+        return NULL;
     }
 
     puremvc_view_init(instanceMap[i]->view, key); // init
+    printf("View Storing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->view);
+    fflush(stdout);
 
     mutex_unlock(&viewMapMutex);
     return instanceMap[i]->view;
@@ -397,9 +399,11 @@ bool puremvc_view_removeView(const char *key, struct IView **out) {
     mutex_once(&viewMutexOnce, dispatchOnce);
     mutex_lock(&viewMapMutex);
 
-    size_t index = 0;
-    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find view
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+    size_t i = 0, index = 0;
+    for (; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find view
+        if (strcmp(instanceMap[i]->key, key) == 0) {
+            printf("View Removing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->view);
+            fflush(stdout);
             memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             if (out != NULL)
                 *out = instanceMap[i]->view;
@@ -413,6 +417,8 @@ bool puremvc_view_removeView(const char *key, struct IView **out) {
             index++;
         }
     }
+
+    if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
 
     mutex_unlock(&viewMapMutex);
 

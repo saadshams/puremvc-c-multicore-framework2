@@ -16,10 +16,10 @@
 #include <stdio.h>
 #include <string.h>
 
-// instanceMap
+// instanceMap (global)
 static struct ControllerMap **instanceMap = NULL;
 
-// mutex for controllerMap
+// mutex for controllerMap (global)
 static Mutex controllerMapMutex;
 static MutexOnce controllerMutexOnce = MUTEX_ONCE_INIT;
 
@@ -247,7 +247,7 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
 
     size_t i = 0;
     for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find controller
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+        if (strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&controllerMapMutex);
             return instanceMap[i]->controller;
         }
@@ -270,10 +270,12 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ControllerMap key truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
         memset(instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&controllerMapMutex);
-        return false;
+        return NULL;
     }
 
     puremvc_controller_init(instanceMap[i]->controller, key); // init
+    printf("Controller Storing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->controller);
+    fflush(stdout);
 
     mutex_unlock(&controllerMapMutex);
     return instanceMap[i]->controller;
@@ -295,9 +297,11 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
     mutex_once(&controllerMutexOnce, dispatchOnce);
     mutex_lock(&controllerMapMutex);
 
-    size_t index = 0;
-    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) {
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+    size_t i = 0, index = 0;
+    for (; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) {
+        if (strcmp(instanceMap[i]->key, key) == 0) {
+            printf("Controller Removing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->controller);
+            fflush(stdout);
             memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             if (out != NULL)
                 *out = instanceMap[i]->controller;
@@ -310,6 +314,8 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
             index++;
         }
     }
+
+    if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
 
     mutex_unlock(&controllerMapMutex);
 

@@ -15,12 +15,17 @@
 #include <stdio.h>
 #include <string.h>
 
-// instanceMap
+// instanceMap (global)
 static struct ModelMap **instanceMap = NULL;
 
-// mutex for modelMap
+// mutex for modelMap (global)
 static Mutex modelMapMutex;
 static MutexOnce modelMutexOnce = MUTEX_ONCE_INIT;
+
+static const char *getMultitonKey(const struct IModel *self) {
+    const struct Model *this = (const struct Model *) self;
+    return this->multitonKey;
+}
 
 static void initializeModel(struct IModel *self, struct ProxyMap **proxyMap) {
     struct Model *this = (struct Model *) self;
@@ -156,6 +161,7 @@ struct IModel *puremvc_model_init(void *buffer, const char *key) {
 
     memset(this, 0, sizeof(struct Model));
 
+    this->base.getMultitonKey = getMultitonKey;
     this->base.initializeModel = initializeModel;
     this->base.registerProxy = registerProxy;
     this->base.retrieveProxy = retrieveProxy;
@@ -182,6 +188,7 @@ static void dispatchOnce(void) {
 }
 
 struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key) {
+
     if (modelMap == NULL && instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] FATAL: Missing ModelMap storage; skipping registration.\033[0m\n");
         return NULL;
@@ -208,7 +215,7 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
 
     size_t i = 0;
     for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find model
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+        if (strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&modelMapMutex);
             return instanceMap[i]->model;
         }
@@ -231,10 +238,12 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] Error: ModelMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
         memset(instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&modelMapMutex);
-        return false;
+        return NULL;
     }
 
     puremvc_model_init(instanceMap[i]->model, key); // init
+    printf("Model Storing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->model);
+    fflush(stdout);
 
     mutex_unlock(&modelMapMutex);
     return instanceMap[i]->model;
@@ -244,21 +253,23 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
     bool removed = false;
 
     if (instanceMap == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] FATAL: Missing ModelMap storage; skipping removal.\033[0m\n");
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] ERROR: Missing ModelMap storage; skipping removal.\033[0m\n");
         return false;
     }
 
     if (key == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] FATAL: Key is NULL; skipping removal.\033[0m\n");
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] ERROR: Key is NULL; skipping removal.\033[0m\n");
         return false;
     }
 
     mutex_once(&modelMutexOnce, dispatchOnce);
     mutex_lock(&modelMapMutex);
 
-    size_t index = 0;
-    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find model
-        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+    size_t i = 0, index = 0;
+    for (; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find model
+        if (strcmp(instanceMap[i]->key, key) == 0) {
+            printf("Model Removing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->model);
+            fflush(stdout);
             memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             if (out != NULL)
                 *out = instanceMap[i]->model;
@@ -274,6 +285,8 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
             index++;
         }
     }
+
+    if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
 
     mutex_unlock(&modelMapMutex);
 
