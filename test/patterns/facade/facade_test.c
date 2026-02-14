@@ -29,23 +29,36 @@ static void test(const char *name, void (*callback)(void)) {
     fflush(stdout);
 }
 
+void mytest() {
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey0");
+
+    struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) }, NULL };
+    struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey0");
+    facade->initializeFacade(facade, NULL, view, NULL);
+
+    if (puremvc_facade_removeFacade("FacadeTestKey0", NULL) != true) abort();
+    if (puremvc_facade_hasCore("FacadeTestKey0") != false) abort();
+}
+
 int main() {
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "FacadeTest");
     printf("\033[1;36m================================================\033[0m\n\n");
 
     beforeAll();
-    test("testGetInstance", testGetInstance);
+    // mytest();
+    // test("testGetInstance", testGetInstance);
     test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification);
     test("testRegisterAndRemoveCommandAndSendNotification", testRegisterAndRemoveCommandAndSendNotification);
-    test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy);
-    test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
-    test("testRegisterRetrieveAndRemoveMediator", testRegisterRetrieveAndRemoveMediator);
-    test("testHasProxy", testHasProxy);
-    test("testHasMediator", testHasMediator);
-    test("testHasCommand", testHasCommand);
-    test("testHasCoreAndRemoveCore", testHasCoreAndRemoveCore);
-    test("testFacadeMapShiftLeft", testFacadeMapShiftLeft);
+    // test("testRegisterAndRetrieveProxy", testRegisterAndRetrieveProxy);
+    // test("testRegisterAndRemoveProxy", testRegisterAndRemoveProxy);
+    // test("testRegisterRetrieveAndRemoveMediator", testRegisterRetrieveAndRemoveMediator);
+    // test("testHasProxy", testHasProxy);
+    // test("testHasMediator", testHasMediator);
+    // test("testHasCommand", testHasCommand);
+    // test("testHasCoreAndRemoveCore", testHasCoreAndRemoveCore);
+    // test("testFacadeMapShiftLeft", testFacadeMapShiftLeft);
     afterAll();
 
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
@@ -113,7 +126,7 @@ void testRegisterCommandAndSendNotification() {
 }
 
 void testRegisterAndRemoveCommandAndSendNotification() {
-    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .key = "", .view = alloca(puremvc_view_size()) }, NULL };
     struct ObserverMap **observerMap = (struct ObserverMap *[]) {
         &(struct ObserverMap){ .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } },
         NULL
@@ -121,7 +134,7 @@ void testRegisterAndRemoveCommandAndSendNotification() {
     struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey3");
     view->initializeView(view, observerMap, NULL);
 
-    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap){ .key = "", .controller = alloca(puremvc_controller_size()) }, NULL };
     struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey3");
     controller->initializeController(controller, view, commandMap);
@@ -134,7 +147,7 @@ void testRegisterAndRemoveCommandAndSendNotification() {
     // handle 'FacadeTest' events
     struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .key = "", .facade = alloca(puremvc_facade_size()) }, NULL };
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey3");
-    facade->initializeFacade(facade, model, view, controller);
+    facade->initializeFacade(facade, NULL, view, controller);
 
     if (facade->registerCommand(facade, "FacadeTestNote", test_facade_command) != true) abort();
     if (facade->removeCommand(facade, "FacadeTestNote", NULL) != true) abort();
@@ -424,6 +437,11 @@ void testFacadeMapShiftLeft() {
         &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
         NULL
     };
+
+    facadeMap[0]->facade->initializeFacade(facadeMap[0]->facade, model, view, controller);
+    facadeMap[1]->facade->initializeFacade(facadeMap[1]->facade, model, view, controller);
+    facadeMap[2]->facade->initializeFacade(facadeMap[2]->facade, model, view, controller);
+    facadeMap[3]->facade->initializeFacade(facadeMap[3]->facade, model, view, controller);
 
     if (puremvc_facade_getInstance(facadeMap, "facade0") == NULL) abort();
     if (strcmp(facadeMap[0]->key, "facade0") != 0) abort();

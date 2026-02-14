@@ -17,7 +17,7 @@
 #include <string.h>
 
 // instanceMap
-static struct ControllerMap **controller_instanceMap = NULL;
+static struct ControllerMap **instanceMap = NULL;
 
 // mutex for controllerMap
 static Mutex controllerMapMutex;
@@ -230,7 +230,7 @@ static void dispatchOnce(void) {
 }
 
 struct IController *puremvc_controller_getInstance(struct ControllerMap **controllerMap, const char *key) {
-    if (controllerMap == NULL && controller_instanceMap == NULL) {
+    if (controllerMap == NULL && instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Controller::getInstance] ERROR: Missing ControllerMap storage; skipping registration.\033[0m\n");
         return NULL;
     }
@@ -240,49 +240,49 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
         return NULL;
     }
 
-    controller_instanceMap = controllerMap;
+    instanceMap = controllerMap;
     mutex_once(&controllerMutexOnce, dispatchOnce);
 
     mutex_lock(&controllerMapMutex);
 
     size_t i = 0;
-    for (; controller_instanceMap != NULL && controller_instanceMap[i] != NULL && controller_instanceMap[i]->key[0] != '\0'; i++) { // find controller
-        if (controller_instanceMap[i]->key == key || strcmp(controller_instanceMap[i]->key, key) == 0) {
+    for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find controller
+        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&controllerMapMutex);
-            return controller_instanceMap[i]->controller;
+            return instanceMap[i]->controller;
         }
     }
 
-    if (controller_instanceMap == NULL || controller_instanceMap[i] == NULL) { // overflow
+    if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::Controller::getInstance] ERROR: ControllerMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&controllerMapMutex);
         return NULL;
     }
 
-    if (controller_instanceMap[i]->controller == NULL) {
+    if (instanceMap[i]->controller == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] ERROR: Missing Controller storage; skipping registration.\033[0m\n");
         mutex_unlock(&controllerMapMutex);
         return NULL;
     }
 
-    int len = snprintf(controller_instanceMap[i]->key, KEY_SIZE, "%s", key); // registration
+    int len = snprintf(instanceMap[i]->key, KEY_SIZE, "%s", key); // registration
     if (len < 0 || len >= KEY_SIZE) { // todo reset controller
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ControllerMap key truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
-        memset(controller_instanceMap[i]->key, 0, KEY_SIZE);
+        memset(instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&controllerMapMutex);
         return false;
     }
 
-    puremvc_controller_init(controller_instanceMap[i]->controller, key); // init
+    puremvc_controller_init(instanceMap[i]->controller, key); // init
 
     mutex_unlock(&controllerMapMutex);
-    return controller_instanceMap[i]->controller;
+    return instanceMap[i]->controller;
 }
 
 bool puremvc_controller_removeController(const char *key, struct IController **out) {
     bool removed = false;
 
-    if (controller_instanceMap == NULL) {
+    if (instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Controller::removeController] ERROR: Missing ControllerMap storage; skipping removal.\033[0m\n");
         return false;
     }
@@ -296,16 +296,16 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
     mutex_lock(&controllerMapMutex);
 
     size_t index = 0;
-    for (size_t i = 0; controller_instanceMap[i] != NULL && controller_instanceMap[i]->key[0] != '\0'; i++) {
-        if (controller_instanceMap[i]->key == key || strcmp(controller_instanceMap[i]->key, key) == 0) {
-            memset(controller_instanceMap[i]->key, 0, KEY_SIZE); // remove
+    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) {
+        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+            memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             if (out != NULL)
-                *out = controller_instanceMap[i]->controller;
+                *out = instanceMap[i]->controller;
             removed = true;
         } else {
             if (index != i) { // shift left (Gap-free array)
-                *controller_instanceMap[index] = *controller_instanceMap[i]; // shift left first
-                memset(controller_instanceMap[i]->key, 0, KEY_SIZE); // remove
+                *instanceMap[index] = *instanceMap[i]; // shift left first
+                memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             }
             index++;
         }

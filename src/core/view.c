@@ -14,8 +14,8 @@
 #include <stdio.h>
 #include <string.h>
 
-// viewMap
-static struct ViewMap **view_instanceMap = NULL;
+// instanceMap
+static struct ViewMap **instanceMap = NULL;
 
 // mutex for viewMap
 static Mutex viewMapMutex;
@@ -333,7 +333,7 @@ static void dispatchOnce(void) {
 }
 
 struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key) {
-    if (viewMap == NULL && view_instanceMap == NULL) {
+    if (viewMap == NULL && instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: Missing ViewMap storage; skipping registration.\033[0m\n");
         return NULL;
     }
@@ -343,48 +343,48 @@ struct IView *puremvc_view_getInstance(struct ViewMap **viewMap, const char *key
         return NULL;
     }
 
-    view_instanceMap = viewMap;
+    instanceMap = viewMap;
 
     mutex_once(&viewMutexOnce, dispatchOnce);
     mutex_lock(&viewMapMutex);
 
     size_t i = 0;
-    for (; view_instanceMap != NULL && view_instanceMap[i] != NULL && view_instanceMap[i]->key[0] != '\0'; i++) { // find view
-        if (view_instanceMap[i]->key == key || strcmp(view_instanceMap[i]->key, key) == 0) {
+    for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find view
+        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&viewMapMutex);
-            return view_instanceMap[i]->view;
+            return instanceMap[i]->view;
         }
     }
 
-    if (view_instanceMap == NULL || view_instanceMap[i] == NULL) { // overflow
+    if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: ViewMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&viewMapMutex);
         return NULL;
     }
 
-    if (view_instanceMap[i]->view == NULL) {
+    if (instanceMap[i]->view == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] FATAL: Missing View storage; skipping registration.\033[0m\n");
         return NULL;
     }
 
-    int len = snprintf(view_instanceMap[i]->key, KEY_SIZE, "%s", key); // init
+    int len = snprintf(instanceMap[i]->key, KEY_SIZE, "%s", key); // init
     if (len < 0 || len >= KEY_SIZE) { // tod reset view?
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] Error: ViewMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
-        memset(view_instanceMap[i]->key, 0, KEY_SIZE);
+        memset(instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&viewMapMutex);
         return false;
     }
 
-    puremvc_view_init(view_instanceMap[i]->view, key); // init
+    puremvc_view_init(instanceMap[i]->view, key); // init
 
     mutex_unlock(&viewMapMutex);
-    return view_instanceMap[i]->view;
+    return instanceMap[i]->view;
 }
 
 bool puremvc_view_removeView(const char *key, struct IView **out) {
     bool removed = false;
 
-    if (view_instanceMap == NULL) {
+    if (instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::removeView] FATAL: Missing ViewMap storage; skipping removal.\033[0m\n");
         return false;
     }
@@ -398,17 +398,17 @@ bool puremvc_view_removeView(const char *key, struct IView **out) {
     mutex_lock(&viewMapMutex);
 
     size_t index = 0;
-    for (size_t i = 0; view_instanceMap[i] != NULL && view_instanceMap[i]->key[0] != '\0'; i++) { // find view
-        if (view_instanceMap[i]->key == key || strcmp(view_instanceMap[i]->key, key) == 0) {
-            memset(view_instanceMap[i]->key, 0, KEY_SIZE); // remove
+    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find view
+        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+            memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             if (out != NULL)
-                *out = view_instanceMap[i]->view;
+                *out = instanceMap[i]->view;
 
             removed = true;
         } else {
             if (index != i) { // shift left (Gap-free array)
-                *view_instanceMap[index] = *view_instanceMap[i]; // shift left first
-                memset(view_instanceMap[i]->key, 0, KEY_SIZE); // remove
+                *instanceMap[index] = *instanceMap[i]; // shift left first
+                memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             }
             index++;
         }

@@ -19,11 +19,26 @@
 #include <string.h>
 
 // instanceMap
-static struct FacadeMap **facade_instanceMap = NULL;
+static struct FacadeMap **instanceMap = NULL;
 
 // mutex for facadeMap
 static Mutex facadeMapMutex;
 static MutexOnce facadeMutexOnce = MUTEX_ONCE_INIT;
+
+static struct IModel *getModel(const struct IFacade *self) {
+    const struct Facade *this = (const struct Facade *) self;
+    return this->model;
+}
+
+static struct IView *getView(const struct IFacade *self) {
+    const struct Facade *this = (const struct Facade *) self;
+    return this->view;
+}
+
+static struct IController *getController(const struct IFacade *self) {
+    const struct Facade *this = (const struct Facade *) self;
+    return this->controller;
+}
 
 static void initializeFacade(struct IFacade *self, struct IModel *model, struct IView *view, struct IController *controller) {
     if (self == NULL) return;
@@ -124,6 +139,9 @@ struct IFacade *puremvc_facade_init(void *buffer, const char *key) {
 
     memset(this, 0, sizeof(struct Facade));
 
+    this->base.getController = getController;
+    this->base.getModel = getModel;
+    this->base.getView = getView;
     this->base.initializeFacade = initializeFacade;
     this->base.initializeController = initializeController;
     this->base.initializeModel = initializeModel;
@@ -157,7 +175,7 @@ static void dispatchOnce(void) {
 }
 
 struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const char *key) {
-    if (facadeMap == NULL && facade_instanceMap == NULL) {
+    if (facadeMap == NULL && instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
         return NULL;
     }
@@ -167,54 +185,54 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
         return NULL;
     }
 
-    if (facadeMap != NULL) facade_instanceMap = facadeMap; // notifier exception
+    if (facadeMap != NULL) instanceMap = facadeMap; // notifier exception
 
     mutex_once(&facadeMutexOnce, dispatchOnce);
     mutex_lock(&facadeMapMutex);
 
     size_t i = 0;
-    for (; facade_instanceMap[i] != NULL && facade_instanceMap[i]->key[0] != '\0'; i++) { // find facade
-        if (facade_instanceMap[i]->key == key || strcmp(facade_instanceMap[i]->key, key) == 0) {
+    for (; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find facade
+        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             mutex_unlock(&facadeMapMutex);
-            return facade_instanceMap[i]->facade;
+            return instanceMap[i]->facade;
         }
     }
 
-    if (facade_instanceMap[i] == NULL) { // overflow
+    if (instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: FacadeMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
         mutex_unlock(&facadeMapMutex);
         return NULL;
     }
 
-    if (facade_instanceMap[i]->facade == NULL) {
+    if (instanceMap[i]->facade == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: Missing Facade storage; skipping registration.\033[0m\n");
         return NULL;
     }
 
-    int len = snprintf(facade_instanceMap[i]->key, KEY_SIZE, "%s", key); // registration
+    int len = snprintf(instanceMap[i]->key, KEY_SIZE, "%s", key); // registration
     if (len < 0 || len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] Error: ModelMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
-        memset(facade_instanceMap[i]->key, 0, KEY_SIZE);
+        memset(instanceMap[i]->key, 0, KEY_SIZE);
         mutex_unlock(&facadeMapMutex);
         return false;
     }
 
-    puremvc_facade_init(facade_instanceMap[i]->facade, key);
+    puremvc_facade_init(instanceMap[i]->facade, key);
 
     mutex_unlock(&facadeMapMutex);
-    return facade_instanceMap[i]->facade;
+    return instanceMap[i]->facade;
 }
 
 bool puremvc_facade_hasCore(const char *key) {
-    if (facade_instanceMap == NULL) {
+    if (instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Facade::hasFacade] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
         return false;
     }
 
     mutex_lock_shared(&facadeMapMutex);
     bool exists = false;
-    for (size_t i = 0; facade_instanceMap[i] != NULL && facade_instanceMap[i]->key[0] != '\0'; i++) {
-        if (facade_instanceMap[i]->key == key || strcmp(facade_instanceMap[i]->key, key) == 0) {
+    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) {
+        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
             exists = true;
             break;
         }
@@ -226,7 +244,7 @@ bool puremvc_facade_hasCore(const char *key) {
 bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
     bool removed = false;
 
-    if (facade_instanceMap == NULL) {
+    if (instanceMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeFacade] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
         return false;
     }
@@ -244,17 +262,17 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
     puremvc_controller_removeController(key, NULL);
 
     size_t index = 0;
-    for (size_t i = 0; facade_instanceMap[i] != NULL && facade_instanceMap[i]->key[0] != '\0'; i++) { // find facade
-        if (facade_instanceMap[i]->key == key || strcmp(facade_instanceMap[i]->key, key) == 0) {
-            memset(facade_instanceMap[i]->key, 0, KEY_SIZE); // remove
+    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find facade
+        if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
+            memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             if (out != NULL)
-                *out = facade_instanceMap[i]->facade;
+                *out = instanceMap[i]->facade;
 
             removed = true;
         } else {
             if (index != i) { // shift left (Gap-free array)
-                *facade_instanceMap[index] = *facade_instanceMap[i]; // shift left first
-                memset(facade_instanceMap[i]->key, 0, KEY_SIZE); // remove
+                *instanceMap[index] = *instanceMap[i]; // shift left first
+                memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             }
             index++;
         }
