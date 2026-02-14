@@ -21,7 +21,7 @@ static const struct IFacade *getFacade(const struct INotifier *self) {
 const char *getMultitonKey(const struct INotifier *self) {
     const struct Notifier *this = (const struct Notifier *) self;
     if (this->key[0] == '\0') {
-        fprintf(stderr, "\033[0;31m[PureMVC::Notifier::getMultitonKey] FATAL: multitonKey for this Notifier not yet initialized!.\033[0m\n");
+        fprintf(stderr, "\033[0;31m[PureMVC::Notifier::getMultitonKey] ERROR: multitonKey for this Notifier not yet initialized!.\033[0m\n");
         abort();
     }
     return this->key;

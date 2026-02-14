@@ -54,7 +54,7 @@ struct IFacade {
 
     bool (*hasProxy)(const struct IFacade *self, const char *proxyName);
 
-    bool (*removeProxy)(const struct IFacade *self, const char *proxyName, struct IProxy **proxy);
+    bool (*removeProxy)(const struct IFacade *self, const char *proxyName, struct IProxy **out);
 
     bool (*registerMediator)(const struct IFacade *self, struct IMediator *(*factory)(void *buffer, const char *name, void *component), const char *name, void *component);
 
@@ -62,7 +62,7 @@ struct IFacade {
 
     bool (*hasMediator)(const struct IFacade *self, const char *mediatorName);
     
-    bool (*removeMediator)(const struct IFacade *self, const char *mediatorName, struct IMediator **mediator);
+    bool (*removeMediator)(const struct IFacade *self, const char *mediatorName, struct IMediator **out);
     
     void (*notifyObservers)(const struct IFacade *self, struct INotification *notification);
 

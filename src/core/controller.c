@@ -20,8 +20,8 @@
 static struct ControllerMap **instanceMap = NULL;
 
 // mutex for controllerMap (global)
-static Mutex controllerMapMutex;
-static MutexOnce controllerMutexOnce = MUTEX_ONCE_INIT;
+static Mutex instanceMapMapMutex;
+static MutexOnce mutexOnce = MUTEX_ONCE_INIT;
 
 static void initializeController(struct IController *self, struct IView *view, struct CommandMap **commandMap) {
     struct Controller *this = (struct Controller *) self;
@@ -32,6 +32,23 @@ static void initializeController(struct IController *self, struct IView *view, s
     this->commandMap = commandMap;
     this->view = view;
     mutex_unlock(&this->commandMapMutex);
+}
+
+static bool hasCommand(const struct IController *self, const char *notificationName) {
+    if (notificationName == NULL) return false;
+    struct Controller *this = (struct Controller *) self;
+    bool exists = false;
+
+    mutex_lock_shared(&this->commandMapMutex);
+    for (size_t i = 0; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) {
+        if (strcmp(this->commandMap[i]->key, notificationName) == 0) {
+            exists = true;
+            break;
+        }
+    }
+    mutex_unlock(&this->commandMapMutex);
+
+    return exists;
 }
 
 static bool registerCommand(struct IController *self, const char *notificationName, struct ICommand *(*factory)(void *buffer)) {
@@ -55,7 +72,7 @@ static bool registerCommand(struct IController *self, const char *notificationNa
 
     size_t i = 0;
     for (; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) { // existing
-        if (this->commandMap[i]->key == notificationName || strcmp(this->commandMap[i]->key, notificationName) == 0) {
+        if (strcmp(this->commandMap[i]->key, notificationName) == 0) {
 #ifndef NDEBUG
             printf("\033[0;36m[PureMVC::Controller::registerCommand] INFO: Command '%s' exists; overriding registration.\033[0m\n", notificationName);
 #endif
@@ -90,92 +107,37 @@ static bool registerCommand(struct IController *self, const char *notificationNa
 }
 
 static bool executeCommand(const struct IController *self, struct INotification *notification) {
-    struct Controller *this = (struct Controller *) self;
-    bool success = false;
-
     if (notification == NULL) return false;
-
-    const char *name = NULL;
-    name = notification->getName(notification);
-    if (name == NULL) return false;
-
-    if (mutex_lock_shared(&this->commandMapMutex) != 0) return false;
-
-    if (this->commandMap == NULL) {
-        mutex_unlock(&this->commandMapMutex);
-        return false;
-    }
-
+    struct Controller *this = (struct Controller *) self;
     struct ICommand *(*factory)(void *) = NULL;
+
+    mutex_lock_shared(&this->commandMapMutex);
     for (size_t i = 0; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) {
-        if (this->commandMap[i]->key == name || strcmp(this->commandMap[i]->key, name) == 0) {
+        if (strcmp(this->commandMap[i]->key, notification->getName(notification)) == 0) {
             factory = this->commandMap[i]->factory;
             break;
         }
     }
-
     mutex_unlock(&this->commandMapMutex);
 
-    if (factory != NULL) {
-        void *buffer = alloca(puremvc_simple_command_size());
-        if (buffer == NULL) return false;
+    if (factory == NULL) return false;
 
-        const struct ICommand *command = factory(buffer);
-        if (command == NULL) return false;
-
-        struct INotifier *notifier = command->getNotifier(command);
-        if (notifier == NULL) return false;
-        notifier->initializeNotifier(notifier, this->multitonKey);
-        success = command->execute(command, notification);
-    }
-
-    return success;
-}
-
-static bool hasCommand(const struct IController *self, const char *notificationName) {
-    struct Controller *this = (struct Controller *) self;
-    bool exists = false;
-
-    if (notificationName == NULL) return false;
-
-    if (mutex_lock_shared(&this->commandMapMutex) != 0) return false;
-
-    if (this->commandMap == NULL) {
-        mutex_unlock(&this->commandMapMutex);
-        return false;
-    }
-
-    for (size_t i = 0; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) {
-        if (this->commandMap[i]->key == notificationName || strcmp(this->commandMap[i]->key, notificationName) == 0) {
-            exists = true;
-            break;
-        }
-    }
-    mutex_unlock(&this->commandMapMutex);
-
-    return exists;
+    const struct ICommand *command = factory(alloca(puremvc_simple_command_size()));
+    struct INotifier *notifier = command->getNotifier(command);
+    notifier->initializeNotifier(notifier, this->multitonKey);
+    return command->execute(command, notification);
 }
 
 static bool removeCommand(struct IController *self, const char *notificationName, struct ICommand *(**out)(void *buffer)) {
+    if (notificationName == NULL) return false;
     struct Controller *this = (struct Controller *) self;
     bool removed = false;
 
-    if (notificationName == NULL) return false;
-
     mutex_lock(&this->commandMapMutex);
-    if (this->commandMap == NULL) {
-        mutex_unlock(&this->commandMapMutex);
-        return false;
-    }
-
-    for (size_t index = 0, i = 0; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) { // One-pass Filter & Shift (O(n) complexity)
-        if (this->commandMap[i]->key == notificationName || strcmp(this->commandMap[i]->key, notificationName) == 0) { // match
-            if (out != NULL) // out param
-                *out = this->commandMap[i]->factory;
-
-            if (this->view->removeObserver(this->view, notificationName, self) == false) // remove observer
-                fprintf(stderr, "\033[0;31m[PureMVC::Controller::removeCommand] Error: Couldn't remove Observer for the notification '%s'; removing Command.\033[0m\n", notificationName);
-
+    for (size_t i = 0, index = 0; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) { // One-pass Filter & Shift (O(n) complexity)
+        if (strcmp(this->commandMap[i]->key, notificationName) == 0) { // match
+            if (out != NULL) *out = this->commandMap[i]->factory; // out param
+            this->view->removeObserver(this->view, notificationName, self);
             memset(&this->commandMap[i]->key, 0, KEY_SIZE); // remove
             removed = true;
         } else {
@@ -224,7 +186,7 @@ static struct IController *puremvc_controller_init(void *buffer, const char *key
 }
 
 static void dispatchOnce(void) {
-    if (mutex_init(&controllerMapMutex) != 0) {
+    if (mutex_init(&instanceMapMapMutex) != 0) {
         fprintf(stderr, "\033[PureMVC::Controller::getInstance] ERROR: Mutex Init Failed!\033[0m\n");
     }
 }
@@ -241,27 +203,27 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
     }
 
     instanceMap = controllerMap;
-    mutex_once(&controllerMutexOnce, dispatchOnce);
+    mutex_once(&mutexOnce, dispatchOnce);
 
-    mutex_lock(&controllerMapMutex);
+    mutex_lock(&instanceMapMapMutex);
 
     size_t i = 0;
     for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find controller
         if (strcmp(instanceMap[i]->key, key) == 0) {
-            mutex_unlock(&controllerMapMutex);
+            mutex_unlock(&instanceMapMapMutex);
             return instanceMap[i]->controller;
         }
     }
 
     if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::Controller::getInstance] ERROR: ControllerMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
-        mutex_unlock(&controllerMapMutex);
+        mutex_unlock(&instanceMapMapMutex);
         return NULL;
     }
 
     if (instanceMap[i]->controller == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] ERROR: Missing Controller storage; skipping registration.\033[0m\n");
-        mutex_unlock(&controllerMapMutex);
+        mutex_unlock(&instanceMapMapMutex);
         return NULL;
     }
 
@@ -269,7 +231,7 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
     if (len < 0 || len >= KEY_SIZE) { // todo reset controller
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ControllerMap key truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
         memset(instanceMap[i]->key, 0, KEY_SIZE);
-        mutex_unlock(&controllerMapMutex);
+        mutex_unlock(&instanceMapMapMutex);
         return NULL;
     }
 
@@ -277,7 +239,7 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
     printf("Controller Storing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->controller);
     fflush(stdout);
 
-    mutex_unlock(&controllerMapMutex);
+    mutex_unlock(&instanceMapMapMutex);
     return instanceMap[i]->controller;
 }
 
@@ -294,8 +256,8 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
         return false;
     }
 
-    mutex_once(&controllerMutexOnce, dispatchOnce);
-    mutex_lock(&controllerMapMutex);
+    mutex_once(&mutexOnce, dispatchOnce);
+    mutex_lock(&instanceMapMapMutex);
 
     size_t i = 0, index = 0;
     for (; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) {
@@ -317,7 +279,7 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
 
     if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
 
-    mutex_unlock(&controllerMapMutex);
+    mutex_unlock(&instanceMapMapMutex);
 
     return removed;
 }

@@ -6,9 +6,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install Dependencies
 RUN apt-get update && apt-get install -y build-essential gcc g++ clang cmake git curl zip tar gdb gdbserver && rm -rf /var/lib/apt/lists/*
 
-# Install VCPKG
-RUN git clone https://github.com/microsoft/vcpkg.git /opt/vcpkg && /opt/vcpkg/bootstrap-vcpkg.sh
-
 # Set up the application directory
 WORKDIR /app
 COPY . .
@@ -30,8 +27,7 @@ RUN mkdir -p build && \
     cmake -S . -B build \
       -DBUILD_TESTS=ON \
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
-      -DCMAKE_C_FLAGS="-fsanitize=address,undefined,leak -fno-omit-frame-pointer -g" \
-      -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake && \
+      -DCMAKE_C_FLAGS="-fsanitize=address,undefined,leak -fno-omit-frame-pointer -g" && \
     cmake --build build --parallel $(nproc)
 
 # Enable ASAN_OPTIONS to get better stack traces in Docker logs

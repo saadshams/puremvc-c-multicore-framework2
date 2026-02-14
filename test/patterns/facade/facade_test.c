@@ -1,5 +1,4 @@
 #include "facade_test.h"
-#include "../../../src/patterns/facade/facade.h"
 
 #include "facade_test_command.h"
 #include "facade_test_vo.h"

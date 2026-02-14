@@ -1,5 +1,6 @@
 #include "view_test_mediator6.h"
 #include "view_test.h"
+#include "puremvc/i_facade.h"
 
 static const char *const *listNotificationInterests(const struct IMediator *self) {
     static const char *const interests[] = { NOTE6, NULL };
@@ -8,15 +9,19 @@ static const char *const *listNotificationInterests(const struct IMediator *self
 
 static bool handleNotification(const struct IMediator *self, struct INotification *notification) {
     if (notification == NULL) return false;
-    struct ViewTest *component = self->getComponent(self);
+    // struct ViewTest *component = self->getComponent(self);
     char *name = (char *) self->getName(self);
 
-    for (size_t i = 0; component->deferred[i] != NULL; i++) {
-        if (component->deferred[i][0] == '\0') { // Find the first EMPTY slot
-            component->deferred[i] = name;
-            break;
-        }
-    }
+    const struct INotifier *notifier = self->getNotifier(self);
+    const struct IFacade *facade = notifier->getFacade(notifier);
+    facade->removeMediator(facade, name, NULL);
+
+    // for (size_t i = 0; component->deferred[i] != NULL; i++) {
+    //     if (component->deferred[i][0] == '\0') { // Find the first empty slot
+    //         component->deferred[i] = name;
+    //         break;
+    //     }
+    // }
     return true;
 }
 

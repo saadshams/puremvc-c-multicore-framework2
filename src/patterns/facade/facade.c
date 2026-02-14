@@ -22,8 +22,8 @@
 static struct FacadeMap **instanceMap = NULL;
 
 // mutex for facadeMap (global)
-static Mutex facadeMapMutex;
-static MutexOnce facadeMutexOnce = MUTEX_ONCE_INIT;
+static Mutex instanceMapMutex;
+static MutexOnce mutexOnce = MUTEX_ONCE_INIT;
 
 static void initializeFacade(struct IFacade *self, struct IModel *model, struct IView *view, struct IController *controller) {
     if (self == NULL) return;
@@ -153,41 +153,41 @@ struct IFacade *puremvc_facade_init(void *buffer, const char *key) {
 }
 
 static void dispatchOnce(void) {
-    mutex_init(&facadeMapMutex);
+    mutex_init(&instanceMapMutex);
 }
 
 struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const char *key) {
     if (facadeMap == NULL && instanceMap == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] ERROR: Missing FacadeMap storage; skipping registration.\033[0m\n");
         return NULL;
     }
 
     if (key == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: Key is NULL; skipping registration.\033[0m\n");
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] ERROR: Key is NULL; skipping registration.\033[0m\n");
         return NULL;
     }
 
     if (facadeMap != NULL) instanceMap = facadeMap; // notifier exception
 
-    mutex_once(&facadeMutexOnce, dispatchOnce);
-    mutex_lock(&facadeMapMutex);
+    mutex_once(&mutexOnce, dispatchOnce);
+    mutex_lock(&instanceMapMutex);
 
     size_t i = 0;
     for (; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find facade
         if (strcmp(instanceMap[i]->key, key) == 0) {
-            mutex_unlock(&facadeMapMutex);
+            mutex_unlock(&instanceMapMutex);
             return instanceMap[i]->facade;
         }
     }
 
     if (instanceMap[i] == NULL) { // overflow
-        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: FacadeMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
-        mutex_unlock(&facadeMapMutex);
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] ERROR: FacadeMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
+        mutex_unlock(&instanceMapMutex);
         return NULL;
     }
 
     if (instanceMap[i]->facade == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] FATAL: Missing Facade storage; skipping registration.\033[0m\n");
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::getInstance] ERROR: Missing Facade storage; skipping registration.\033[0m\n");
         return NULL;
     }
 
@@ -195,25 +195,23 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
     if (len < 0 || len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] Error: ModelMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
         memset(instanceMap[i]->key, 0, KEY_SIZE);
-        mutex_unlock(&facadeMapMutex);
+        mutex_unlock(&instanceMapMutex);
         return NULL;
     }
 
     puremvc_facade_init(instanceMap[i]->facade, key);
-    printf("Facade Storing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->facade);
-    fflush(stdout);
 
-    mutex_unlock(&facadeMapMutex);
+    mutex_unlock(&instanceMapMutex);
     return instanceMap[i]->facade;
 }
 
 bool puremvc_facade_hasCore(const char *key) {
     if (instanceMap == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Facade::hasFacade] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::hasFacade] ERROR: Missing FacadeMap storage; skipping registration.\033[0m\n");
         return false;
     }
 
-    mutex_lock_shared(&facadeMapMutex);
+    mutex_lock_shared(&instanceMapMutex);
     bool exists = false;
     for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) {
         if (instanceMap[i]->key == key || strcmp(instanceMap[i]->key, key) == 0) {
@@ -221,7 +219,7 @@ bool puremvc_facade_hasCore(const char *key) {
             break;
         }
     }
-    mutex_unlock(&facadeMapMutex);
+    mutex_unlock(&instanceMapMutex);
     return exists;
 }
 
@@ -229,17 +227,17 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
     bool removed = false;
 
     if (instanceMap == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeFacade] FATAL: Missing FacadeMap storage; skipping registration.\033[0m\n");
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeFacade] ERROR: Missing FacadeMap storage; skipping registration.\033[0m\n");
         return false;
     }
 
     if (key == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeFacade] FATAL: Key is NULL; skipping registration.\033[0m\n");
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeFacade] ERROR: Key is NULL; skipping registration.\033[0m\n");
         return false;
     }
 
-    mutex_once(&facadeMutexOnce, dispatchOnce);
-    mutex_lock(&facadeMapMutex);
+    mutex_once(&mutexOnce, dispatchOnce);
+    mutex_lock(&instanceMapMutex);
 
     size_t i = 0, index = 0;
     for (; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find facade
@@ -263,7 +261,7 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
 
     if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
 
-    mutex_unlock(&facadeMapMutex);
+    mutex_unlock(&instanceMapMutex);
 
     return removed;
 }
