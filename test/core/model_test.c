@@ -13,7 +13,7 @@ static void beforeEach() {}
 static void afterEach() {}
 static void afterAll() {}
 
-static void test(const char *name, void (*callback)(void)) {
+static void test(const char *name, void (*callback)()) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
