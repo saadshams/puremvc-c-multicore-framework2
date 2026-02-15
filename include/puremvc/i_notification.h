@@ -21,7 +21,7 @@
 struct INotification {
     const char *(*getName)(const struct INotification *self);
 
-    const void *(*getBody)(const struct INotification *self);
+    void *(*getBody)(const struct INotification *self);
 
     void (*setBody)(struct INotification *self, void *body);
 

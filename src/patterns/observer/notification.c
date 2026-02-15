@@ -16,7 +16,7 @@ static const char *getName(const struct INotification *self) {
     return this->name;
 }
 
-static const void *getBody(const struct INotification *self) {
+static void *getBody(const struct INotification *self) {
     const struct Notification *this = (const struct Notification *) self;
     return this->body;
 }
