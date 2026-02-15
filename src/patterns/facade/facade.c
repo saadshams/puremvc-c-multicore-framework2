@@ -192,9 +192,6 @@ struct IFacade *puremvc_facade_getInstance(struct FacadeMap **facadeMap, const c
 
     facade = puremvc_facade_init(instanceMap[i]->facade, key);
 
-    mutex_unlock(&instanceMapMutex);
-    return instanceMap[i]->facade;
-
 finally:
     mutex_unlock(&instanceMapMutex);
     return facade;
