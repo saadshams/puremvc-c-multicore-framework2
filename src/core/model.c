@@ -34,62 +34,52 @@ static void initializeModel(struct IModel *self, struct ProxyMap **proxyMap) {
 
 static bool registerProxy(struct IModel *self, struct IProxy *(*factory)(void *buffer, const char *name, void *data), const char *name, void *data) {
     struct Model *this = (struct Model *) self;
+    struct IProxy *proxy = NULL;
+    bool registered = false;
 
     mutex_lock(&this->proxyMapMutex);
 
     if (this->proxyMap == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] ERROR: Missing ProxyMap field in ModelMap; skipping registration.\033[0m\n");
-        return false;
+        goto finally;
     }
 
     size_t i = 0;
     for (; this->proxyMap[i] != NULL && this->proxyMap[i]->key[0] != '\0'; i++) { // find existing
-        if (this->proxyMap[i]->key == name || strcmp(this->proxyMap[i]->key, name) == 0) {
+        if (strcmp(this->proxyMap[i]->key, name) == 0) {
             this->proxyMap[i]->proxy->onRemove(this->proxyMap[i]->proxy);
             fprintf(stderr, "\033[0;33m[PureMVC::Model::registerMediator] Warning: Proxy '%s' exists; overriding registration.\033[0m\n", name);
 
-            struct IProxy *proxy = factory(this->proxyMap[i]->proxy, name, data); // replace
-
-            struct INotifier *notifier = this->proxyMap[i]->proxy->getNotifier(this->proxyMap[i]->proxy);
-            if (notifier == NULL) return false;
-            notifier->initializeNotifier(notifier, this->multitonKey);
-
-            if (proxy == NULL) return false;
+            proxy = factory(this->proxyMap[i]->proxy, name, data); // replace
+            proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), this->multitonKey);
             proxy->onRegister(proxy);
-
-            mutex_unlock(&this->proxyMapMutex);
-            return true;
+            registered = true;
+            goto finally;
         }
     }
 
     if (this->proxyMap[i] == NULL) { // overflow (ProxyMap)
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap storage overflow for proxy '%s'; increase slots - skipping registration.\033[0m\n", name);
-        mutex_unlock(&this->proxyMapMutex);
-        return false;
+        goto finally;
     }
 
-    // todo check if proxy exists (error if .proxy wasn't alloca)
-    struct IProxy *proxy = factory(this->proxyMap[i]->proxy, name, data); // init
-    if (proxy == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Proxy::registerProxy] Error: Factory failed to initialize Proxy '%s' .\033[0m\n", name);
-        return false;
-    }
-
-    struct INotifier *notifier = proxy->getNotifier(proxy);
-    notifier->initializeNotifier(notifier, this->multitonKey);
+    proxy = factory(this->proxyMap[i]->proxy, name, data); // init  todo check if proxy exists (error if .proxy wasn't alloca)
+    proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), this->multitonKey);
+    proxy->onRegister(proxy);
 
     const char *key = proxy->getName(proxy);
     int len = snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", key); // registration
     if (len < 0 || len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name, you have to reinit buffer too in this case
         fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap key truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
-        memset(this->proxyMap[i]->key, 0, KEY_SIZE);
-        mutex_unlock(&this->proxyMapMutex);
-        return false;
+        memset(this->proxyMap[i]->key, 0, KEY_SIZE); // clear
+        goto finally;
     }
-    proxy->onRegister(proxy);
 
+    registered = true;
+
+finally:
     mutex_unlock(&this->proxyMapMutex);
-    return true;
+    return registered;
 }
 
 static struct IProxy *retrieveProxy(const struct IModel *self, const char *proxyName) {
@@ -134,9 +124,11 @@ static bool removeProxy(struct IModel *self, const char *proxyName, struct IProx
     mutex_lock(&this->proxyMapMutex);
     for (size_t i = 0, index = 0; this->proxyMap[i] != NULL && this->proxyMap[i]->key[0] != '\0'; i++) {
         if (strcmp(this->proxyMap[i]->key, proxyName) == 0) { // match
-            if (out != NULL) *out = this->proxyMap[i]->proxy;
+            if (out != NULL) *out = this->proxyMap[i]->proxy; // out param
+
             struct IProxy *proxy = this->proxyMap[i]->proxy;
             proxy->onRemove(proxy);
+
             memset(&this->proxyMap[i]->key, 0, KEY_SIZE); // remove
             removed = true;
         } else {
@@ -147,8 +139,8 @@ static bool removeProxy(struct IModel *self, const char *proxyName, struct IProx
             index++;
         }
     }
-    mutex_unlock(&this->proxyMapMutex);
 
+    mutex_unlock(&this->proxyMapMutex);
     return removed;
 }
 
@@ -188,25 +180,8 @@ static void dispatchOnce(void) {
 }
 
 struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char *key) {
-
-    if (modelMap == NULL && instanceMap == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] ERROR: Missing ModelMap storage; skipping registration.\033[0m\n");
-        return NULL;
-    }
-
-    if (key == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] ERROR: Key is NULL; skipping registration.\033[0m\n");
-        return NULL;
-
-        // fputs("[PureMVC::Model::getInstance] Error: Key '", stderr);
-        // fputs(key, stderr);
-        // fputs("' too long — skipping registration.\n", stderr);
-
-        // fputs("\033[0;31m", stderr);      // 1. Terminal: "Okay, everything is RED now."
-        // fputs("[PureMVC] ", stderr);      // 2. Terminal: Prints "[PureMVC]" in red.
-        // fputs("ERROR ERROR", stderr);     // 3. Terminal: Prints "ERROR ERROR" in red.
-        // fputs("\033[0m\n", stderr);       // 4. Terminal: "Back to normal colors," then Newline.
-    }
+    if (modelMap == NULL || key == NULL) return NULL;
+    struct IModel *model = NULL;
 
     instanceMap = modelMap;
 
@@ -216,40 +191,37 @@ struct IModel *puremvc_model_getInstance(struct ModelMap **modelMap, const char 
     size_t i = 0;
     for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find model
         if (strcmp(instanceMap[i]->key, key) == 0) {
-            mutex_unlock(&instanceMapMutex);
-            return instanceMap[i]->model;
+            model = instanceMap[i]->model;
+            goto finally;
         }
     }
 
     if (instanceMap == NULL || instanceMap[i] == NULL) { // overflow
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] ERROR: ModelMap storage overflow for the key '%s'; increase slots - skipping registration.\033[0m\n", key);
-        // fputs("\033[0;31m[PureMVC::Model::getInstance] ERROR: Missing Model storage; skipping registration.\033[0m\n", stderr);
-        mutex_unlock(&instanceMapMutex);
-        return NULL;
+        goto finally;
     }
 
     if (instanceMap[i]->model == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] ERROR: Missing Model storage; skipping registration.\033[0m\n");
-        return NULL;
+        goto finally;
     }
 
     int len = snprintf(instanceMap[i]->key, KEY_SIZE, "%s", key); // registration
     if (len < 0 || len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name
         fprintf(stderr, "\033[0;31m[PureMVC::Model::getInstance] Error: ModelMap key truncated: '%s' (max %zu chars).\033[0m\n", key, sizeof(key));
         memset(instanceMap[i]->key, 0, KEY_SIZE);
-        mutex_unlock(&instanceMapMutex);
-        return NULL;
+        goto finally;
     }
 
-    puremvc_model_init(instanceMap[i]->model, key); // init
-    printf("Model Storing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->model);
-    fflush(stdout);
+    model = puremvc_model_init(instanceMap[i]->model, key); // init
 
+finally:
     mutex_unlock(&instanceMapMutex);
-    return instanceMap[i]->model;
+    return model;
 }
 
 bool puremvc_model_removeModel(const char *key, struct IModel **out) {
+    if (key == NULL) return false;
     bool removed = false;
 
     if (instanceMap == NULL) {
@@ -257,29 +229,19 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
         return false;
     }
 
-    if (key == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::removeModel] ERROR: Key is NULL; skipping removal.\033[0m\n");
-        return false;
-    }
-
     mutex_once(&mutexOnce, dispatchOnce);
     mutex_lock(&instanceMapMutex);
 
-    size_t i = 0, index = 0;
-    for (; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find model
+    size_t index = 0;
+    for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find model
         if (strcmp(instanceMap[i]->key, key) == 0) {
-            printf("Model Removing: requested key='%s', map key: '%s', pointer %p\n", key, instanceMap[i]->key, instanceMap[i]->model);
-            fflush(stdout);
+            if (out != NULL) *out = instanceMap[i]->model;
             memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
-            if (out != NULL)
-                *out = instanceMap[i]->model;
-
             removed = true;
-
             // ((struct Model *) s_modelMap[i]->model)->proxyMap[0]->key // todo remove proxies?
         } else {
             if (index != i) { // shift left
-                *instanceMap[index] = *instanceMap[i];
+                *instanceMap[index] = *instanceMap[i]; // shift left first
                 memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             }
             index++;
@@ -289,6 +251,5 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
     if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
 
     mutex_unlock(&instanceMapMutex);
-
     return removed;
 }

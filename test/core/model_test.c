@@ -264,7 +264,10 @@ void testRegisterAndReplaceProxy() {
     // test assertions
     if (proxy == NULL) abort();
     if (strcmp(proxy->getName(proxy), "sizes") != 0) abort();
-    if (proxy->getNotifier(proxy) == NULL) abort();
+    struct INotifier *notifier = proxy->getNotifier(proxy);
+    if (notifier == NULL) abort();
+    if (notifier->getMultitonKey(notifier) == NULL) abort();
+
 
     const char **data = proxy->getData(proxy);
     if (data != colors) abort();
