@@ -15,7 +15,7 @@
 
 #define MEDIATOR_NAME "mediator"
 
-#ifndef NAME_SIZE
+#ifndef KEY_SIZE
 #define KEY_SIZE 32
 #endif
 

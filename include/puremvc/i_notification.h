@@ -10,7 +10,7 @@
 
 #include <stddef.h>
 
-#ifndef NAME_SIZE
+#ifndef KEY_SIZE
 #define KEY_SIZE 32
 #endif
 

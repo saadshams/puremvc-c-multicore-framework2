@@ -69,9 +69,16 @@ install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/puremvc-config-version.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/puremvc)
 
+option(PUREMVC_BUILD_TESTS "Build PureMVC Tests" ${PROJECT_IS_TOP_LEVEL})
+
 # 9️⃣ Tests
-option(BUILD_TESTS "Build Tests" ON)
-if(BUILD_TESTS)
+if (PUREMVC_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
-endif()
+endif ()
+
+#option(BUILD_TESTS "Build Tests" ON)
+#if(BUILD_TESTS)
+#    enable_testing()
+#    add_subdirectory(test)
+#endif()

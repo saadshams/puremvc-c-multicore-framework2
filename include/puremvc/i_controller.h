@@ -13,6 +13,10 @@
 #include "i_notification.h"
 #include "i_view.h"
 
+#ifndef KEY_SIZE
+#define KEY_SIZE 32
+#endif
+
 struct ControllerMap {
     char key[KEY_SIZE];
     struct IController *controller;

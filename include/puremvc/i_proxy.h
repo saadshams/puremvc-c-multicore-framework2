@@ -10,11 +10,9 @@
 
 #include "i_notifier.h"
 
-#include <stddef.h>
-
 #define PROXY_NAME "Proxy"
 
-#ifndef NAME_SIZE
+#ifndef KEY_SIZE
 #define KEY_SIZE 32
 #endif
 

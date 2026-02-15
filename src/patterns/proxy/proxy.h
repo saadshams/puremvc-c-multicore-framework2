@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "puremvc/platform.h"
+// #include "puremvc/platform.h"
 #include "puremvc/i_proxy.h"
 #include "../observer/notifier.h"
 

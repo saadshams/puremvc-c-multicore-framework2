@@ -13,6 +13,10 @@
 
 #include <stdbool.h>
 
+#ifndef KEY_SIZE
+#define KEY_SIZE 32
+#endif
+
 struct ViewMap {
     char key[KEY_SIZE];
     struct IView *view;

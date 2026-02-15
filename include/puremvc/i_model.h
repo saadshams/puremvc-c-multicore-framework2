@@ -12,6 +12,10 @@
 
 #include <stdbool.h>
 
+#ifndef KEY_SIZE
+#define KEY_SIZE 32
+#endif
+
 struct ModelMap {
     char key[KEY_SIZE];
     struct IModel *model;

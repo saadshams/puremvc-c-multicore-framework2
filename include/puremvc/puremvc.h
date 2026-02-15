@@ -4,8 +4,8 @@
  */
 #pragma once
 
-#ifndef NAME_SIZE
-#define NAME_SIZE 32
+#ifndef KEY_SIZE
+#define KEY_SIZE 32
 #endif
 
 #include "platform.h"

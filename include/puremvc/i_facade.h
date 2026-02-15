@@ -18,6 +18,10 @@
 #include "i_notification.h"
 #include "i_proxy.h"
 
+#ifndef KEY_SIZE
+#define KEY_SIZE 32
+#endif
+
 /**
  * @struct IFacade
  * @brief Represents the Facade in the PureMVC framework.
