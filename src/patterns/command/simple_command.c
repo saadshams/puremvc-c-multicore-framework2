@@ -8,6 +8,7 @@
 */
 #include "simple_command.h"
 
+#include <stdio.h>
 #include <string.h>
 
 static struct INotifier *getNotifier(const struct ICommand *self) {
@@ -25,8 +26,12 @@ size_t puremvc_simple_command_size() {
 }
 
 struct ICommand *puremvc_simple_command_init(void *buffer) {
-    struct SimpleCommand *this = (struct SimpleCommand *) buffer;
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::SimpleCommand::init] Error: Buffer is NULL for SimpleCommand - skipping initialization.\033[0m\n");
+        return NULL;
+    }
 
+    struct SimpleCommand *this = (struct SimpleCommand *) buffer;
     memset(this, 0, sizeof(struct SimpleCommand));
 
     this->super.getNotifier = getNotifier;

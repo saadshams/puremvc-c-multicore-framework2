@@ -9,6 +9,7 @@
 #include "macro_command.h"
 
 #include <stddef.h>
+#include <stdio.h>
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
     if (notification == NULL) return;
@@ -32,6 +33,11 @@ size_t puremvc_macro_command_size() {
 }
 
 struct ICommand *puremvc_macro_command_init(void *buffer) {
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::MacroCommand::init] Error: Buffer is NULL for MacroCommand - skipping initialization.\033[0m\n");
+        return NULL;
+    }
+
     struct ICommand *self = puremvc_simple_command_init(buffer);
     self->execute = execute;
     return self;

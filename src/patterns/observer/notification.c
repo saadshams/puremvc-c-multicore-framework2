@@ -53,8 +53,12 @@ size_t puremvc_notification_size() {
 }
 
 struct INotification *puremvc_notification_init(void *buffer, const char *name, void *body, const char *type) {
-    struct Notification *this = (struct Notification *) buffer;
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Notification::init] Error: Buffer is NULL for notification '%s' - skipping initialization.\033[0m\n", name);
+        return NULL;
+    }
 
+    struct Notification *this = (struct Notification *) buffer;
     memset(this, 0, sizeof(struct Notification));
 
     this->super.getName = getName;

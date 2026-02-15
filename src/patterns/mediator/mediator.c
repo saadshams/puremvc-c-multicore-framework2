@@ -55,8 +55,12 @@ size_t puremvc_mediator_size(void) {
 }
 
 struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *component) {
-    struct Mediator *this = (struct Mediator *) buffer;
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Mediator::init] Error: Buffer is NULL for mediator '%s' - skipping initialization.\033[0m\n", name != NULL ? name : "(unnamed)");
+        return NULL;
+    }
 
+    struct Mediator *this = (struct Mediator *) buffer;
     memset(this, 0, sizeof(struct Mediator));
 
     this->super.getName = getName;

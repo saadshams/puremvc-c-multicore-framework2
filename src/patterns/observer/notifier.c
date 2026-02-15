@@ -42,8 +42,12 @@ size_t puremvc_notifier_size() {
 }
 
 struct INotifier *puremvc_notifier_init(void *buffer) {
-    struct Notifier *this = (struct Notifier *) buffer;
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Notifier::init] Error: Buffer is NULL for notifier - skipping initialization.\033[0m\n");
+        return NULL;
+    }
 
+    struct Notifier *this = (struct Notifier *) buffer;
     memset(this, 0, sizeof(struct Notifier));
 
     this->super.getFacade = getFacade;

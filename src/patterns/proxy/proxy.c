@@ -44,8 +44,12 @@ size_t puremvc_proxy_size() {
 }
 
 struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
-    struct Proxy *this = (struct Proxy *) buffer;
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Proxy::init] Error: Buffer is NULL for proxy '%s' - skipping initialization.\033[0m\n", name != NULL ? name : "(unnamed)");
+        return NULL;
+    }
 
+    struct Proxy *this = (struct Proxy *) buffer;
     memset(this, 0, sizeof(struct Proxy));
 
     this->super.getName = getName;

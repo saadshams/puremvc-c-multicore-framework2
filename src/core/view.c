@@ -292,8 +292,12 @@ size_t puremvc_view_size() {
 }
 
 struct IView *puremvc_view_init(void *buffer, const char *key) {
-    struct View *this = (struct View *) buffer;
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::View::init] Error: Buffer is NULL for view '%s' - skipping initialization.\033[0m\n", key);
+        return NULL;
+    }
 
+    struct View *this = (struct View *) buffer;
     memset(this, 0, sizeof(struct View));
 
     this->super.initializeView = initializeView;

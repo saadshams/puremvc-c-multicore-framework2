@@ -52,7 +52,7 @@ struct IFacade {
 
     bool (*removeCommand)(const struct IFacade *self, const char *notificationName, struct ICommand *(**out)(void *buffer));
 
-    bool (*registerProxy)(const struct IFacade *self, struct IProxy *(*factory)(void *buffer, const char *name, void *data), const char *name, void *data);
+    bool (*registerProxy)(const struct IFacade *self, struct IProxy *(*factory)(void *buffer, const char *proxyName, void *data), const char *proxyName, void *data);
 
     struct IProxy *(*retrieveProxy)(const struct IFacade *self, const char *proxyName);
 
@@ -60,7 +60,7 @@ struct IFacade {
 
     bool (*removeProxy)(const struct IFacade *self, const char *proxyName, struct IProxy **out);
 
-    bool (*registerMediator)(const struct IFacade *self, struct IMediator *(*factory)(void *buffer, const char *name, void *component), const char *name, void *component);
+    bool (*registerMediator)(const struct IFacade *self, struct IMediator *(*factory)(void *buffer, const char *mediatorName, void *component), const char *mediatorName, void *component);
 
     struct IMediator *(*retrieveMediator)(const struct IFacade *self, const char *mediatorName);
 

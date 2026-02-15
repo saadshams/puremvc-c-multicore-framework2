@@ -144,8 +144,12 @@ size_t puremvc_model_size() {
 }
 
 struct IModel *puremvc_model_init(void *buffer, const char *key) {
-    struct Model *this = (struct Model *) buffer;
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::init] Error: Buffer is NULL for model '%s' - skipping initialization.\033[0m\n", key);
+        return NULL;
+    }
 
+    struct Model *this = (struct Model *) buffer;
     memset(this, 0, sizeof(struct Model));
 
     this->super.initializeModel = initializeModel;

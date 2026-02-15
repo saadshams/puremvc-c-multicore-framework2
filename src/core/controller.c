@@ -149,10 +149,12 @@ size_t puremvc_controller_size() {
 }
 
 static struct IController *puremvc_controller_init(void *buffer, const char *key) {
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Controller::init] Error: Buffer is NULL for controller '%s' - skipping initialization.\033[0m\n", key);
+        return NULL;
+    }
+
     struct Controller *this = (struct Controller *) buffer;
-
-    if (buffer == NULL) return NULL;
-
     memset(this, 0, sizeof(struct Controller));
 
     this->super.initializeController = initializeController;

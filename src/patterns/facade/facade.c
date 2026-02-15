@@ -52,61 +52,109 @@ static void initializeView(struct IFacade *self, struct IView *view) {
 
 static bool registerCommand(const struct IFacade *self, const char *notificationName, struct ICommand *(*factory)(void *buffer)) {
     const struct Facade *this = (struct Facade *) self;
+    if (this->controller == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::registerCommand] Error: Controller unavailable to register Command '%s' — skipping registration.\033[0m\n", notificationName);
+        return false;
+    }
     return this->controller->registerCommand(this->controller, notificationName, factory);
 }
 
 static bool hasCommand(const struct IFacade *self, const char *notificationName) {
     const struct Facade *this = (struct Facade *) self;
+    if (this->controller == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::hasCommand] Error: Controller unavailable to check registration for Command '%s' — skipping registration check.\033[0m\n", notificationName);
+        return false;
+    }
     return this->controller->hasCommand(this->controller, notificationName);
 }
 
 static bool removeCommand(const struct IFacade *self, const char *notificationName, struct ICommand *(**out)(void *)) {
     const struct Facade *this = (struct Facade *) self;
+    if (this->controller == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeCommand] Error: Controller unavailable to remove Command '%s' — skipping removal.\033[0m\n", notificationName);
+        return false;
+    }
     return this->controller->removeCommand(this->controller, notificationName, out);
 }
 
-static bool registerProxy(const struct IFacade *self, struct IProxy *(*factory)(void *buffer, const char *name, void *data), const char *name, void *data) {
+static bool registerProxy(const struct IFacade *self, struct IProxy *(*factory)(void *buffer, const char *proxyName, void *data), const char *proxyName, void *data) {
     const struct Facade *this = (struct Facade *) self;
-    return this->model->registerProxy(this->model, factory, name, data);
+    if (this->model == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::registerProxy] Error: Model unavailable to register Proxy '%s' — skipping registration.\033[0m\n", proxyName);
+        return false;
+    }
+    return this->model->registerProxy(this->model, factory, proxyName, data);
 }
 
 static struct IProxy *retrieveProxy(const struct IFacade *self, const char *proxyName) {
     const struct Facade *this = (struct Facade *) self;
+    if (this->model == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::retrieveProxy] Error: Model unavailable to retrieve Proxy '%s' — skipping retrieval.\033[0m\n", proxyName);
+        return false;
+    }
     return this->model->retrieveProxy(this->model, proxyName);
 }
 
 static bool hasProxy(const struct IFacade *self, const char *proxyName) {
     const struct Facade *this = (struct Facade *) self;
+    if (this->model == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::hasProxy] Error: Model unavailable to check registration for Proxy '%s' — skipping registration check.\033[0m\n", proxyName);
+        return false;
+    }
     return this->model->hasProxy(this->model, proxyName);
 }
 
 static bool removeProxy(const struct IFacade *self, const char *proxyName, struct IProxy **out) {
     const struct Facade *this = (struct Facade *) self;
+    if (this->model == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeProxy] Error: Model unavailable to remove Proxy '%s' — skipping removal.\033[0m\n", proxyName);
+        return false;
+    }
     return this->model->removeProxy(this->model, proxyName, out);
 }
 
-static bool registerMediator(const struct IFacade *self, struct IMediator *(*factory)(void *buffer, const char *name, void *component), const char *name, void *component) {
+static bool registerMediator(const struct IFacade *self, struct IMediator *(*factory)(void *buffer, const char *mediatorName, void *component), const char *mediatorName, void *component) {
     const struct Facade *this = (struct Facade *) self;
-    return this->view->registerMediator(this->view, factory, name, component);
+    if (this->view == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::registerMediator] Error: View unavailable to register Mediator '%s' — skipping registration.\033[0m\n", mediatorName);
+        return false;
+    }
+    return this->view->registerMediator(this->view, factory, mediatorName, component);
 }
 
 static struct IMediator *retrieveMediator(const struct IFacade *self, const char *mediatorName) {
     const struct Facade *this = (struct Facade *) self;
+    if (this->view == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::retrieveMediator] Error: View unavailable to retrieve Mediator '%s' — skipping retrieval.\033[0m\n", mediatorName);
+        return false;
+    }
     return this->view->retrieveMediator(this->view, mediatorName);
 }
 
 static bool hasMediator(const struct IFacade *self, const char *mediatorName) {
     const struct Facade *this = (struct Facade *) self;
+    if (this->view == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::hasMediator] Error: View unavailable to check registration for Mediator '%s' — skipping registration check.\033[0m\n", mediatorName);
+        return false;
+    }
     return this->view->hasMediator(this->view, mediatorName);
 }
 
 static bool removeMediator(const struct IFacade *self, const char *mediatorName, struct IMediator **out) {
     const struct Facade *this = (struct Facade *) self;
+    if (this->view == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::removeMediator] Error: View unavailable to remove Mediator '%s' — skipping removal.\033[0m\n", mediatorName);
+        return false;
+    }
     return this->view->removeMediator(this->view, mediatorName, out);
 }
 
 static void notifyObservers(const struct IFacade *self, struct INotification *notification) {
     const struct Facade *this = (struct Facade *) self;
+    if (this->view == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::notifyObservers] Error: View unavailable to notify Observers '%s' — skipping notification.\033[0m\n", notification->getName(notification));
+        return;
+    }
     this->view->notifyObservers(this->view, notification);
 }
 
@@ -120,8 +168,12 @@ size_t puremvc_facade_size() {
 }
 
 struct IFacade *puremvc_facade_init(void *buffer, const char *key) {
-    struct Facade *this = (struct Facade *) buffer;
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Facade::init] Error: Buffer is NULL for Facade '%s' - skipping initialization.\033[0m\n", key != NULL ? key : "(unnamed)");
+        return NULL;
+    }
 
+    struct Facade *this = (struct Facade *) buffer;
     memset(this, 0, sizeof(struct Facade));
 
     this->super.initializeFacade = initializeFacade;

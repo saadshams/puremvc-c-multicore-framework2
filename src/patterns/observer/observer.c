@@ -8,6 +8,7 @@
 */
 #include "observer.h"
 
+#include <stdio.h>
 #include <string.h>
 
 static void *getContext(const struct IObserver *self) {
@@ -47,8 +48,12 @@ size_t puremvc_observer_size() {
 }
 
 struct IObserver *puremvc_observer_init(void *buffer, bool (*notify)(const void *context, const struct INotification *notification), void *context) {
-    struct Observer *this = (struct Observer *) buffer;
+    if (buffer == NULL) {
+        fprintf(stderr, "\033[0;31m[PureMVC::Observer::init] Error: Buffer is NULL for observer - skipping initialization.\033[0m\n");
+        return NULL;
+    }
 
+    struct Observer *this = (struct Observer *) buffer;
     memset(this, 0, sizeof(struct Observer));
 
     this->super.getContext = getContext;
