@@ -51,25 +51,13 @@ int main() {
 }
 
 void testGetInstance() {
-    struct ViewMap **viewMap = (struct ViewMap *[]) {
-        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
-        NULL
-    };
+    // Test Factory Method
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey1"); // pre-initialize View for the Controller
 
     // Test Factory Method
-   struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey1"); // pre-initialize View for the Controller
-
-    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
-        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
-        NULL
-    };
-
-    struct CommandMap **commandMap = (struct CommandMap *[]) {
-        &(struct CommandMap){},
-        NULL
-    };
-
-    // Test Factory Method
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey1");
     controller->initializeController(controller, view, commandMap);
 
@@ -85,17 +73,10 @@ void testGetInstance() {
 }
 
 void testRegisterAndExecuteCommand() {
-    struct ViewMap **viewMap = (struct ViewMap *[]) {
-        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
-        NULL
-    };
-
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
     struct ObserverMap **observerMap = (struct ObserverMap *[]) {
         &(struct ObserverMap) {
-            .observers = (struct IObserver *[]) {
-                memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
-                NULL
-            }
+            .observers = (struct IObserver *[]) { memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL }
         },
         NULL
     };
@@ -103,15 +84,8 @@ void testRegisterAndExecuteCommand() {
     struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey2");
     view->initializeView(view, observerMap, NULL);
 
-    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
-        &(struct ControllerMap) { .controller = alloca(puremvc_controller_size()) },
-        NULL
-    };
-
-    struct CommandMap **commandMap = (struct CommandMap *[]) {
-        &(struct CommandMap){},
-        NULL
-    };
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap) { .controller = alloca(puremvc_controller_size()) }, NULL };
+    struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
 
     // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey2");
@@ -161,17 +135,13 @@ void testRegisterAndRemoveCommand() {
     struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey3"); // dependency for the controller
     view->initializeView(view, observerMap, NULL);
 
+    // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
     struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
         &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
         NULL
     };
+    struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
 
-    struct CommandMap **commandMap = (struct CommandMap *[]) {
-        &(struct CommandMap){},
-        NULL
-    };
-
-    // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey3");
     controller->initializeController(controller, view, commandMap);
 
@@ -252,7 +222,6 @@ void testHasCommand() {
 
 void testReregisterAndExecuteCommand() {
     struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
-
     struct ObserverMap **observerMap = (struct ObserverMap *[]) {
         &(struct ObserverMap){
             .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL },
@@ -264,10 +233,7 @@ void testReregisterAndExecuteCommand() {
     struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey5");
     view->initializeView(view, observerMap, NULL);
 
-    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
-        &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) },
-        NULL
-    };
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) { &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
     struct CommandMap **commandMap = (struct CommandMap *[]) { &(struct CommandMap){}, NULL };
 
     // Fetch the controller, register the ControllerTestCommand to handle 'ControllerTest2' notes

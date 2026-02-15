@@ -20,7 +20,7 @@
 static struct ControllerMap **instanceMap = NULL;
 
 // mutex for controllerMap (global)
-static Mutex instanceMaMutex;
+static Mutex instanceMapMutex;
 static MutexOnce mutexOnce = MUTEX_ONCE_INIT;
 
 static void initializeController(struct IController *self, struct IView *view, struct CommandMap **commandMap) {
@@ -182,7 +182,7 @@ static struct IController *puremvc_controller_init(void *buffer, const char *key
 }
 
 static void dispatchOnce(void) {
-    if (mutex_init(&instanceMaMutex) != 0) {
+    if (mutex_init(&instanceMapMutex) != 0) {
         fprintf(stderr, "\033[PureMVC::Controller::getInstance] ERROR: Mutex Init Failed!\033[0m\n");
     }
 }
@@ -194,12 +194,11 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
     instanceMap = controllerMap;
 
     mutex_once(&mutexOnce, dispatchOnce);
-    mutex_lock(&instanceMaMutex);
+    mutex_lock(&instanceMapMutex);
 
     size_t i = 0;
     for (; instanceMap != NULL && instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) { // find controller
         if (strcmp(instanceMap[i]->key, key) == 0) { // match
-            mutex_unlock(&instanceMaMutex);
             controller = instanceMap[i]->controller;
             goto finally;
         }
@@ -211,13 +210,13 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
     }
 
     if (instanceMap[i]->controller == NULL) {
-        fprintf(stderr, "\033[0;31m[PureMVC::View::getInstance] ERROR: Missing Controller storage; skipping registration.\033[0m\n");
+        fprintf(stderr, "\033[0;31m[PureMVC::Controller::getInstance] ERROR: Missing Controller storage; skipping registration.\033[0m\n");
         goto finally;
     }
 
     int len = snprintf(instanceMap[i]->key, KEY_SIZE, "%s", key); // registration
     if (len < 0 || len >= KEY_SIZE) { // todo reset controller
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ControllerMap key truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
+        fprintf(stderr, "\033[0;31m[PureMVC::Controller::getInstance] Error: ControllerMap key truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
         memset(instanceMap[i]->key, 0, KEY_SIZE);
         goto finally;
     }
@@ -225,7 +224,7 @@ struct IController *puremvc_controller_getInstance(struct ControllerMap **contro
     controller = puremvc_controller_init(instanceMap[i]->controller, key); // init
 
 finally:
-    mutex_unlock(&instanceMaMutex);
+    mutex_unlock(&instanceMapMutex);
     return controller;
 }
 
@@ -239,7 +238,7 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
     }
 
     mutex_once(&mutexOnce, dispatchOnce);
-    mutex_lock(&instanceMaMutex);
+    mutex_lock(&instanceMapMutex);
 
     size_t index = 0;
     for (size_t i = 0; instanceMap[i] != NULL && instanceMap[i]->key[0] != '\0'; i++) {
@@ -258,6 +257,6 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
 
     if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
 
-    mutex_unlock(&instanceMaMutex);
+    mutex_unlock(&instanceMapMutex);
     return removed;
 }
