@@ -66,7 +66,7 @@ void testSimpleCommandExecute() {
     command->getNotifier(command)->initializeNotifier(command->getNotifier(command), "testing");
 
     // Execute the SimpleCommand
-    if (command->execute(command, notification) == false) abort();
+    command->execute(command, notification);
 
     // test assertions
     if (vo.result != 10) abort();

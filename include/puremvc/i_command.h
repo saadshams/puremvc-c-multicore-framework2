@@ -24,7 +24,7 @@
 struct ICommand {
     struct INotifier *(*getNotifier)(const struct ICommand *self);
 
-    bool (*execute)(const struct ICommand *self, struct INotification *notification);
+    void (*execute)(const struct ICommand *self, struct INotification *notification);
 };
 
 size_t puremvc_simple_command_size();

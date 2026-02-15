@@ -37,7 +37,7 @@ static bool registerCommand(struct IController *self, const char *notificationNa
     mutex_lock(&this->commandMapMutex);
 
     if (this->view == NULL) {
-        fprintf(stderr, "\033[0;31m[[PureMVC::Controller::registerCommand] Error: View unavailable to register Command '%s' — skipping registration.\033[0m\n", notificationName);
+        fprintf(stderr, "\033[0;31m[PureMVC::Controller::registerCommand] Error: View unavailable to register Command '%s' — skipping registration.\033[0m\n", notificationName);
         goto finally;
     }
 
@@ -80,8 +80,8 @@ finally:
     return registered;
 }
 
-static bool executeCommand(const struct IController *self, struct INotification *notification) {
-    if (notification == NULL) return false;
+static void executeCommand(const struct IController *self, struct INotification *notification) {
+    if (notification == NULL) return;
     struct Controller *this = (struct Controller *) self;
     struct ICommand *(*factory)(void *) = NULL;
 
@@ -94,12 +94,12 @@ static bool executeCommand(const struct IController *self, struct INotification 
     }
     mutex_unlock(&this->commandMapMutex);
 
-    if (factory == NULL) return false;
+    if (factory == NULL) return;
 
     const struct ICommand *command = factory(alloca(puremvc_simple_command_size()));
     struct INotifier *notifier = command->getNotifier(command);
     notifier->initializeNotifier(notifier, this->multitonKey);
-    return command->execute(command, notification);
+    command->execute(command, notification);
 }
 
 static bool hasCommand(const struct IController *self, const char *notificationName) {

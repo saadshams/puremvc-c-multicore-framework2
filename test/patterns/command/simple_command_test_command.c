@@ -7,14 +7,13 @@
  * @param self
  * @param notification the <code>INotification</code> carrying the <code>SimpleCommandTestVO</code>
  */
-static bool execute(const struct ICommand *self, struct INotification *notification) {
-    if (notification == NULL) return false;
+static void execute(const struct ICommand *self, struct INotification *notification) {
+    if (notification == NULL) return;
 
     struct SimpleCommandTestVO *vo = (struct SimpleCommandTestVO *) notification->getBody(notification);
 
     // Fabricate a result
     vo->result = 2 * vo->input;
-    return true;
 }
 
 struct ICommand *test_simple_command_init(void *buffer) {

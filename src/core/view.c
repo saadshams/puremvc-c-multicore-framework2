@@ -48,7 +48,7 @@ static bool registerObserver(struct IView *self, const char *notificationName, b
             for (; observers[j] != NULL && observers[j]->getContext != NULL; j++) {}
 
             if (observers[j] == NULL) { // overflow (Observer)
-                fprintf(stderr, "\033[0;31m[PureMVC::View::registerObserver] ERROR1: Observer storage overflow for notification '%s'; increase slots - skipping registration.\033[0m\n", notificationName);
+                fprintf(stderr, "\033[0;31m[PureMVC::View::registerObserver] ERROR: Observer storage overflow for notification '%s'; increase slots - skipping registration.\033[0m\n", notificationName);
                 goto finally;
             }
 
@@ -64,7 +64,7 @@ static bool registerObserver(struct IView *self, const char *notificationName, b
     }
 
     if (this->observerMap[i]->observers == NULL || this->observerMap[i]->observers[0] == NULL) { // overflow (Observer)
-        fprintf(stderr, "\033[0;31m[PureMVC::View::registerObserver] Error2: Observer storage overflow for notification '%s'; increase slots - skipping registration.\033[0m\n", notificationName);
+        fprintf(stderr, "\033[0;31m[PureMVC::View::registerObserver] Error: Observer storage overflow for notification '%s'; increase slots - skipping registration.\033[0m\n", notificationName);
         goto finally;
     }
 

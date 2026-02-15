@@ -47,7 +47,7 @@ void testMacroCommandExecute() {
 
     command->getNotifier(command)->initializeNotifier(command->getNotifier(command), "MacroCommandTestkey1");
 
-    if (command->execute(command, notification) == false) abort();
+    command->execute(command, notification);
 
     if (vo.result1 != 10) abort();
     if (vo.result2 != 25) abort();

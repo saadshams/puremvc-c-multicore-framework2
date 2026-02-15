@@ -10,8 +10,8 @@
 
 #include <stddef.h>
 
-static bool execute(const struct ICommand *self, struct INotification *notification) {
-    if (notification == NULL) return false;
+static void execute(const struct ICommand *self, struct INotification *notification) {
+    if (notification == NULL) return;
 
     (void)self;
     struct ICommand *(*subCommands[1])() = { NULL };
@@ -23,11 +23,8 @@ static bool execute(const struct ICommand *self, struct INotification *notificat
         struct INotifier *notifier = command->getNotifier(command);
         notifier->initializeNotifier(notifier, notifier->getMultitonKey(notifier));
 
-        if (command->execute(command, notification) == false) // stop execution if subCommands fail
-            return false;
+        command->execute(command, notification);
     }
-
-    return true;
 }
 
 size_t puremvc_macro_command_size() {

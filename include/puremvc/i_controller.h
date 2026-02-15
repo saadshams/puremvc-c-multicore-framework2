@@ -40,7 +40,7 @@ struct IController {
 
     bool (*registerCommand)(struct IController *self, const char *notificationName, struct ICommand *(*factory)(void *buffer));
 
-    bool (*executeCommand)(const struct IController *self, struct INotification *notification);
+    void (*executeCommand)(const struct IController *self, struct INotification *notification);
 
     bool (*hasCommand)(const struct IController *self, const char *notificationName);
 

@@ -46,13 +46,12 @@ struct Object {
     int result;
 };
 
-static bool execute(const struct ICommand *self, struct INotification *notification) {
-    if (notification == NULL) return false;
+static void execute(const struct ICommand *self, struct INotification *notification) {
+    if (notification == NULL) return;
     struct Object *temp = (struct Object *)notification->getBody(notification);
 
     // fabricate a result
     temp->result = temp->value * 4;
-    return true;
 }
 
 static struct ICommand *notifier_command(void *buffer) {
