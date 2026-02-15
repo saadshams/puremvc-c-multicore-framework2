@@ -22,11 +22,6 @@ static struct ModelMap **instanceMap = NULL;
 static Mutex instanceMapMutex;
 static MutexOnce mutexOnce = MUTEX_ONCE_INIT;
 
-static const char *getMultitonKey(const struct IModel *self) {
-    const struct Model *this = (const struct Model *) self;
-    return this->multitonKey;
-}
-
 static void initializeModel(struct IModel *self, struct ProxyMap **proxyMap) {
     struct Model *this = (struct Model *) self;
     this->proxyMap = proxyMap;
@@ -153,7 +148,6 @@ struct IModel *puremvc_model_init(void *buffer, const char *key) {
 
     memset(this, 0, sizeof(struct Model));
 
-    this->base.getMultitonKey = getMultitonKey;
     this->base.initializeModel = initializeModel;
     this->base.registerProxy = registerProxy;
     this->base.retrieveProxy = retrieveProxy;

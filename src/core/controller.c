@@ -25,30 +25,8 @@ static MutexOnce mutexOnce = MUTEX_ONCE_INIT;
 
 static void initializeController(struct IController *self, struct IView *view, struct CommandMap **commandMap) {
     struct Controller *this = (struct Controller *) self;
-
-    if (view == NULL || commandMap == NULL) return;
-
-    mutex_lock(&this->commandMapMutex);
     this->commandMap = commandMap;
     this->view = view;
-    mutex_unlock(&this->commandMapMutex);
-}
-
-static bool hasCommand(const struct IController *self, const char *notificationName) {
-    if (notificationName == NULL) return false;
-    struct Controller *this = (struct Controller *) self;
-    bool exists = false;
-
-    mutex_lock_shared(&this->commandMapMutex);
-    for (size_t i = 0; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) {
-        if (strcmp(this->commandMap[i]->key, notificationName) == 0) {
-            exists = true;
-            break;
-        }
-    }
-    mutex_unlock(&this->commandMapMutex);
-
-    return exists;
 }
 
 static bool registerCommand(struct IController *self, const char *notificationName, struct ICommand *(*factory)(void *buffer)) {
@@ -122,6 +100,23 @@ static bool executeCommand(const struct IController *self, struct INotification 
     struct INotifier *notifier = command->getNotifier(command);
     notifier->initializeNotifier(notifier, this->multitonKey);
     return command->execute(command, notification);
+}
+
+static bool hasCommand(const struct IController *self, const char *notificationName) {
+    if (notificationName == NULL) return false;
+    struct Controller *this = (struct Controller *) self;
+    bool exists = false;
+
+    mutex_lock_shared(&this->commandMapMutex);
+    for (size_t i = 0; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) {
+        if (strcmp(this->commandMap[i]->key, notificationName) == 0) {
+            exists = true;
+            break;
+        }
+    }
+    mutex_unlock(&this->commandMapMutex);
+
+    return exists;
 }
 
 static bool removeCommand(struct IController *self, const char *notificationName, struct ICommand *(**out)(void *buffer)) {
