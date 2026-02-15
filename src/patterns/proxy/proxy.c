@@ -48,12 +48,12 @@ struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
 
     memset(this, 0, sizeof(struct Proxy));
 
-    this->base.getName = getName;
-    this->base.getData = getData;
-    this->base.setData = setData;
-    this->base.getNotifier = getNotifier;
-    this->base.onRegister = onRegister;
-    this->base.onRemove = onRemove;
+    this->super.getName = getName;
+    this->super.getData = getData;
+    this->super.setData = setData;
+    this->super.getNotifier = getNotifier;
+    this->super.onRegister = onRegister;
+    this->super.onRemove = onRemove;
 
     const char *key = name != NULL ? name : PROXY_NAME;
     int len = snprintf(this->name, sizeof(this->name), "%s", key);

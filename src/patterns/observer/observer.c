@@ -51,12 +51,12 @@ struct IObserver *puremvc_observer_init(void *buffer, bool (*notify)(const void 
 
     memset(this, 0, sizeof(struct Observer));
 
-    this->base.getContext = getContext;
-    this->base.setContext = setContext;
-    this->base.getNotify = getNotify;
-    this->base.setNotify = setNotify;
-    this->base.notifyObserver = notifyObserver;
-    this->base.compareNotifyContext = compareNotifyContext;
+    this->super.getContext = getContext;
+    this->super.setContext = setContext;
+    this->super.getNotify = getNotify;
+    this->super.setNotify = setNotify;
+    this->super.notifyObserver = notifyObserver;
+    this->super.compareNotifyContext = compareNotifyContext;
 
     this->context = context;
     this->notify = notify;

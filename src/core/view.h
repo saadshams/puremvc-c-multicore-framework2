@@ -11,7 +11,7 @@
 #include "puremvc/i_view.h"
 
 struct View {
-    struct IView base; // headers
+    struct IView super; // headers
 
     char multitonKey[KEY_SIZE];  // pointers
     struct ObserverMap **observerMap;

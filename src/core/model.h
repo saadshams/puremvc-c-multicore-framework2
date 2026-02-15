@@ -11,7 +11,7 @@
 #include "puremvc/i_model.h"
 
 struct Model {
-    struct IModel base;
+    struct IModel super;
 
     char multitonKey[KEY_SIZE];
     struct ProxyMap **proxyMap;

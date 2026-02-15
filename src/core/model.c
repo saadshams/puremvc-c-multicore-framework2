@@ -148,11 +148,11 @@ struct IModel *puremvc_model_init(void *buffer, const char *key) {
 
     memset(this, 0, sizeof(struct Model));
 
-    this->base.initializeModel = initializeModel;
-    this->base.registerProxy = registerProxy;
-    this->base.retrieveProxy = retrieveProxy;
-    this->base.hasProxy = hasProxy;
-    this->base.removeProxy = removeProxy;
+    this->super.initializeModel = initializeModel;
+    this->super.registerProxy = registerProxy;
+    this->super.retrieveProxy = retrieveProxy;
+    this->super.hasProxy = hasProxy;
+    this->super.removeProxy = removeProxy;
 
     int len = snprintf(this->multitonKey, KEY_SIZE, "%s", key);
     if (len < 0 || len >= KEY_SIZE) {

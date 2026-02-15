@@ -13,7 +13,7 @@ struct Facade; // forward declaration
 struct IFacade;
 
 struct Notifier {
-    struct INotifier base;
+    struct INotifier super;
 
     const char *key;
 };

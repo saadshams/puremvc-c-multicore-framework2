@@ -296,14 +296,14 @@ struct IView *puremvc_view_init(void *buffer, const char *key) {
 
     memset(this, 0, sizeof(struct View));
 
-    this->base.initializeView = initializeView;
-    this->base.registerObserver = registerObserver;
-    this->base.notifyObservers = notifyObservers;
-    this->base.removeObserver = removeObserver;
-    this->base.registerMediator = registerMediator;
-    this->base.retrieveMediator = retrieveMediator;
-    this->base.hasMediator = hasMediator;
-    this->base.removeMediator = removeMediator;
+    this->super.initializeView = initializeView;
+    this->super.registerObserver = registerObserver;
+    this->super.notifyObservers = notifyObservers;
+    this->super.removeObserver = removeObserver;
+    this->super.registerMediator = registerMediator;
+    this->super.retrieveMediator = retrieveMediator;
+    this->super.hasMediator = hasMediator;
+    this->super.removeMediator = removeMediator;
 
     int len = snprintf(this->multitonKey, KEY_SIZE, "%s", key);
     if (len < 0 || len >= KEY_SIZE) {

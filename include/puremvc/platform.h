@@ -54,3 +54,24 @@ int mutex_once(MutexOnce *once, void (*callback)(void));
 
 // Alignment to pointer size (8 bytes on 64-bit, 4 on 32-bit)
 #define ALIGNMENT sizeof(void *)
+
+struct process_stats {
+    double max_rss_mb;          /* Peak resident memory */
+    double current_rss_mb;      /* Current resident memory (0 if unsupported) */
+
+    double user_cpu_sec;        /* User CPU time */
+    double system_cpu_sec;      /* Kernel CPU time */
+
+    long minor_page_faults;
+    long major_page_faults;
+
+    long voluntary_ctx_switches;
+    long involuntary_ctx_switches;
+};
+
+/* Collect stats into provided struct.
+   Returns 0 on success, non-zero on failure. */
+int process_stats_collect(struct process_stats *out);
+
+/* Convenience printer */
+void process_stats_print(void);

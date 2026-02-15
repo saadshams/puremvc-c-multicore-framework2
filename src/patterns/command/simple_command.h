@@ -11,7 +11,7 @@
 #include "../observer/notifier.h"
 
 struct SimpleCommand {
-    struct ICommand base;
+    struct ICommand super;
 
     struct Notifier notifier;
 };

@@ -46,10 +46,10 @@ struct INotifier *puremvc_notifier_init(void *buffer) {
 
     memset(this, 0, sizeof(struct Notifier));
 
-    this->base.getFacade = getFacade;
-    this->base.getMultitonKey = getMultitonKey;
-    this->base.initializeNotifier = initializeNotifier;
-    this->base.sendNotification = sendNotification;
+    this->super.getFacade = getFacade;
+    this->super.getMultitonKey = getMultitonKey;
+    this->super.initializeNotifier = initializeNotifier;
+    this->super.sendNotification = sendNotification;
 
     return (struct INotifier *) this;
 }

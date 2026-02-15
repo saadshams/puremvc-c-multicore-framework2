@@ -59,14 +59,14 @@ struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *co
 
     memset(this, 0, sizeof(struct Mediator));
 
-    this->base.getName = getName;
-    this->base.setComponent = setComponent;
-    this->base.getComponent = getComponent;
-    this->base.getNotifier = getNotifier;
-    this->base.listNotificationInterests = listNotificationInterests;
-    this->base.handleNotification = handleNotification;
-    this->base.onRegister = onRegister;
-    this->base.onRemove = onRemove;
+    this->super.getName = getName;
+    this->super.setComponent = setComponent;
+    this->super.getComponent = getComponent;
+    this->super.getNotifier = getNotifier;
+    this->super.listNotificationInterests = listNotificationInterests;
+    this->super.handleNotification = handleNotification;
+    this->super.onRegister = onRegister;
+    this->super.onRemove = onRemove;
 
     const char *key = name != NULL ? name : MEDIATOR_NAME;
     int len = snprintf(this->name, sizeof(this->name), "%s", key);

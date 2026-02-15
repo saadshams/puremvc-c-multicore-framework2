@@ -11,7 +11,7 @@
 #include "../observer/notifier.h"
 
 struct Mediator {
-    struct IMediator base;
+    struct IMediator super;
 
     char name[KEY_SIZE];
     void *component;

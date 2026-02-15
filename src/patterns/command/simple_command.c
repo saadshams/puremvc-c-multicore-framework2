@@ -29,8 +29,8 @@ struct ICommand *puremvc_simple_command_init(void *buffer) {
 
     memset(this, 0, sizeof(struct SimpleCommand));
 
-    this->base.getNotifier = getNotifier;
-    this->base.execute = execute;
+    this->super.getNotifier = getNotifier;
+    this->super.execute = execute;
 
     puremvc_notifier_init((struct INotifier *) &this->notifier);
 

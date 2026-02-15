@@ -14,7 +14,7 @@
 #include "puremvc/i_view.h"
 
 struct Facade {
-    struct IFacade base;
+    struct IFacade super;
 
     char multitonKey[KEY_SIZE];
     struct IController *controller;

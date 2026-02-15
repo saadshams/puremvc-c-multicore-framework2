@@ -13,7 +13,7 @@
 #include "puremvc/i_view.h"
 
 struct Controller {
-    struct IController base;
+    struct IController super;
 
     char multitonKey[KEY_SIZE];
     struct CommandMap **commandMap;

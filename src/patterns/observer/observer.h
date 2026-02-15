@@ -10,7 +10,7 @@
 #include "puremvc/i_observer.h"
 
 struct Observer {
-    struct IObserver base;
+    struct IObserver super;
 
     void *context;
 

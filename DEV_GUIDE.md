@@ -178,12 +178,18 @@ Even though the language is "good," embedded compilers often implement the C sta
 Variable Length Arrays (VLAs): C11 made VLAs optional. In embedded, you should avoid them. They behave like alloca(), but if the size is too big, they crash the stack silently. Your current alloca() approach is actually more "explicit" and often preferred.
 
 The Standard Library: Functions like printf or snprintf (which you used) are often very "heavy" for tiny microcontrollers (they can add 20KB+ to your binary). Most embedded devs use a "mini-printf" library.
-
+https://github.com/mludvig/mini-printf
 Multithreading (threads.h): Most embedded compilers (like GCC for ARM) do not implement the C11 threads library. They expect you to use FreeRTOS or POSIX threads instead.
 
 If you are building an embedded system where stack space is tight (e.g., 2KB total stack), go with Option 1 (Double-Buffer FAM).
 
 **Stack Depth (The "Runtime" Cost**
+
+```c++
+char buf[512];
+snprintf(buf, sizeof(buf), "[SUITE] %s\n", "ControllerTest");
+fwrite(buf, 1, strlen(buf), stdout);
+```
 
 ```c++
 #include <sys/resource.h>
@@ -224,8 +230,6 @@ The flow is now logically complete:
 4. **Capacity Check**
 5. **Side Effect** (Registering with the View)
 6. **Concurrency Unlock**
-
-One minor housekeeping tip: In the `fprintf` on the `this->view == NULL` check, you have a double bracket `[[`. You might want to strip that back to a single one to keep your logs tidy.
 
 ### Final Code Checklist for `registerCommand`
 

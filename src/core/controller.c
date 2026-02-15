@@ -155,11 +155,11 @@ static struct IController *puremvc_controller_init(void *buffer, const char *key
 
     memset(this, 0, sizeof(struct Controller));
 
-    this->base.initializeController = initializeController;
-    this->base.executeCommand = executeCommand;
-    this->base.registerCommand = registerCommand;
-    this->base.hasCommand = hasCommand;
-    this->base.removeCommand = removeCommand;
+    this->super.initializeController = initializeController;
+    this->super.executeCommand = executeCommand;
+    this->super.registerCommand = registerCommand;
+    this->super.hasCommand = hasCommand;
+    this->super.removeCommand = removeCommand;
 
     int len = snprintf(this->multitonKey, KEY_SIZE, "%s", key);
     if (len < 0 || len >= KEY_SIZE) {

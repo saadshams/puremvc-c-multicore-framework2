@@ -57,12 +57,12 @@ struct INotification *puremvc_notification_init(void *buffer, const char *name, 
 
     memset(this, 0, sizeof(struct Notification));
 
-    this->base.getName = getName;
-    this->base.getBody = getBody;
-    this->base.setBody = setBody;
-    this->base.getType = getType;
-    this->base.setType = setType;
-    this->base.toString = toString;
+    this->super.getName = getName;
+    this->super.getBody = getBody;
+    this->super.setBody = setBody;
+    this->super.getType = getType;
+    this->super.setType = setType;
+    this->super.toString = toString;
 
     if (name != NULL) {
         int len = snprintf(this->name, KEY_SIZE, "%s", name);

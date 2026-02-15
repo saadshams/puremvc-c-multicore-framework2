@@ -10,7 +10,7 @@
 #include "puremvc/i_notification.h"
 
 struct Notification {
-    struct INotification base;
+    struct INotification super;
 
     void *body;
 

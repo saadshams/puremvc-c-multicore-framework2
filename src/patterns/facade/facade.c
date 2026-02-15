@@ -124,23 +124,23 @@ struct IFacade *puremvc_facade_init(void *buffer, const char *key) {
 
     memset(this, 0, sizeof(struct Facade));
 
-    this->base.initializeFacade = initializeFacade;
-    this->base.initializeController = initializeController;
-    this->base.initializeModel = initializeModel;
-    this->base.initializeView = initializeView;
-    this->base.registerCommand = registerCommand;
-    this->base.hasCommand = hasCommand;
-    this->base.removeCommand = removeCommand;
-    this->base.registerProxy = registerProxy;
-    this->base.retrieveProxy = retrieveProxy;
-    this->base.hasProxy = hasProxy;
-    this->base.removeProxy = removeProxy;
-    this->base.registerMediator = registerMediator;
-    this->base.retrieveMediator = retrieveMediator;
-    this->base.hasMediator = hasMediator;
-    this->base.removeMediator = removeMediator;
-    this->base.notifyObservers = notifyObservers;
-    this->base.sendNotification = sendNotification;
+    this->super.initializeFacade = initializeFacade;
+    this->super.initializeController = initializeController;
+    this->super.initializeModel = initializeModel;
+    this->super.initializeView = initializeView;
+    this->super.registerCommand = registerCommand;
+    this->super.hasCommand = hasCommand;
+    this->super.removeCommand = removeCommand;
+    this->super.registerProxy = registerProxy;
+    this->super.retrieveProxy = retrieveProxy;
+    this->super.hasProxy = hasProxy;
+    this->super.removeProxy = removeProxy;
+    this->super.registerMediator = registerMediator;
+    this->super.retrieveMediator = retrieveMediator;
+    this->super.hasMediator = hasMediator;
+    this->super.removeMediator = removeMediator;
+    this->super.notifyObservers = notifyObservers;
+    this->super.sendNotification = sendNotification;
 
     int len = snprintf(this->multitonKey, KEY_SIZE, "%s", key);
     if (len < 0 || len >= KEY_SIZE) {
