@@ -28,7 +28,7 @@ static void initializeView(struct IView *self, struct ObserverMap **observerMap,
 }
 
 // api change since the search needs to happen on the pre-allocated slots for an empty or a new entry and instantiate it
-static bool registerObserver(struct IView *self, const char *notificationName, bool (*notify)(const void *context, const struct INotification *notification), void *context) {
+static bool registerObserver(struct IView *self, const char *notificationName, void (*notify)(const void *context, const struct INotification *notification), void *context) {
     struct View *this = (struct View *) self;
     bool registered = false;
 
@@ -185,7 +185,7 @@ bool registerMediator(struct IView *self, struct IMediator *(*factory)(void *buf
 
     const char *const *interests = mediator->listNotificationInterests(mediator);
     for (const char *const *interest = interests; *interest; interest++) { // register observers (mutex guards context if mediator is removed)
-        self->registerObserver(self, *interest, (bool (*)(const void *, const struct INotification *)) mediator->handleNotification, mediator);
+        self->registerObserver(self, *interest, (void (*)(const void *, const struct INotification *)) mediator->handleNotification, mediator);
     }
 
     const char *key = mediator->getName(mediator);

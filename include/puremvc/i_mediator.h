@@ -30,7 +30,7 @@ struct IMediator {
     struct INotifier *(*getNotifier)(const struct IMediator *self);
 
     const char *const *(*listNotificationInterests)(const struct IMediator *self);
-    bool (*handleNotification)(const struct IMediator *self, struct INotification *notification);
+    void (*handleNotification)(const struct IMediator *self, struct INotification *notification);
 
     void (*onRegister)(struct IMediator *self);
     void (*onRemove)(struct IMediator *self);

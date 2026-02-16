@@ -7,8 +7,8 @@ static const char *const *listNotificationInterests(const struct IMediator *self
     return interests;
 }
 
-static bool handleNotification(const struct IMediator *self, struct INotification *notification) {
-    if (notification == NULL) return false;
+static void handleNotification(const struct IMediator *self, struct INotification *notification) {
+    if (notification == NULL) return;
     // struct ViewTest *component = self->getComponent(self);
     char *name = (char *) self->getName(self);
 
@@ -22,7 +22,6 @@ static bool handleNotification(const struct IMediator *self, struct INotificatio
     //         break;
     //     }
     // }
-    return true;
 }
 
 static void onRemove(struct IMediator *self) {

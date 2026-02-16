@@ -21,12 +21,12 @@ static void setContext(struct IObserver *self, void *notifyContext) {
     this->context = notifyContext;
 }
 
-static bool (*getNotify(const struct IObserver *self))(const void *context, const struct INotification *notification) {
+static void (*getNotify(const struct IObserver *self))(const void *context, const struct INotification *notification) {
     const struct Observer *this = (const struct Observer *) self;
     return this->notify;
 }
 
-static void setNotify(struct IObserver *self, bool (*notify)(const void *context, const struct INotification *notification)) {
+static void setNotify(struct IObserver *self, void (*notify)(const void *context, const struct INotification *notification)) {
     struct Observer *this = (struct Observer *) self;
     this->notify = notify;
 }
@@ -47,7 +47,7 @@ size_t puremvc_observer_size() {
     return (sizeof(struct Observer) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 
-struct IObserver *puremvc_observer_init(void *buffer, bool (*notify)(const void *context, const struct INotification *notification), void *context) {
+struct IObserver *puremvc_observer_init(void *buffer, void (*notify)(const void *context, const struct INotification *notification), void *context) {
     if (buffer == NULL) {
         fprintf(stderr, "\033[0;31m[PureMVC::Observer::init] Error: Buffer is NULL for observer - skipping initialization.\033[0m\n");
         return NULL;

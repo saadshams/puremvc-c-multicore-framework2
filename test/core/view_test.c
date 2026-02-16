@@ -118,7 +118,7 @@ void testRegisterAndNotifyObserver() {
     view->initializeView(view, observerMap, NULL);
 
     // Register Observer's interest in a particular Notification with the View, passing in notification method and context
-    if (view->registerObserver(view, "ViewTestNote1", (bool (*)(const void *, const struct INotification *)) handleNotification, &viewComponent) != true)
+    if (view->registerObserver(view, "ViewTestNote1", (void (*)(const void *, const struct INotification *)) handleNotification, &viewComponent) != true)
         abort();
 
     // Create a ViewTestNote, setting
@@ -772,7 +772,7 @@ void testGarbageStorageForObserver() {
     view1->initializeView(view1, observerMap1, NULL); // no observerMap
     view1->notifyObservers(view1, NULL); // crash test
     view1->removeObserver(view1, "ViewTestKey14_testing1", &component);
-    view1->registerObserver(view1, "ViewTestKey14_testing1", (bool (*)(const void *, const struct INotification *)) handleNotification, &component);
+    view1->registerObserver(view1, "ViewTestKey14_testing1", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
     if (puremvc_view_removeView("ViewTestKey14", NULL) != true) abort();
 
     // empty observerMap
@@ -782,7 +782,7 @@ void testGarbageStorageForObserver() {
     view2->initializeView(view2, observerMap2, NULL);
     view2->notifyObservers(view2, NULL);
     view2->removeObserver(view2, "ViewTestKey14_testing2", &component);
-    view2->registerObserver(view2, "ViewTestKey14_testing2", (bool (*)(const void *, const struct INotification *)) handleNotification, &component);
+    view2->registerObserver(view2, "ViewTestKey14_testing2", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
     if (puremvc_view_removeView("ViewTestKey14", NULL) != true) abort();
 
     // empty ObserverMap field
@@ -792,7 +792,7 @@ void testGarbageStorageForObserver() {
     view3->initializeView(view3, observerMap3, NULL);
     view3->notifyObservers(view3, NULL);
     view3->removeObserver(view3, "ViewTestKey14_testing3", &component);
-    view3->registerObserver(view3, "ViewTestKey14_testing3", (bool (*)(const void *, const struct INotification *)) handleNotification, &component);
+    view3->registerObserver(view3, "ViewTestKey14_testing3", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
     if (puremvc_view_removeView("ViewTestKey14", NULL) != true) abort();
 
     // empty observers
@@ -802,7 +802,7 @@ void testGarbageStorageForObserver() {
     view4->initializeView(view4, observerMap4, NULL);
     view4->notifyObservers(view4, NULL);
     view4->removeObserver(view4, "ViewTestKey14_testing4", &component);
-    view4->registerObserver(view4, "ViewTestKey14_testing4", (bool (*)(const void *, const struct INotification *)) handleNotification, &component);
+    view4->registerObserver(view4, "ViewTestKey14_testing4", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
     if (puremvc_view_removeView("ViewTestKey14", NULL) != true) abort();
 }
 

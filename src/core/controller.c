@@ -63,7 +63,7 @@ static bool registerCommand(struct IController *self, const char *notificationNa
         goto finally;;
     }
 
-    if (this->view->registerObserver(this->view, notificationName, (bool (*)(const void *context, const struct INotification *notification)) self->executeCommand, self)) {
+    if (this->view->registerObserver(this->view, notificationName, (void (*)(const void *context, const struct INotification *notification)) self->executeCommand, self)) {
         int len = snprintf(this->commandMap[i]->key, KEY_SIZE, "%s", notificationName); // registration
         if (len < 0 || len >= KEY_SIZE) { // todo reset command
             fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap key truncated: '%s' (max %d chars).\033[0m\n", notificationName, KEY_SIZE);

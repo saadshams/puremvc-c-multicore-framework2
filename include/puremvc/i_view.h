@@ -42,7 +42,7 @@ struct ObserverMap {
 struct IView {
     void (*initializeView)(struct IView *self, struct ObserverMap **observerMap, struct MediatorMap **mediatorMap);
 
-    bool (*registerObserver)(struct IView *self, const char *notificationName, bool (*notify)(const void *context, const struct INotification *notification), void *context);
+    bool (*registerObserver)(struct IView *self, const char *notificationName, void (*notify)(const void *context, const struct INotification *notification), void *context);
 
     void (*notifyObservers)(const struct IView *self, const struct INotification *notification);
 
