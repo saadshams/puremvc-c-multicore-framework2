@@ -2,6 +2,7 @@
 #include "controller_test_vo.h"
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
+    (void) self;
     struct ControllerTestVO *vo = (struct ControllerTestVO *) notification->getBody(notification);
 
     // Fabricate a result

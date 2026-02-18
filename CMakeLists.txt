@@ -19,9 +19,9 @@ add_library(puremvc STATIC
 add_library(puremvc::puremvc ALIAS puremvc)
 
 if(WIN32)
-    target_sources(puremvc PRIVATE src/platform/win/mutex.c src/platform/win/stats.c)
+    target_sources(puremvc PRIVATE src/platform/win/mutex.c)
 else()
-    target_sources(puremvc PRIVATE src/platform/posix/mutex.c src/platform/posix/stats.c)
+    target_sources(puremvc PRIVATE src/platform/posix/mutex.c)
 endif()
 
 # 4️⃣ Target include paths
@@ -70,7 +70,6 @@ install(FILES
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/puremvc)
 
 option(PUREMVC_BUILD_TESTS "Build PureMVC Tests" ${PROJECT_IS_TOP_LEVEL})
-
 # 9️⃣ Tests
 if (PUREMVC_BUILD_TESTS)
     enable_testing()

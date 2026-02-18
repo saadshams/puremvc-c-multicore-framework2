@@ -45,8 +45,6 @@ int main() {
     test("testCommandMapShiftLeft", testCommandMapShiftLeft);
     test("TestControllerMapShiftLeft", TestControllerMapShiftLeft);
 
-    process_stats_print();
-
     printf("\n\033[1;32m[DONE] All tests in suite finished.\033[0m\n");
     afterAll();
     return 0;

@@ -77,8 +77,7 @@ jobs:
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_C_FLAGS="-Wextra -fsanitize=address,undefined,leak -fno-omit-frame-pointer" \
-          -DBUILD_TESTS=ON \
-          -DEXAMPLE_TESTS=ON \
+          -DPUREMVC_BUILD_TESTS=ON \
           -S "${{ github.workspace }}"
 
     - name: Configure CMake (Windows)
@@ -90,8 +89,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=%CPP_COMPILER% ^
           -DCMAKE_C_COMPILER=%C_COMPILER% ^
           -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
-          -DBUILD_TESTS=ON ^
-          -DEXAMPLE_TESTS=ON ^
+          -DPUREMVC_BUILD_TESTS=ON ^
           -S "%CD%"
 
     - name: Build
