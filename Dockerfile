@@ -25,7 +25,7 @@ RUN mkdir -p build && \
     export CC=${CC} && \
     export CXX=${CXX} && \
     cmake -S . -B build \
-      -DBUILD_TESTS=ON \
+      -DPUREMVC_BUILD_TESTS=ON \
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
       -DCMAKE_C_FLAGS="-fsanitize=address,undefined,leak -fno-omit-frame-pointer -g" && \
     cmake --build build --parallel $(nproc)
