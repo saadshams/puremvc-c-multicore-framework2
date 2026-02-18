@@ -252,7 +252,7 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
         }
     }
 
-    if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
+    if (index == 0) instanceMap = NULL;
 
     mutex_unlock(&instanceMapMutex);
     return removed;

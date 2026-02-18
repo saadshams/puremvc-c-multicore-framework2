@@ -14,7 +14,7 @@
 static void execute(const struct ICommand *self, struct INotification *notification) {
     if (notification == NULL) return;
 
-    (void)self;
+    (void) self;
     struct ICommand *(*subCommands[1])() = { NULL };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {

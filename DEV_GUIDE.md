@@ -253,3 +253,10 @@ You're adapting it to:
 So you must split static vs dynamic layers.
 
 That’s not breaking PureMVC — that’s correctly porting it.
+
+Include Order
+
+1) The module’s own header
+2) Project headers
+3) Third-party library headers
+4) Standard library headers

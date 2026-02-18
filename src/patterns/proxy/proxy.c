@@ -32,11 +32,11 @@ static struct INotifier *getNotifier(const struct IProxy *self) {
 }
 
 static void onRegister(struct IProxy *self) {
-    (void)self;
+    (void) self;
 }
 
 static void onRemove(struct IProxy *self) {
-    (void)self;
+    (void) self;
 }
 
 size_t puremvc_proxy_size() {

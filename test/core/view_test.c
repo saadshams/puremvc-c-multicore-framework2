@@ -53,7 +53,7 @@ int main() {
     test("testRemoveMediatorAndSubsequentNotify", testRemoveMediatorAndSubsequentNotify);
     test("testGetInstance", testGetInstance);
     test("testMediatorReregistration", testMediatorReregistration);
-    // test("testModifyObserverListDuringNotification", testModifyObserverListDuringNotification);
+    test("testModifyObserverListDuringNotification", testModifyObserverListDuringNotification);
     test("testRemoveView", testRemoveView);
     test("testGarbageStorageForView", testGarbageStorageForView);
     test("testGarbageStorageForObserver", testGarbageStorageForObserver);
@@ -707,20 +707,20 @@ void testModifyObserverListDuringNotification() {
     view->notifyObservers(view, notification);
 
     // assertions
-    // for (size_t i = 0; i < 8; i++) {
-    //     char mediator_name[32] = {0};
-    //     snprintf(mediator_name, 32, "view_test_mediator6/%zu", i + 1);
-    //     if (strcmp(viewTest.deferred[i], mediator_name) != 0) abort();
-    // }
+    for (size_t i = 0; i < 8; i++) {
+        char mediator_name[32] = {0};
+        snprintf(mediator_name, 32, "view_test_mediator6/%zu", i + 1);
+        if (strcmp(viewTest.deferred[i], mediator_name) != 0) abort();
+    }
 
     // iterate through deferred names and call removeMediator
-    // for (size_t i = 0; viewTest.deferred[i] != NULL; i++) {
-    //     const char *mediatorName = viewTest.deferred[i];
-    //     if (mediatorName == NULL) abort();
-    //     struct IMediator *removedMediator = NULL;
-    //     if (view->removeMediator(view, mediatorName, &removedMediator) != true) abort();
-    //     if (strcmp(removedMediator->getName(removedMediator), mediatorName) != 0) abort();
-    // }
+    for (size_t i = 0; viewTest.deferred[i] != NULL; i++) {
+        const char *mediatorName = viewTest.deferred[i];
+        if (mediatorName == NULL) abort();
+        struct IMediator *removedMediator = NULL;
+        if (view->removeMediator(view, mediatorName, &removedMediator) != true) abort();
+        if (strcmp(removedMediator->getName(removedMediator), mediatorName) != 0) abort();
+    }
 
     // verify the count is correct
     if (viewTest.counter != 8) abort();

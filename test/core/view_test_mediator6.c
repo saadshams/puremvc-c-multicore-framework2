@@ -9,19 +9,19 @@ static const char *const *listNotificationInterests(const struct IMediator *self
 
 static void handleNotification(const struct IMediator *self, struct INotification *notification) {
     if (notification == NULL) return;
-    // struct ViewTest *component = self->getComponent(self);
+    const struct ViewTest *component = self->getComponent(self);
     char *name = (char *) self->getName(self);
 
-    const struct INotifier *notifier = self->getNotifier(self);
-    const struct IFacade *facade = notifier->getFacade(notifier);
-    facade->removeMediator(facade, name, NULL);
+    // const struct INotifier *notifier = self->getNotifier(self);
+    // const struct IFacade *facade = notifier->getFacade(notifier);
+    // facade->removeMediator(facade, name, NULL);
 
-    // for (size_t i = 0; component->deferred[i] != NULL; i++) {
-    //     if (component->deferred[i][0] == '\0') { // Find the first empty slot
-    //         component->deferred[i] = name;
-    //         break;
-    //     }
-    // }
+    for (size_t i = 0; component->deferred[i] != NULL; i++) {
+        if (component->deferred[i][0] == '\0') { // Find the first empty slot
+            component->deferred[i] = name;
+            break;
+        }
+    }
 }
 
 static void onRemove(struct IMediator *self) {

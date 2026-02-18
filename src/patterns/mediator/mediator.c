@@ -32,22 +32,22 @@ static struct INotifier *getNotifier(const struct IMediator *self) {
 }
 
 static const char *const *listNotificationInterests(const struct IMediator *self) {
-    (void)self;
+    (void) self;
     static const char *const interests[] = { NULL };
     return interests;
 }
 
 static void handleNotification(const struct IMediator *self, struct INotification *notification) {
-    (void)self;
-    (void)notification;
+    (void) self;
+    (void) notification;
 }
 
 static void onRegister(struct IMediator *self) {
-    (void)self;
+    (void) self;
 }
 
 static void onRemove(struct IMediator *self) {
-    (void)self;
+    (void) self;
 }
 
 size_t puremvc_mediator_size(void) {

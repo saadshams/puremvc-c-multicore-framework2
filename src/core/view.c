@@ -12,6 +12,7 @@
 #include "puremvc/i_observer.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 // instanceMap (global)
@@ -167,9 +168,7 @@ bool registerMediator(struct IView *self, struct IMediator *(*factory)(void *buf
     size_t i = 0;
     for (; this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find existing
         if (strcmp(this->mediatorMap[i]->key, name) == 0) { // no override; return
-#ifndef NDEBUG
             printf("\033[0;33m[PureMVC::View::registerMediator] Warning: Mediator '%s' exists; skipping registration\033[0m.\n", name);
-#endif
             goto finally;
         }
     }
@@ -401,7 +400,7 @@ bool puremvc_view_removeView(const char *key, struct IView **out) {
         }
     }
 
-    if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
+    if (index == 0) instanceMap = NULL;
 
     mutex_unlock(&instanceMapMutex);
     return removed;

@@ -236,7 +236,6 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
             if (out != NULL) *out = instanceMap[i]->model;
             memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             removed = true;
-            // ((struct Model *) s_modelMap[i]->model)->proxyMap[0]->key // todo remove proxies?
         } else {
             if (index != i) { // shift left
                 *instanceMap[index] = *instanceMap[i]; // shift left first
@@ -246,7 +245,7 @@ bool puremvc_model_removeModel(const char *key, struct IModel **out) {
         }
     }
 
-    if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
+    if (index == 0) instanceMap = NULL;
 
     mutex_unlock(&instanceMapMutex);
     return removed;
