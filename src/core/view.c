@@ -46,7 +46,12 @@ static bool registerObserver(struct IView *self, const char *notificationName, v
             struct IObserver **observers = this->observerMap[i]->observers;
 
             size_t j = 0; // find available observer slot
-            for (; observers[j] != NULL && observers[j]->getContext != NULL; j++) {}
+            for (; observers[j] != NULL && observers[j]->getContext != NULL; j++) {
+                if (observers[j]->getContext(observers[j]) == context) { // existing
+                    fprintf(stderr, "\033[0;33m[PureMVC::View::registerObserver] Warning: Observer exists for notification '%s'; skipping registration.\033[0m\n", notificationName);
+                    goto finally;
+                }
+            }
 
             if (observers[j] == NULL) { // overflow (Observer)
                 fprintf(stderr, "\033[0;31m[PureMVC::View::registerObserver] ERROR: Observer storage overflow for notification '%s'; increase slots - skipping registration.\033[0m\n", notificationName);
@@ -126,14 +131,10 @@ bool removeObserver(struct IView *self, const char *notificationName, const void
                 } else {
                     if (index != j) { // shift observers left
                         observers[index]->setContext(observers[index], observers[j]->getContext(observers[j]));
+                        observers[j]->setContext(observers[j], NULL);
                     }
                     index++;
                 }
-            }
-
-            // mark remaining slots as dead
-            for (size_t k = index; observers != NULL && observers[k] != NULL && observers[k]->getContext(observers[k]) != NULL; k++) {
-                observers[k]->setContext(observers[k], NULL);
             }
 
             if (index == 0) { // Since no entries were shifted left, the current observerMap is empty
