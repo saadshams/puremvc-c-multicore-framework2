@@ -1,11 +1,11 @@
 #pragma once
 
-void testGetInstance();
-void testRegisterAndRetrieveProxy();
-void testRegisterAndRemoveProxy();
-void testRegisterAndReplaceProxy();
-void testHasProxy();
-void testOnRegisterAndOnRemove();
-void testRemoveModel();
-void testProxyMapShiftLeft();
-void TestModelMapShiftLeft();
+void testGetInstance(void);
+void testRegisterAndRetrieveProxy(void);
+void testRegisterAndRemoveProxy(void);
+void testRegisterAndReplaceProxy(void);
+void testHasProxy(void);
+void testOnRegisterAndOnRemove(void);
+void testRemoveModel(void);
+void testProxyMapShiftLeft(void);
+void TestModelMapShiftLeft(void);

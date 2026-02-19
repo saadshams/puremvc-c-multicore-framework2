@@ -10,12 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void beforeAll() {}
-static void beforeEach() {}
-static void afterEach() {}
-static void afterAll() {}
+static void beforeAll(void) {}
+static void beforeEach(void) {}
+static void afterEach(void) {}
+static void afterAll(void) {}
 
-static void test(const char *name, void (*callback)()) {
+static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
@@ -27,7 +27,7 @@ static void test(const char *name, void (*callback)()) {
     fflush(stdout);
 }
 
-int main() {
+int main(void) {
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "SimpleCommandTest");
     printf("\033[1;36m================================================\033[0m\n\n");
@@ -52,7 +52,7 @@ int main() {
  * object that was passed on the Notification body, which will
  * be modified by the SimpleCommand</P>.
  */
-void testSimpleCommandExecute() {
+void testSimpleCommandExecute(void) {
     // Create the VO
     struct SimpleCommandTestVO vo = {.input = 5};
 

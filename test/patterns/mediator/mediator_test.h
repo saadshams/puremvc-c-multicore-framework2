@@ -1,6 +1,6 @@
 #pragma once
 
-void testConstructor();
-void testNameAccessor();
-void testViewAccessor();
-void testNotifier();
+void testConstructor(void);
+void testNameAccessor(void);
+void testViewAccessor(void);
+void testNotifier(void);

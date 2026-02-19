@@ -1,8 +1,8 @@
 #pragma once
 
-void testObserverConstructor();
-void testObserverAccessors();
-void testCompareNotifyContext();
+void testObserverConstructor(void);
+void testObserverAccessors(void);
+void testCompareNotifyContext(void);
 
 struct ObserverTestVar {
     int value;

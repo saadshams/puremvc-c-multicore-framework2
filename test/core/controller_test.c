@@ -12,12 +12,12 @@
 #include <string.h>
 #include <stdlib.h>
 
-static void beforeAll() {}
-static void beforeEach() {}
-static void afterEach() {}
-static void afterAll() {}
+static void beforeAll(void) {}
+static void beforeEach(void) {}
+static void afterEach(void) {}
+static void afterAll(void) {}
 
-static void test(const char *name, void (*callback)()) {
+static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
@@ -29,7 +29,7 @@ static void test(const char *name, void (*callback)()) {
     fflush(stdout);
 }
 
-int main() {
+int main(void) {
     beforeAll();
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "ControllerTest");
@@ -50,7 +50,7 @@ int main() {
     return 0;
 }
 
-void testGetInstance() {
+void testGetInstance(void) {
     // Test Factory Method
     struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
     struct IView *view = puremvc_view_getInstance(viewMap, "ControllerTestKey1"); // pre-initialize View for the Controller
@@ -72,7 +72,7 @@ void testGetInstance() {
     if (puremvc_view_removeView("ControllerTestKey1", &removedView) != true) abort();
 }
 
-void testRegisterAndExecuteCommand() {
+void testRegisterAndExecuteCommand(void) {
     struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
     struct ObserverMap **observerMap = (struct ObserverMap *[]) {
         &(struct ObserverMap) {
@@ -115,7 +115,7 @@ void testRegisterAndExecuteCommand() {
     if (puremvc_view_removeView("ControllerTestKey2", NULL) != true) abort();;
 }
 
-void testRegisterAndRemoveCommand() {
+void testRegisterAndRemoveCommand(void) {
    struct ViewMap **viewMap = (struct ViewMap *[]) {
        &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
        NULL
@@ -177,7 +177,7 @@ void testRegisterAndRemoveCommand() {
     if (puremvc_view_removeView("ControllerTestKey3", NULL) != true) abort();
 }
 
-void testHasCommand() {
+void testHasCommand(void) {
     struct ViewMap **viewMap = (struct ViewMap *[]) {
         &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
         NULL
@@ -220,7 +220,7 @@ void testHasCommand() {
     if (puremvc_view_removeView("ControllerTestKey4", NULL) != true) abort();;
 }
 
-void testReregisterAndExecuteCommand() {
+void testReregisterAndExecuteCommand(void) {
     struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
     struct ObserverMap **observerMap = (struct ObserverMap *[]) {
         &(struct ObserverMap){

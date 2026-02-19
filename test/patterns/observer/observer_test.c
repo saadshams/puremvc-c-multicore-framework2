@@ -7,12 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void beforeAll() {}
-static void beforeEach() {}
-static void afterEach() {}
-static void afterAll() {}
+static void beforeAll(void) {}
+static void beforeEach(void) {}
+static void afterEach(void) {}
+static void afterAll(void) {}
 
-static void test(const char *name, void (*callback)()) {
+static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
@@ -24,7 +24,7 @@ static void test(const char *name, void (*callback)()) {
     fflush(stdout);
 }
 
-int main() {
+int main(void) {
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "ObserverTest");
     printf("\033[1;36m================================================\033[0m\n\n");
@@ -57,7 +57,7 @@ static void handleNotification(const void *context, const struct INotification *
 /**
  * Tests the Constructor method of the Observer class
  */
-void testObserverConstructor() {
+void testObserverConstructor(void) {
     // Create observer
     struct Object { int x; } object = { 0 };
     const struct IObserver *observer = puremvc_observer_init(alloca(puremvc_observer_size()), handleNotification, &object);
@@ -74,7 +74,7 @@ void testObserverConstructor() {
 /**
  * Tests observer class when initialized by accessor methods.
  */
-void testObserverAccessors() {
+void testObserverAccessors(void) {
     // Create observer with null args, then
     // use accessors to set notification method and context
     struct Object {int x;} object;
@@ -100,7 +100,7 @@ void testObserverAccessors() {
 /**
  * Tests the compareNotifyContext method of the Observer class
  */
-void testCompareNotifyContext() {
+void testCompareNotifyContext(void) {
     // Create observer passing in notification method and context
     struct Object {char dummy;};
     struct Object object = {0};

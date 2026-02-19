@@ -1,11 +1,11 @@
 #pragma once
 
-void testGetInstance();
-void testRegisterAndExecuteCommand();
-void testRegisterAndRemoveCommand();
-void testHasCommand();
-void testReregisterAndExecuteCommand();
-void testRegisterAndUpdateCommand();
-void testRemoveController();
-void testCommandMapShiftLeft();
-void TestControllerMapShiftLeft();
+void testGetInstance(void);
+void testRegisterAndExecuteCommand(void);
+void testRegisterAndRemoveCommand(void);
+void testHasCommand(void);
+void testReregisterAndExecuteCommand(void);
+void testRegisterAndUpdateCommand(void);
+void testRemoveController(void);
+void testCommandMapShiftLeft(void);
+void TestControllerMapShiftLeft(void);

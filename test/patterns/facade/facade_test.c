@@ -11,12 +11,12 @@
 #include <stdio.h>
 #include <string.h>
 
-static void beforeAll() {}
-static void beforeEach() {}
-static void afterEach() {}
-static void afterAll() {}
+static void beforeAll(void) {}
+static void beforeEach(void) {}
+static void afterEach(void) {}
+static void afterAll(void) {}
 
-static void test(const char *name, void (*callback)()) {
+static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
@@ -28,7 +28,7 @@ static void test(const char *name, void (*callback)()) {
     fflush(stdout);
 }
 
-void mytest() {
+void mytest(void) {
     struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
     struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey0");
 
@@ -40,13 +40,13 @@ void mytest() {
     if (puremvc_facade_hasCore("FacadeTestKey0") != false) abort();
 }
 
-int main() {
+int main(void) {
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "FacadeTest");
     printf("\033[1;36m================================================\033[0m\n\n");
 
     beforeAll();
-    // mytest();
+    // mytest(void);
     test("testGetInstance", testGetInstance);
     test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification);
     test("testRegisterAndRemoveCommandAndSendNotification", testRegisterAndRemoveCommandAndSendNotification);
@@ -64,7 +64,7 @@ int main() {
     return 0;
 }
 
-void testGetInstance() {
+void testGetInstance(void) {
     struct FacadeMap **instanceMap = (struct FacadeMap *[]) {
         &(struct FacadeMap){ .facade = alloca(puremvc_facade_size()) },
         NULL
@@ -82,7 +82,7 @@ void testGetInstance() {
     if (instanceMap[0]->key[0] != '\0') abort();
 }
 
-void testRegisterCommandAndSendNotification() {
+void testRegisterCommandAndSendNotification(void) {
     struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .key = "", .view = alloca(puremvc_view_size()) }, NULL };
     struct ObserverMap **observerMap = (struct ObserverMap *[]) { &(struct ObserverMap) {
         .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } }, NULL
@@ -120,7 +120,7 @@ void testRegisterCommandAndSendNotification() {
     if (puremvc_facade_removeFacade("FacadeTestKey2", &removedFacade) != true) abort();
 }
 
-void testRegisterAndRemoveCommandAndSendNotification() {
+void testRegisterAndRemoveCommandAndSendNotification(void) {
     struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .key = "", .view = alloca(puremvc_view_size()) }, NULL };
     struct ObserverMap **observerMap = (struct ObserverMap *[]) {
         &(struct ObserverMap){ .observers = (struct IObserver *[]){ memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()), NULL } },
@@ -156,7 +156,7 @@ void testRegisterAndRemoveCommandAndSendNotification() {
     if (puremvc_facade_removeFacade("FacadeTestKey3", &removedFacade) != true) abort();
 }
 
-void testRegisterAndRetrieveProxy() {
+void testRegisterAndRetrieveProxy(void) {
     struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap) { .model = alloca(puremvc_model_size()) }, NULL };
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) { &(struct ProxyMap) { .proxy = alloca(puremvc_proxy_size()) }, NULL };
     struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey4");
@@ -191,7 +191,7 @@ void testRegisterAndRetrieveProxy() {
     if (puremvc_facade_removeFacade("FacadeTestKey4", &removedFacade) != true) abort();
 }
 
-void testRegisterAndRemoveProxy() {
+void testRegisterAndRemoveProxy(void) {
     struct ModelMap **modelMap = (struct ModelMap *[]) { &(struct ModelMap) { .model = alloca(puremvc_model_size()) }, NULL };
     struct ProxyMap **proxyMap = (struct ProxyMap *[]) { &(struct ProxyMap){ .proxy = alloca(puremvc_proxy_size()) }, NULL };
     struct IModel *model = puremvc_model_getInstance(modelMap, "FacadeTestKey5");
@@ -237,7 +237,7 @@ void testRegisterAndRemoveProxy() {
     if (puremvc_facade_removeFacade("FacadeTestKey5", &removedFacade) == false) abort();
 }
 
-void testRegisterRetrieveAndRemoveMediator() {
+void testRegisterRetrieveAndRemoveMediator(void) {
     struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
     struct MediatorMap **mediatorMap = (struct MediatorMap *[]){ &(struct MediatorMap){ .mediator = alloca(puremvc_mediator_size()) }, NULL };
     struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey6");

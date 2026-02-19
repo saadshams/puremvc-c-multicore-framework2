@@ -8,12 +8,12 @@
 #include <string.h>
 #include <stdlib.h>
 
-static void beforeAll() {}
-static void beforeEach() {}
-static void afterEach() {}
-static void afterAll() {}
+static void beforeAll(void) {}
+static void beforeEach(void) {}
+static void afterEach(void) {}
+static void afterAll(void) {}
 
-static void test(const char *name, void (*callback)()) {
+static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
@@ -25,7 +25,7 @@ static void test(const char *name, void (*callback)()) {
     fflush(stdout);
 }
 
-int main() {
+int main(void) {
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "ModelTest");
     printf("\033[1;36m================================================\033[0m\n\n");
@@ -46,7 +46,7 @@ int main() {
     return 0;
 }
 
-void testGetInstance() {
+void testGetInstance(void) {
     struct ModelMap **instanceMap = (struct ModelMap *[]){
         &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
         NULL
@@ -66,7 +66,7 @@ void testGetInstance() {
     if (instanceMap[0]->key[0] != '\0') abort();
 }
 
-void testRegisterAndRetrieveProxy() {
+void testRegisterAndRetrieveProxy(void) {
     struct ModelMap **instanceMap = (struct ModelMap *[]) {
         &(struct ModelMap) { .model = alloca(puremvc_model_size()) },
         NULL
@@ -106,7 +106,7 @@ void testRegisterAndRetrieveProxy() {
     model = NULL;
 }
 
-void testHasProxy() {
+void testHasProxy(void) {
     struct ModelMap **instanceMap = (struct ModelMap *[]) {
         &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
         NULL
@@ -141,7 +141,7 @@ void testHasProxy() {
     if (puremvc_model_removeModel("ModelTestKey3", NULL) != true) abort();
 }
 
-void testRegisterAndRemoveProxy() {
+void testRegisterAndRemoveProxy(void) {
     struct ModelMap **instanceMap = (struct ModelMap *[]) {
         &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
         NULL
@@ -176,7 +176,7 @@ void testRegisterAndRemoveProxy() {
     model = NULL;
 }
 
-void testOnRegisterAndOnRemove() {
+void testOnRegisterAndOnRemove(void) {
     struct ModelMap **instanceMap = (struct ModelMap *[]) {
         &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
         NULL
@@ -211,7 +211,7 @@ void testOnRegisterAndOnRemove() {
     model = NULL;
 }
 
-void testRemoveModel() {
+void testRemoveModel(void) {
     struct ModelMap **instanceMap = (struct ModelMap *[]) {
         &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
         NULL
@@ -235,7 +235,7 @@ void testRemoveModel() {
     if (instanceMap[0]->key[0] != '\0') abort();
 }
 
-void testRegisterAndReplaceProxy() {
+void testRegisterAndReplaceProxy(void) {
     struct ModelMap **instanceMap = (struct ModelMap *[]) {
         &(struct ModelMap){ .model = alloca(puremvc_model_size()) },
         NULL
@@ -283,7 +283,7 @@ void testRegisterAndReplaceProxy() {
     if (puremvc_model_removeModel("ModelTestKey9", NULL) != true) abort();
 }
 
-void testProxyMapShiftLeft() {
+void testProxyMapShiftLeft(void) {
     struct ModelMap **instanceMap = (struct ModelMap *[]) {
         &(struct ModelMap){ .model = alloca(puremvc_model_size() )},
         NULL

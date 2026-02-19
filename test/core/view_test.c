@@ -20,12 +20,12 @@
 
 #include "puremvc/i_facade.h"
 
-static void beforeAll() {}
-static void beforeEach() {}
-static void afterEach() {}
-static void afterAll() {}
+static void beforeAll(void) {}
+static void beforeEach(void) {}
+static void afterEach(void) {}
+static void afterAll(void) {}
 
-static void test(const char *name, void (*callback)()) {
+static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
@@ -37,7 +37,7 @@ static void test(const char *name, void (*callback)()) {
     fflush(stdout);
 }
 
-int main() {
+int main(void) {
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "ViewTest");
     printf("\033[1;36m================================================\033[0m\n\n");
@@ -75,7 +75,7 @@ void handleNotification(const void *context, const struct INotification *notific
     viewTestVar = (struct ViewTestVar *) notification->getBody(notification);
 }
 
-void testGetInstance() {
+void testGetInstance(void) {
     struct ViewMap **instanceMap = (struct ViewMap *[]) {
         &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
         NULL
@@ -96,7 +96,7 @@ void testGetInstance() {
     if (instanceMap[0]->key[0] != '\0') abort();
 }
 
-void testRegisterAndNotifyObserver() {
+void testRegisterAndNotifyObserver(void) {
     struct ViewMap **instanceMap = (struct ViewMap *[]) {
         &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
         NULL
@@ -144,7 +144,7 @@ void testRegisterAndNotifyObserver() {
     if (puremvc_view_removeView("ViewTestKey2", NULL) != true) abort();
 }
 
-void testRegisterAndRetrieveMediator() {
+void testRegisterAndRetrieveMediator(void) {
     struct ViewMap **instanceMap = (struct ViewMap *[]) {
         &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
         NULL
@@ -187,7 +187,7 @@ void testRegisterAndRetrieveMediator() {
     if (puremvc_view_removeView("ViewTestKey3", NULL) != true) abort();
 }
 
-void testHasMediator() {
+void testHasMediator(void) {
     struct ViewMap **instanceMap = (struct ViewMap *[]) {
         &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
         NULL
@@ -226,7 +226,7 @@ void testHasMediator() {
         abort();
 }
 
-void testRegisterAndRemoveMediator() {
+void testRegisterAndRemoveMediator(void) {
     struct ViewMap **instanceMap = (struct ViewMap *[]){
         &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
         NULL
@@ -262,7 +262,7 @@ void testRegisterAndRemoveMediator() {
     if (puremvc_view_removeView("ViewTestKey5", NULL) != true) abort();
 }
 
-void testOnRegisterAndOnRemove() {
+void testOnRegisterAndOnRemove(void) {
     struct ViewMap **instanceMap = (struct ViewMap *[]) {
         &(struct ViewMap){ .view = alloca(puremvc_view_size()) },
         NULL

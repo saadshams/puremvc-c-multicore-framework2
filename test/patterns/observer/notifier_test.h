@@ -1,4 +1,4 @@
 #pragma once
 
-void testInstance();
-void testRegisterCommandAndSendNotification();
+void testInstance(void);
+void testRegisterCommandAndSendNotification(void);

@@ -1,7 +1,7 @@
 #pragma once
 
-void testConstructor();
-void testNameAccessors();
-void testBodyAccessors();
-void testTypeAccessors();
-void testToString();
+void testConstructor(void);
+void testNameAccessors(void);
+void testBodyAccessors(void);
+void testTypeAccessors(void);
+void testToString(void);

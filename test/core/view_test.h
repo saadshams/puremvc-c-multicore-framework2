@@ -10,25 +10,25 @@
 #define NOTE6 "Notification6"
 #define NOTE7 "Notification7"
 
-void testGetInstance();
-void testRegisterAndNotifyObserver();
-void testRegisterAndRetrieveMediator();
-void testHasMediator();
-void testRegisterAndRemoveMediator();
-void testOnRegisterAndOnRemove();
-void testSuccessiveRegisterAndRemoveMediator();
-void testRemoveMediatorAndSubsequentNotify();
-void testRemoveOneOfTwoMediatorsAndSubsequentNotify();
-void testMediatorReregistration();
-void testModifyObserverListDuringNotification();
-void testRemoveView();
-void testGarbageStorageForView();
-void testGarbageStorageForObserver();
-void testGarbageStorageForMediator();
-void testObserverMapShiftLeft();
-void testObserverShiftLeft();
-void testMediatorMapShiftLeft();
-void testViewMapShiftLeft();
+void testGetInstance(void);
+void testRegisterAndNotifyObserver(void);
+void testRegisterAndRetrieveMediator(void);
+void testHasMediator(void);
+void testRegisterAndRemoveMediator(void);
+void testOnRegisterAndOnRemove(void);
+void testSuccessiveRegisterAndRemoveMediator(void);
+void testRemoveMediatorAndSubsequentNotify(void);
+void testRemoveOneOfTwoMediatorsAndSubsequentNotify(void);
+void testMediatorReregistration(void);
+void testModifyObserverListDuringNotification(void);
+void testRemoveView(void);
+void testGarbageStorageForView(void);
+void testGarbageStorageForObserver(void);
+void testGarbageStorageForMediator(void);
+void testObserverMapShiftLeft(void);
+void testObserverShiftLeft(void);
+void testMediatorMapShiftLeft(void);
+void testViewMapShiftLeft(void);
 
 struct ViewTest {
     const char *lastNotification;

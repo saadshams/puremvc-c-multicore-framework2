@@ -7,12 +7,12 @@
 #include <string.h>
 #include <stdlib.h>
 
-static void beforeAll() {}
-static void beforeEach() {}
-static void afterEach() {}
-static void afterAll() {}
+static void beforeAll(void) {}
+static void beforeEach(void) {}
+static void afterEach(void) {}
+static void afterAll(void) {}
 
-static void test(const char *name, void (*callback)()) {
+static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
@@ -24,7 +24,7 @@ static void test(const char *name, void (*callback)()) {
     fflush(stdout);
 }
 
-int main() {
+int main(void) {
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "NotificationTest");
     printf("\033[1;36m================================================\033[0m\n\n");
@@ -44,7 +44,7 @@ int main() {
 /**
  * Tests setting the name and body using the Notification class Constructor.
  */
-void testConstructor() {
+void testConstructor(void) {
     // Create a new Notification using the Constructor to set the note name and body
     const struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "TestNote", NULL, NULL);
 
@@ -57,7 +57,7 @@ void testConstructor() {
 /**
  * Tests setting and getting the name using Notification class accessor methods.
  */
-void testNameAccessors() {
+void testNameAccessors(void) {
     // Create a new Notification and use accessors to set the note name
     const struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "TestNote", NULL, NULL);
 
@@ -68,7 +68,7 @@ void testNameAccessors() {
 /**
  * Tests setting and getting the body using Notification class accessor methods.
  */
-void testBodyAccessors() {
+void testBodyAccessors(void) {
     // Create a new Notification and use accessors to set the body
     struct { int value; } vo = {.value = 5};
 
@@ -83,7 +83,7 @@ void testBodyAccessors() {
 /**
  * Tests setting and getting the type using Notification class accessor methods.
  */
-void testTypeAccessors() {
+void testTypeAccessors(void) {
     struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "TestNote", NULL, "TestNoteType");
 
     // test assertions
@@ -93,7 +93,7 @@ void testTypeAccessors() {
 }
 
 /** Node Notifications */
-void testToString() {
+void testToString(void) {
     struct { int value; } test = {.value = 5};
 
     const struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "TestNote", NULL, "TestNoteType");

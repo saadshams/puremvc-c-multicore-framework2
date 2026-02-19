@@ -34,8 +34,8 @@ target_include_directories(puremvc
 
 # 4. Xcode Specific: Organize files into folders (Groups)
 # Otherwise, Xcode will dump all 20+ files into one flat list
-#source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "src" FILES ${LIB_SOURCES})
-#source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include" PREFIX "include" FILES ${LIB_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "src" FILES ${LIB_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include" PREFIX "include" FILES ${LIB_SOURCES})
 
 # 5. (Optional) Define the public headers for installation/Xcode Frameworks
 #set_target_properties(puremvc PROPERTIES

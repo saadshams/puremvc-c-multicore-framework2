@@ -1,4 +1,4 @@
 #pragma once
 
-void testMacroCommandExecute();
-void testRegisterAndExecuteCommand();
+void testMacroCommandExecute(void);
+void testRegisterAndExecuteCommand(void);

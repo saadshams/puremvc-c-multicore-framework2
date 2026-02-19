@@ -8,12 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void beforeAll() {}
-static void beforeEach() {}
-static void afterEach() {}
-static void afterAll() {}
+static void beforeAll(void) {}
+static void beforeEach(void) {}
+static void afterEach(void) {}
+static void afterAll(void) {}
 
-static void test(const char *name, void (*callback)()) {
+static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
@@ -25,7 +25,7 @@ static void test(const char *name, void (*callback)()) {
     fflush(stdout);
 }
 
-int main() {
+int main(void) {
     printf("\n\033[1;36m================================================\033[0m\n");
     printf("\033[1;36m[SUITE] %s\033[0m\n", "MacroCommandTest");
     printf("\033[1;36m================================================\033[0m\n\n");
@@ -38,7 +38,7 @@ int main() {
     return 0;
 }
 
-void testMacroCommandExecute() {
+void testMacroCommandExecute(void) {
     struct MacroCommandTestVO vo = { .input = 5, 0, 0, 0};
 
     struct INotification *notification = puremvc_notification_init(alloca(puremvc_notification_size()), "MacroCommandTest", &vo, NULL);

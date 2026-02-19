@@ -7,12 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void beforeAll() {}
-static void beforeEach() {}
-static void afterEach() {}
-static void afterAll() {}
+static void beforeAll(void) {}
+static void beforeEach(void) {}
+static void afterEach(void) {}
+static void afterAll(void) {}
 
-static void test(const char *name, void (*callback)()) {
+static void test(const char *name, void (*callback)(void)) {
     printf("\033[0;34m[RUNNING]\033[0m %s...\n", name);
     fflush(stdout);
 
@@ -44,7 +44,7 @@ int main(void) {
 /**
  * Test Constructor
  */
-void testConstructor() {
+void testConstructor(void) {
     const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
 
     // test assertions
@@ -56,7 +56,7 @@ void testConstructor() {
 /**
  * Tests getting the name using Proxy class accessor method. Setting can only be done in constructor.
  */
-void testNameAccessors() {
+void testNameAccessors(void) {
     const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), "TestProxy", NULL);
 
     // test assertions
@@ -69,7 +69,7 @@ void testNameAccessors() {
 /**
  * Tests setting and getting the item using Proxy class accessor methods.
  */
-void testDataAccessors() {
+void testDataAccessors(void) {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
     const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), "TestProxy", colors);
 
@@ -82,7 +82,7 @@ void testDataAccessors() {
     if (*(data + 3) != NULL) abort();
 }
 
-void testDataReassign() {
+void testDataReassign(void) {
     const char **colors = (const char *[]) {"red", "green", "blue", NULL};
 
     struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), "colors", colors);
@@ -98,7 +98,7 @@ void testDataReassign() {
     if (*(data + 3) != NULL) abort();
 }
 
-void testNotifier() {
+void testNotifier(void) {
     const struct IProxy *proxy = puremvc_proxy_init(alloca(puremvc_proxy_size()), NULL, NULL);
     if (strcmp(proxy->getName(proxy), PROXY_NAME) != 0) abort();
 

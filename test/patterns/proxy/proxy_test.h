@@ -1,8 +1,8 @@
 #pragma once
 
-void testConstructor();
-void testNameAccessors();
-void testDataAccessors();
-void testDataAccessors2();
-void testDataReassign();
-void testNotifier();
+void testConstructor(void);
+void testNameAccessors(void);
+void testDataAccessors(void);
+void testDataAccessors2(void);
+void testDataReassign(void);
+void testNotifier(void);

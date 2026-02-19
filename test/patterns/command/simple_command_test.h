@@ -1,4 +1,4 @@
 #pragma once
 
-void testConstructor();
-void testSimpleCommandExecute();
+void testConstructor(void);
+void testSimpleCommandExecute(void);
