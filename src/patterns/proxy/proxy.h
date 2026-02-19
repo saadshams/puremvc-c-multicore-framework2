@@ -10,7 +10,7 @@
 
 // #include "puremvc/platform.h"
 #include "puremvc/i_proxy.h"
-#include "../observer/notifier.h"
+#include "patterns/observer/notifier.h"
 
 struct Proxy {
     // alignas(ALIGNMENT)

@@ -8,7 +8,7 @@
 #pragma once
 
 #include "puremvc/i_command.h"
-#include "../observer/notifier.h"
+#include "patterns/observer/notifier.h"
 
 struct SimpleCommand {
     struct ICommand super;

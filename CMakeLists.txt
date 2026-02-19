@@ -28,7 +28,25 @@ endif()
 target_include_directories(puremvc
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<INSTALL_INTERFACE:include>)
+            $<INSTALL_INTERFACE:include>
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+# 4. Xcode Specific: Organize files into folders (Groups)
+# Otherwise, Xcode will dump all 20+ files into one flat list
+#source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "src" FILES ${LIB_SOURCES})
+#source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include" PREFIX "include" FILES ${LIB_SOURCES})
+
+# 5. (Optional) Define the public headers for installation/Xcode Frameworks
+#set_target_properties(puremvc PROPERTIES
+#        PUBLIC_HEADER "include/puremvc/puremvc.h" # Add your umbrella header here
+#        C_EXTENSIONS OFF
+#        C_STANDARD 99
+#)
+
+#mkdir build
+#cd build
+#cmake -G Xcode ..
 
 # Compiler warnings (cross-platform, strict)
 target_compile_options(puremvc
