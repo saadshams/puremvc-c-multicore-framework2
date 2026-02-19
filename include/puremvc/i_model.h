@@ -49,7 +49,7 @@ struct IModel {
     bool (*removeProxy)(struct IModel *self, const char *proxyName, struct IProxy **out);
 };
 
-size_t puremvc_model_size();
+size_t puremvc_model_size(void);
 
 struct IModel *puremvc_model_init(void *buffer, const char *key);
 

@@ -47,7 +47,7 @@ struct IController {
     bool (*removeCommand)(struct IController *self, const char *notificationName, struct ICommand *(**out)(void *buffer));
 };
 
-size_t puremvc_controller_size();
+size_t puremvc_controller_size(void);
 
 struct IController *puremvc_controller_getInstance(struct ControllerMap **controllerMap, const char *key);
 

@@ -39,7 +39,7 @@ static void onRemove(struct IProxy *self) {
     (void) self;
 }
 
-size_t puremvc_proxy_size() {
+size_t puremvc_proxy_size(void) {
     return (sizeof(struct Proxy) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 

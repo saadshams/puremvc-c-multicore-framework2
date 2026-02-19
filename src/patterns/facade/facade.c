@@ -163,7 +163,7 @@ static void sendNotification(const struct IFacade *self, const char *notificatio
     self->notifyObservers(self, notification);
 }
 
-size_t puremvc_facade_size() {
+size_t puremvc_facade_size(void) {
     return (sizeof(struct Facade) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 

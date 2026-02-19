@@ -15,10 +15,10 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     if (notification == NULL) return;
 
     (void) self;
-    struct ICommand *(*subCommands[1])() = { NULL };
+    struct ICommand *(*subCommands[1])(void) = { NULL };
 
     for (size_t i = 0; subCommands[i] != NULL; i++) {
-        struct ICommand *(*factory)() = subCommands[i];
+        struct ICommand *(*factory)(void) = subCommands[i];
         const struct ICommand *command = factory();
 
         struct INotifier *notifier = command->getNotifier(command);
@@ -28,7 +28,7 @@ static void execute(const struct ICommand *self, struct INotification *notificat
     }
 }
 
-size_t puremvc_macro_command_size() {
+size_t puremvc_macro_command_size(void) {
     return puremvc_simple_command_size();
 }
 

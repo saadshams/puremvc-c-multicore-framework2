@@ -27,10 +27,10 @@ struct ICommand {
     void (*execute)(const struct ICommand *self, struct INotification *notification);
 };
 
-size_t puremvc_simple_command_size();
+size_t puremvc_simple_command_size(void);
 
 struct ICommand *puremvc_simple_command_init(void *buffer);
 
-size_t puremvc_macro_command_size();
+size_t puremvc_macro_command_size(void);
 
 struct ICommand *puremvc_macro_command_init(void *buffer);

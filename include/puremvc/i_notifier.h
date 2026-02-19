@@ -22,6 +22,6 @@ struct INotifier {
     void (*sendNotification)(const struct INotifier *self, const char *notificationName, void *body, const char *type);
 };
 
-size_t puremvc_notifier_size();
+size_t puremvc_notifier_size(void);
 
 struct INotifier *puremvc_notifier_init(void *buffer);

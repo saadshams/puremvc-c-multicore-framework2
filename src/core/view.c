@@ -287,7 +287,7 @@ static bool removeMediator(struct IView *self, const char *mediatorName, struct 
     return removed;
 }
 
-size_t puremvc_view_size() {
+size_t puremvc_view_size(void) {
     return (sizeof(struct View) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 

@@ -139,7 +139,7 @@ static bool removeProxy(struct IModel *self, const char *proxyName, struct IProx
     return removed;
 }
 
-size_t puremvc_model_size() {
+size_t puremvc_model_size(void) {
     return (sizeof(struct Model) + (sizeof(void *) - 1u)) & ~(sizeof(void *) - 1u);
 }
 

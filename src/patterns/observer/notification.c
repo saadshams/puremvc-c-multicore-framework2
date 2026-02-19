@@ -48,7 +48,7 @@ void toString(const struct INotification *self, char *buffer, size_t buffer_size
         fprintf(stderr, "\033[0;33m[PureMVC::Notification::toString] Warning: Buffer Truncated: (Required: %d, Available: %zu).\033[0m\n", len, buffer_size);
 }
 
-size_t puremvc_notification_size() {
+size_t puremvc_notification_size(void) {
     return (sizeof(struct Notification) + (sizeof(void *) -1u)) & ~(sizeof(void *) -1u);
 }
 

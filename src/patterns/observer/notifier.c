@@ -37,7 +37,7 @@ static void sendNotification(const struct INotifier *self, const char *notificat
     facade->sendNotification(facade, notificationName, body, type);
 }
 
-size_t puremvc_notifier_size() {
+size_t puremvc_notifier_size(void) {
     return (sizeof(struct Notifier) + (sizeof(void *) -1u)) & ~(sizeof(void *) - 1u);
 }
 

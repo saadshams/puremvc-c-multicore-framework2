@@ -73,7 +73,7 @@ struct IFacade {
     void (*sendNotification)(const struct IFacade *self, const char *notificationName, void *body, const char *type);
 };
 
-size_t puremvc_facade_size();
+size_t puremvc_facade_size(void);
 
 struct IFacade *puremvc_facade_init(void *buffer, const char *key);
 

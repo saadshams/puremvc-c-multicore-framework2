@@ -144,7 +144,7 @@ static bool removeCommand(struct IController *self, const char *notificationName
     return removed;
 }
 
-size_t puremvc_controller_size() {
+size_t puremvc_controller_size(void) {
     return (sizeof(struct Controller) + (sizeof(void *) -1u)) & ~(sizeof(void *) - 1u);
 }
 
