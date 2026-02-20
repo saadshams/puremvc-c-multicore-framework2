@@ -58,7 +58,7 @@ struct INotification *puremvc_notification_init(void *buffer, const char *name, 
         return NULL;
     }
 
-    struct Notification *this = (struct Notification *) buffer;
+    struct Notification *this = buffer;
     memset(this, 0, sizeof(struct Notification));
 
     this->super.getName = getName;

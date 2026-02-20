@@ -297,7 +297,7 @@ struct IView *puremvc_view_init(void *buffer, const char *key) {
         return NULL;
     }
 
-    struct View *this = (struct View *) buffer;
+    struct View *this = buffer;
     memset(this, 0, sizeof(struct View));
 
     this->super.initializeView = initializeView;

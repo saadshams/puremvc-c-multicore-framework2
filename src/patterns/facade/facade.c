@@ -173,7 +173,7 @@ struct IFacade *puremvc_facade_init(void *buffer, const char *key) {
         return NULL;
     }
 
-    struct Facade *this = (struct Facade *) buffer;
+    struct Facade *this = buffer;
     memset(this, 0, sizeof(struct Facade));
 
     this->super.initializeFacade = initializeFacade;

@@ -53,7 +53,7 @@ struct IObserver *puremvc_observer_init(void *buffer, void (*notify)(const void 
         return NULL;
     }
 
-    struct Observer *this = (struct Observer *) buffer;
+    struct Observer *this = buffer;
     memset(this, 0, sizeof(struct Observer));
 
     this->super.getContext = getContext;

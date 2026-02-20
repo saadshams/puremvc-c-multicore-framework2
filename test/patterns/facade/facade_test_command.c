@@ -4,7 +4,7 @@
 static void execute(const struct ICommand *self, struct INotification *notification) {
     if (notification == NULL) return;
 
-    struct FacadeTestVO *vo = (struct FacadeTestVO *)notification->getBody(notification);
+    struct FacadeTestVO *vo = notification->getBody(notification);
 
     // Fabricate a result
     vo->result = 2 * vo->input;

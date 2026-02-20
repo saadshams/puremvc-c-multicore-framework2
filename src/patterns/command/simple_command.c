@@ -31,7 +31,7 @@ struct ICommand *puremvc_simple_command_init(void *buffer) {
         return NULL;
     }
 
-    struct SimpleCommand *this = (struct SimpleCommand *) buffer;
+    struct SimpleCommand *this = buffer;
     memset(this, 0, sizeof(struct SimpleCommand));
 
     this->super.getNotifier = getNotifier;

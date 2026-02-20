@@ -4,7 +4,7 @@
 static void execute(const struct ICommand *self, struct INotification *notification) {
     if (notification == NULL) return;
 
-    struct MacroCommandTestVO *vo = (struct MacroCommandTestVO *) notification->getBody(notification);
+    struct MacroCommandTestVO *vo = notification->getBody(notification);
 
     // Fabricate a result
     vo->result1 = 2 * vo->input;

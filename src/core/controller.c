@@ -154,7 +154,7 @@ static struct IController *puremvc_controller_init(void *buffer, const char *key
         return NULL;
     }
 
-    struct Controller *this = (struct Controller *) buffer;
+    struct Controller *this = buffer;
     memset(this, 0, sizeof(struct Controller));
 
     this->super.initializeController = initializeController;

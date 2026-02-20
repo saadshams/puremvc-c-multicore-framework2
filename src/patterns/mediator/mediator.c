@@ -60,7 +60,7 @@ struct IMediator *puremvc_mediator_init(void *buffer, const char *name, void *co
         return NULL;
     }
 
-    struct Mediator *this = (struct Mediator *) buffer;
+    struct Mediator *this = buffer;
     memset(this, 0, sizeof(struct Mediator));
 
     this->super.getName = getName;

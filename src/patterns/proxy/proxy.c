@@ -49,7 +49,7 @@ struct IProxy *puremvc_proxy_init(void *buffer, const char *name, void *data) {
         return NULL;
     }
 
-    struct Proxy *this = (struct Proxy *) buffer;
+    struct Proxy *this = buffer;
     memset(this, 0, sizeof(struct Proxy));
 
     this->super.getName = getName;

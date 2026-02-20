@@ -48,7 +48,7 @@ struct Object {
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
     if (notification == NULL) return;
-    struct Object *temp = (struct Object *)notification->getBody(notification);
+    struct Object *temp = notification->getBody(notification);
 
     // fabricate a result
     temp->result = temp->value * 4;

@@ -149,7 +149,7 @@ struct IModel *puremvc_model_init(void *buffer, const char *key) {
         return NULL;
     }
 
-    struct Model *this = (struct Model *) buffer;
+    struct Model *this = buffer;
     memset(this, 0, sizeof(struct Model));
 
     this->super.initializeModel = initializeModel;

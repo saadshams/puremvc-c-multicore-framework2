@@ -3,7 +3,7 @@
 
 static void execute(const struct ICommand *self, struct INotification *notification) {
     (void) self;
-    struct ControllerTestVO *vo = (struct ControllerTestVO *) notification->getBody(notification);
+    struct ControllerTestVO *vo = notification->getBody(notification);
 
     // Fabricate a result
     vo->result = vo->result + (2 * vo->input);

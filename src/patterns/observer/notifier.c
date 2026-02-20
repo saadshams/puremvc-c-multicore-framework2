@@ -47,7 +47,7 @@ struct INotifier *puremvc_notifier_init(void *buffer) {
         return NULL;
     }
 
-    struct Notifier *this = (struct Notifier *) buffer;
+    struct Notifier *this = buffer;
     memset(this, 0, sizeof(struct Notifier));
 
     this->super.getFacade = getFacade;
