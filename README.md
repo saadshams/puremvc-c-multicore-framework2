@@ -1,4 +1,4 @@
-## [PureMVC](http://puremvc.org/) TypeScript MultiCore Framework [![CMake on multiple platforms](https://github.com/saadshams/puremvc-c-multicore-framework2/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/saadshams/puremvc-c-multicore-framework2/actions/workflows/cmake-multi-platform.yml)
+## [PureMVC](http://puremvc.org/) C MultiCore Framework [![CMake on multiple platforms](https://github.com/saadshams/puremvc-c-multicore-framework2/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/saadshams/puremvc-c-multicore-framework2/actions/workflows/cmake-multi-platform.yml)
 
 PureMVC is a lightweight framework for creating applications based upon the classic [Model-View-Controller](http://en.wikipedia.org/wiki/Model-view-controller) design meta-pattern. It supports [modular programming](http://en.wikipedia.org/wiki/Modular_programming) through the use of [Multiton](http://en.wikipedia.org/wiki/Multiton) Core actors instead of the [Singletons](http://en.wikipedia.org/wiki/Singleton_pattern).
 
@@ -29,7 +29,7 @@ PureMVC is a lightweight framework for creating applications based upon the clas
 * [Make](https://www.gnu.org/software/make/)
 
 ## License
-* PureMVC Javascript Demo - Employee Admin - Copyright © 2026 [Saad Shams](https://www.linkedin.com/in/muizz)
+* PureMVC Multicore Framework for C - Copyright © 2026 [Saad Shams](https://www.linkedin.com/in/muizz)
 * PureMVC - Copyright © 2026 Futurescale, Inc.
 * All rights reserved.
 
