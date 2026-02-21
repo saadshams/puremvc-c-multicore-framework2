@@ -16,10 +16,10 @@
 #include <stdio.h>
 #include <string.h>
 
-// instanceMap (global)
+// instanceMap
 static struct ControllerMap **instanceMap = NULL;
 
-// mutex for controllerMap (global)
+// mutex for controllerMap
 static Mutex instanceMapMutex;
 static MutexOnce mutexOnce = MUTEX_ONCE_INIT;
 
@@ -125,20 +125,21 @@ static bool removeCommand(struct IController *self, const char *notificationName
     bool removed = false;
 
     mutex_lock(&this->commandMapMutex);
-    for (size_t i = 0, index = 0; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) { // One-pass Filter & Shift (O(n) complexity)
+    size_t index = 0;
+    for (size_t i = 0; this->commandMap[i] != NULL && this->commandMap[i]->key[0] != '\0'; i++) { // One-pass Filter & Shift (O(n) complexity)
         if (strcmp(this->commandMap[i]->key, notificationName) == 0) { // match
             if (out != NULL) *out = this->commandMap[i]->factory; // out param
             this->view->removeObserver(this->view, notificationName, self);
             memset(&this->commandMap[i]->key, 0, KEY_SIZE); // remove
             removed = true;
         } else {
-            if (index != i) { // shift left (Gap-free array)
-                *this->commandMap[index] = *this->commandMap[i]; // shift left first
-                memset(&this->commandMap[i]->key, 0, KEY_SIZE); // remove
-            }
+            if (index != i)
+                *this->commandMap[index] = *this->commandMap[i]; // shift left (Gap-free array)
+
             index++;
         }
     }
+    memset(&this->commandMap[index]->key, 0, KEY_SIZE); // reset tail slot
     mutex_unlock(&this->commandMapMutex);
 
     return removed;
@@ -244,13 +245,13 @@ bool puremvc_controller_removeController(const char *key, struct IController **o
             memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             removed = true;
         } else {
-            if (index != i) { // shift left (Gap-free array)
-                *instanceMap[index] = *instanceMap[i]; // shift left first
-                memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
-            }
+            if (index != i)
+                *instanceMap[index] = *instanceMap[i]; // shift left (Gap-free array)
+
             index++;
         }
     }
+    memset(instanceMap[index]->key, 0, KEY_SIZE); // reset tail slot
 
     if (index == 0) instanceMap = NULL;
 

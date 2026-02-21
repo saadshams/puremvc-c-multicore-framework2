@@ -18,10 +18,10 @@
 #include <stdio.h>
 #include <string.h>
 
-// instanceMap (global)
+// instanceMap
 static struct FacadeMap **instanceMap = NULL;
 
-// mutex for facadeMap (global)
+// mutex for facadeMap
 static Mutex instanceMapMutex;
 static MutexOnce mutexOnce = MUTEX_ONCE_INIT;
 
@@ -293,11 +293,11 @@ bool puremvc_facade_removeFacade(const char *key, struct IFacade **out) {
         } else {
             if (index != i) { // shift left (Gap-free array)
                 *instanceMap[index] = *instanceMap[i]; // shift left first
-                memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             }
             index++;
         }
     }
+    memset(instanceMap[index]->key, 0, KEY_SIZE); // reset tail slot
 
     if (index == 0) instanceMap = NULL; // avoid dangling global stack pointer after removal of last entry
 

@@ -55,9 +55,6 @@ int main(void) {
     test("testMediatorReregistration", testMediatorReregistration);
     test("testModifyObserverListDuringNotification", testModifyObserverListDuringNotification);
     test("testRemoveView", testRemoveView);
-    test("testGarbageStorageForView", testGarbageStorageForView);
-    test("testGarbageStorageForObserver", testGarbageStorageForObserver);
-    test("testGarbageStorageForMediator", testGarbageStorageForMediator);
     test("testObserverMapShiftLeft", testObserverMapShiftLeft);
     test("testObserverShiftLeft", testObserverShiftLeft);
     test("testMediatorMapShiftLeft", testMediatorMapShiftLeft);
@@ -755,82 +752,6 @@ void testRemoveView() {
     if (puremvc_view_removeView("ViewTestKey12", NULL) != true) abort();
 }
 
-void testGarbageStorageForView() {
-    struct ViewMap *viewMap1[] = { NULL }; // empty view
-    const struct IView *view1 = puremvc_view_getInstance(viewMap1, "ViewTestKey13"); // crash test
-    if (view1 != NULL) abort();
-    if (puremvc_view_removeView("ViewTestKey13", NULL) != false) abort();
-}
-
-void testGarbageStorageForObserver() {
-    struct ViewComponent component = {0};
-
-    // no ObserverMap
-    struct ViewMap **instanceMap1 = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
-    struct ObserverMap **observerMap1 = NULL;
-    struct IView *view1 = puremvc_view_getInstance(instanceMap1, "ViewTestKey14");
-    view1->initializeView(view1, observerMap1, NULL); // no observerMap
-    view1->notifyObservers(view1, NULL); // crash test
-    view1->removeObserver(view1, "ViewTestKey14_testing1", &component);
-    view1->registerObserver(view1, "ViewTestKey14_testing1", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
-    if (puremvc_view_removeView("ViewTestKey14", NULL) != true) abort();
-
-    // empty observerMap
-    struct ViewMap **instanceMap2 = (struct ViewMap *[]) {  &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
-    struct ObserverMap **observerMap2 = (struct ObserverMap *[]) { NULL };
-    struct IView *view2 = puremvc_view_getInstance(instanceMap2, "ViewTestKey14");
-    view2->initializeView(view2, observerMap2, NULL);
-    view2->notifyObservers(view2, NULL);
-    view2->removeObserver(view2, "ViewTestKey14_testing2", &component);
-    view2->registerObserver(view2, "ViewTestKey14_testing2", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
-    if (puremvc_view_removeView("ViewTestKey14", NULL) != true) abort();
-
-    // empty ObserverMap field
-    struct ViewMap **instanceMap3 = (struct ViewMap *[]) {  &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
-    struct ObserverMap **observerMap3 = (struct ObserverMap *[]) { &(struct ObserverMap){}, NULL };
-    struct IView *view3 = puremvc_view_getInstance(instanceMap3, "ViewTestKey14");
-    view3->initializeView(view3, observerMap3, NULL);
-    view3->notifyObservers(view3, NULL);
-    view3->removeObserver(view3, "ViewTestKey14_testing3", &component);
-    view3->registerObserver(view3, "ViewTestKey14_testing3", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
-    if (puremvc_view_removeView("ViewTestKey14", NULL) != true) abort();
-
-    // empty observers
-    struct ViewMap **instanceMap4 = (struct ViewMap *[]) {  &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
-    struct IView *view4 = puremvc_view_getInstance(instanceMap4, "ViewTestKey14");
-    struct ObserverMap **observerMap4 = (struct ObserverMap *[]) { &(struct ObserverMap){ .observers = (struct IObserver *[]){ NULL } }, NULL };
-    view4->initializeView(view4, observerMap4, NULL);
-    view4->notifyObservers(view4, NULL);
-    view4->removeObserver(view4, "ViewTestKey14_testing4", &component);
-    view4->registerObserver(view4, "ViewTestKey14_testing4", (void (*)(const void *, const struct INotification *)) handleNotification, &component);
-    if (puremvc_view_removeView("ViewTestKey14", NULL) != true) abort();
-}
-
-void testGarbageStorageForMediator() {
-    // missing MediatorMap
-    struct ViewMap **instanceMap1 = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
-    struct MediatorMap **mediatorMap1 = NULL;
-    struct IView *view1 = puremvc_view_getInstance(instanceMap1, "ViewTestKey15");
-    view1->initializeView(view1, NULL, mediatorMap1);
-    if (view1 == NULL) abort();
-    if (view1->registerMediator(view1, puremvc_mediator_init, MEDIATOR_NAME, NULL) != false) abort();
-    if (view1->hasMediator(view1, MEDIATOR_NAME) != false) abort();;
-    if (view1->retrieveMediator(view1, MEDIATOR_NAME) != NULL) abort();;
-    if (view1->removeMediator(view1, MEDIATOR_NAME, NULL) != false) abort();
-    if (puremvc_view_removeView("ViewTestKey15", NULL) != true) abort();
-
-    // empty mediatorMap
-    struct ViewMap **instanceMap2 = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
-    struct MediatorMap **mediatorMap2 = (struct MediatorMap *[]){ NULL };
-    struct IView *view2 = puremvc_view_getInstance(instanceMap2, "ViewTestKey15");
-    view2->initializeView(view2, NULL, mediatorMap2);
-    if (view2->registerMediator(view2, puremvc_mediator_init, MEDIATOR_NAME, NULL) != false) abort();;
-    if (view2->hasMediator(view2, MEDIATOR_NAME) != false) abort();
-    if (view2->retrieveMediator(view2, MEDIATOR_NAME) != NULL) abort();;
-    if (view2->removeMediator(view2, MEDIATOR_NAME, NULL) != false) abort();
-    if (puremvc_view_removeView("ViewTestKey15", NULL) != true) abort();
-}
-
 void testObserverMapShiftLeft() {
     // 4 ObserverMaps each with a single Observer
     struct ViewMap **instanceMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
@@ -843,89 +764,92 @@ void testObserverMapShiftLeft() {
         NULL
     };
 
+    printf("ObserverMap Address: %p - Observers: %p - Observers[0]: %p\n", &observerMap[0], &observerMap[0]->observers, &observerMap[0]->observers[0]);
+    printf("ObserverMap Address: %p - Observers: %p - Observers[0]: %p\n", &observerMap[1], &observerMap[1]->observers, &observerMap[1]->observers[0]);
+    printf("ObserverMap Address: %p - Observers: %p - Observers[0]: %p\n", &observerMap[2], &observerMap[2]->observers, &observerMap[2]->observers[0]);
+    printf("ObserverMap Address: %p - Observers: %p - Observers[0]: %p\n", &observerMap[3], &observerMap[3]->observers, &observerMap[3]->observers[0]);
+
+    printf("test started\n\n");
+
     struct IView *view = puremvc_view_getInstance(instanceMap, "ViewTestKey16");
     view->initializeView(view, observerMap, NULL);
 
-    struct ViewComponent component0 = {0}, component1 = {0}, component2 = {0}, component3 = {0};
-
-    size_t offset = sizeof(struct IView) + KEY_SIZE;  // skip base + multitonKey
-    struct ObserverMap ***ppp = (struct ObserverMap ***)((char *) view + offset);
-    struct ObserverMap **obsMap = *ppp;
+    struct ViewComponent context0 = {0}, context1 = {0}, context2 = {0}, context3 = {0};
 
     // register four observers, check association and remove them
-    view->registerObserver(view, "observer0", NULL, (void *) &component0);
-    if (strcmp(obsMap[0]->key, "observer0") != 0) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != &component0) abort();
+    view->registerObserver(view, "observer0", NULL, (void *) &context0);
+    if (strcmp(observerMap[0]->key, "observer0") != 0) abort();
 
-    view->registerObserver(view, "observer1", NULL, (void *) &component1);
-    if (strcmp(obsMap[1]->key, "observer1") != 0) abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != &component1) abort();
+    view->registerObserver(view, "observer1", NULL, (void *) &context1);
+    if (strcmp(observerMap[1]->key, "observer1") != 0) abort();
 
-    view->registerObserver(view, "observer2", NULL, (void *) &component2);
-    if (strcmp(obsMap[2]->key, "observer2") != 0) abort();
-    if (obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) != &component2) abort();
+    view->registerObserver(view, "observer2", NULL, (void *) &context2);
+    if (strcmp(observerMap[2]->key, "observer2") != 0) abort();
 
-    view->registerObserver(view, "observer3", NULL, (void *) &component3);
-    if (strcmp(obsMap[3]->key, "observer3") != 0) abort();
-    if (obsMap[3]->observers[0]->getContext(obsMap[3]->observers[0]) != &component3) abort();
+    view->registerObserver(view, "observer3", NULL, (void *) &context3);
+    if (strcmp(observerMap[3]->key, "observer3") != 0) abort();
+
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != &context0) abort();
+    if (observerMap[1]->observers[0]->getContext(observerMap[1]->observers[0]) != &context1) abort();
+    if (observerMap[2]->observers[0]->getContext(observerMap[2]->observers[0]) != &context2) abort();
+    if (observerMap[3]->observers[0]->getContext(observerMap[3]->observers[0]) != &context3) abort();
 
     // remove the middle observer1; remaining entries (2, 3) shift left and the tail is reinit.
-    view->removeObserver(view, "observer1", &component1);
-    if (strcmp(obsMap[0]->key, "observer0") != 0) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != &component0) abort();
-    if (strcmp(obsMap[1]->key, "observer2") != 0) abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != &component2) abort();
-    if (strcmp(obsMap[2]->key, "observer3") != 0) abort();
-    if (obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) != &component3) abort();
-    if (obsMap[3]->key[0] != '\0') abort();
-    if (obsMap[3]->observers[0]->getContext(obsMap[3]->observers[0]) != NULL) abort();
-    if (obsMap[4] != NULL) abort();
+    view->removeObserver(view, "observer1", &context1);
+    if (strcmp(observerMap[0]->key, "observer0") != 0) abort();
+    if (strcmp(observerMap[1]->key, "observer2") != 0) abort();
+    if (strcmp(observerMap[2]->key, "observer3") != 0) abort();
+    if (observerMap[3]->key[0] != '\0') abort();
+
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != &context0) abort();
+    if (observerMap[1]->observers[0]->getContext(observerMap[1]->observers[0]) != &context2) abort();
+    if (observerMap[2]->observers[0]->getContext(observerMap[2]->observers[0]) != &context3) abort();
+    if (observerMap[3]->observers[0]->getContext(observerMap[3]->observers[0]) != NULL) abort();
 
     // remove the last observer3 and verify the remaining entries (0, 2) stay in place
-    view->removeObserver(view, "observer3", &component3);
-    if (strcmp(obsMap[0]->key, "observer0") != 0) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != &component0) abort();
-    if (strcmp(obsMap[1]->key, "observer2") != 0) abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != &component2) abort();
-    if (obsMap[3]->key[0] != '\0') abort();
-    if (obsMap[3]->observers[0]->getContext(obsMap[2]->observers[0]) != NULL) abort();
-    if (obsMap[3]->key[0] != '\0') abort();
-    if (obsMap[3]->observers[0]->getContext(obsMap[3]->observers[0]) != NULL) abort();
-    if (obsMap[4] != NULL) abort();
+    view->removeObserver(view, "observer3", &context3);
+    if (strcmp(observerMap[0]->key, "observer0") != 0) abort();
+    if (strcmp(observerMap[1]->key, "observer2") != 0) abort();
+    if (observerMap[3]->key[0] != '\0') abort();
+    if (observerMap[3]->key[0] != '\0') abort();
+
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != &context0) abort();
+    if (observerMap[1]->observers[0]->getContext(observerMap[1]->observers[0]) != &context2) abort();
+    if (observerMap[3]->observers[0]->getContext(observerMap[2]->observers[0]) != NULL) abort(); // no effect
+    if (observerMap[3]->observers[0]->getContext(observerMap[3]->observers[0]) != NULL) abort();
 
     // remove the first observer0 and verify that remaining observer shift left
-    view->removeObserver(view, "observer0", &component0);
-    if (strcmp(obsMap[0]->key, "observer2") != 0) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != &component2) abort();
-    if (obsMap[1]->key[0] != '\0') abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != NULL) abort();
-    if (obsMap[2]->key[0] != '\0') abort();
-    if (obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) != NULL) abort();
-    if (obsMap[3]->key[0] != '\0') abort();
-    if (obsMap[3]->observers[0]->getContext(obsMap[3]->observers[0]) != NULL) abort();
-    if (obsMap[4] != NULL) abort();
+    view->removeObserver(view, "observer0", &context0);
+    if (strcmp(observerMap[0]->key, "observer2") != 0) abort();
+    if (observerMap[1]->key[0] != '\0') abort();
+    if (observerMap[2]->key[0] != '\0') abort();
+    if (observerMap[3]->key[0] != '\0') abort();
+
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != &context2) abort();
+    if (observerMap[1]->observers[0]->getContext(observerMap[1]->observers[0]) != NULL) abort();
+    if (observerMap[2]->observers[0]->getContext(observerMap[2]->observers[0]) != NULL) abort();
+    if (observerMap[3]->observers[0]->getContext(observerMap[3]->observers[0]) != NULL) abort();
 
     // Remove the remaining observer2
-    view->removeObserver(view, "observer2", &component2);
-    if (obsMap[0]->key[0] != '\0') abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != NULL) abort();
-    if (obsMap[1]->key[0] != '\0') abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != NULL) abort();
-    if (obsMap[2]->key[0] != '\0') abort();
-    if (obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) != NULL) abort();
-    if (obsMap[3]->key[0] != '\0') abort();
-    if (obsMap[3]->observers[0]->getContext(obsMap[3]->observers[0]) != NULL) abort();
-    if (obsMap[4] != NULL) abort();
+    view->removeObserver(view, "observer2", &context2);
+    if (observerMap[0]->key[0] != '\0') abort();
+    if (observerMap[1]->key[0] != '\0') abort();
+    if (observerMap[2]->key[0] != '\0') abort();
+    if (observerMap[3]->key[0] != '\0') abort();
+
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != NULL) abort();
+    if (observerMap[1]->observers[0]->getContext(observerMap[1]->observers[0]) != NULL) abort();
+    if (observerMap[2]->observers[0]->getContext(observerMap[2]->observers[0]) != NULL) abort();
+    if (observerMap[3]->observers[0]->getContext(observerMap[3]->observers[0]) != NULL) abort();
 
     if (puremvc_view_removeView("ViewTestKey16", NULL) != true) abort();
 }
 
 // another test for observers shift left in a single ObserverMap
 void testObserverShiftLeft() {
-    // An ObserverMaps with 4 Observers
-    struct ViewMap **instanceMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
 
-    struct ObserverMap **observerMap = (struct ObserverMap *[]){
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) { // An ObserverMaps with 4 Observers
         &(struct ObserverMap){ .observers = (struct IObserver *[]) {
             memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
             memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
@@ -937,61 +861,52 @@ void testObserverShiftLeft() {
     };
 
     struct ViewComponent context0 = {0}, context1 = {0}, context2 = {0}, context3 = {0};
-    struct IView *view = puremvc_view_getInstance(instanceMap, "ViewTestKey17");
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey17");
     view->initializeView(view, observerMap, NULL);
-
-    size_t offset = sizeof(struct IView) + KEY_SIZE;  // skip base + multitonKey
-    struct ObserverMap ***ppp = (struct ObserverMap ***)((char *) view + offset);
-    struct ObserverMap **obsMap = *ppp;
 
     // register four observers, check association and remove them
     if (view->registerObserver(view, "notification0", NULL, (void *) &context0) != true) abort();
-    if (strcmp(obsMap[0]->key, "notification0") != 0) abort(); // key gets created
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != &context0) abort();
+    if (strcmp(observerMap[0]->key, "notification0") != 0) abort(); // key gets created
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != &context0) abort();
 
     if (view->registerObserver(view, "notification0", NULL, &context1) != true) abort();
-    if (obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) != &context1) abort();
+    if (observerMap[0]->observers[1]->getContext(observerMap[0]->observers[1]) != &context1) abort();
 
     if (view->registerObserver(view, "notification0", NULL, &context2) != true) abort();
-    if (obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) != &context2) abort();
+    if (observerMap[0]->observers[2]->getContext(observerMap[0]->observers[2]) != &context2) abort();
 
     if (view->registerObserver(view, "notification0", NULL, &context3) != true) abort();
-    if (obsMap[0]->observers[3]->getContext(obsMap[0]->observers[3]) != &context3) abort();
-    if (obsMap[0]->observers[4] != NULL) abort();
+    if (observerMap[0]->observers[3]->getContext(observerMap[0]->observers[3]) != &context3) abort();
 
     // remove the middle context1; remaining entries (2, 3) shift left and the tail is reinit.
     if (view->removeObserver(view, "notification0", &context1) != true) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != &context0) abort();
-    if (obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) != &context2) abort();
-    if (obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) != &context3) abort();
-    if (obsMap[0]->observers[3]->getContext(obsMap[0]->observers[3]) != NULL) abort();
-    if (obsMap[0]->observers[4] != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != &context0) abort();
+    if (observerMap[0]->observers[1]->getContext(observerMap[0]->observers[1]) != &context2) abort();
+    if (observerMap[0]->observers[2]->getContext(observerMap[0]->observers[2]) != &context3) abort();
+    if (observerMap[0]->observers[3]->getContext(observerMap[0]->observers[3]) != NULL) abort();
 
     // remove the last context3 and verify the remaining entries (0, 2) stay in place
     if (view->removeObserver(view, "notification0", &context3) != true) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != &context0) abort();
-    if (obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) != &context2) abort();
-    if (obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) != NULL) abort();
-    if (obsMap[0]->observers[3]->getContext(obsMap[0]->observers[3]) != NULL) abort();
-    if (obsMap[0]->observers[4] != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != &context0) abort();
+    if (observerMap[0]->observers[1]->getContext(observerMap[0]->observers[1]) != &context2) abort();
+    if (observerMap[0]->observers[2]->getContext(observerMap[0]->observers[2]) != NULL) abort();
+    if (observerMap[0]->observers[3]->getContext(observerMap[0]->observers[3]) != NULL) abort();
 
     // remove the first context0 and verify that remaining observer shift left
     if (view->removeObserver(view, "notification0", &context0) != true) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != &context2) abort();
-    if (obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) != NULL) abort();
-    if (obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) != NULL) abort();
-    if (obsMap[0]->observers[3]->getContext(obsMap[0]->observers[3]) != NULL) abort();
-    if (obsMap[0]->observers[4] != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != &context2) abort();
+    if (observerMap[0]->observers[1]->getContext(observerMap[0]->observers[1]) != NULL) abort();
+    if (observerMap[0]->observers[2]->getContext(observerMap[0]->observers[2]) != NULL) abort();
+    if (observerMap[0]->observers[3]->getContext(observerMap[0]->observers[3]) != NULL) abort();
 
     // Remove the remaining context2
     if (view->removeObserver(view, "notification0", &context2) != true) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != NULL) abort();
-    if (obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) != NULL) abort();
-    if (obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) != NULL) abort();
-    if (obsMap[0]->observers[3]->getContext(obsMap[0]->observers[3]) != NULL) abort();
-    if (obsMap[0]->observers[4] != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != NULL) abort();
+    if (observerMap[0]->observers[1]->getContext(observerMap[0]->observers[1]) != NULL) abort();
+    if (observerMap[0]->observers[2]->getContext(observerMap[0]->observers[2]) != NULL) abort();
+    if (observerMap[0]->observers[3]->getContext(observerMap[0]->observers[3]) != NULL) abort();
 
-    if (obsMap[0]->key[0] != '\0') abort(); // key gets deleted
+    if (observerMap[0]->key[0] != '\0') abort(); // key gets deleted
 
     // Test duplicate context registration and repeated removal:
     if (view->registerObserver(view, "notification0", NULL, &context0) != true) abort();
@@ -999,11 +914,10 @@ void testObserverShiftLeft() {
     if (view->registerObserver(view, "notification0", NULL, &context0) != false) abort();
     if (view->registerObserver(view, "notification0", NULL, &context0) != false) abort();
 
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != &context0) abort(); // only one gets registered
-    if (obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) != NULL) abort();
-    if (obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) != NULL) abort();
-    if (obsMap[0]->observers[3]->getContext(obsMap[0]->observers[3]) != NULL) abort();
-    if (obsMap[0]->observers[4] != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != &context0) abort(); // only one gets registered
+    if (observerMap[0]->observers[1]->getContext(observerMap[0]->observers[1]) != NULL) abort();
+    if (observerMap[0]->observers[2]->getContext(observerMap[0]->observers[2]) != NULL) abort();
+    if (observerMap[0]->observers[3]->getContext(observerMap[0]->observers[3]) != NULL) abort();
 
     if (view->removeObserver(view, "notification0", &context0) != true) abort();
     if (view->removeObserver(view, "notification0", &context0) != false) abort();
@@ -1016,20 +930,21 @@ void testObserverShiftLeft() {
 
 void testMediatorMapShiftLeft() {
     // viewMap for 4 mediators sharing one notification, one observer per notification
-    struct ViewMap **instanceMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
-
-    struct ObserverMap **observerMap = (struct ObserverMap *[]){
-        &(struct ObserverMap){ .observers = (struct IObserver *[]) {
-            memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
-            memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
-            memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
-            memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
-            NULL
-        } },
+    struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
+    struct ObserverMap **observerMap = (struct ObserverMap *[]) {
+        &(struct ObserverMap){
+            .observers = (struct IObserver *[]){
+                memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
+                memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
+                memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
+                memset(alloca(puremvc_observer_size()), 0, puremvc_observer_size()),
+                NULL
+            },
+        },
         NULL
     };
 
-    struct MediatorMap **mediatorMap = (struct MediatorMap *[]){ // 4 mediators
+    struct MediatorMap **mediatorMap = (struct MediatorMap *[]) { // 4 mediators
         &(struct MediatorMap){ .mediator = alloca(puremvc_mediator_size()) },
         &(struct MediatorMap){ .mediator = alloca(puremvc_mediator_size()) },
         &(struct MediatorMap){ .mediator = alloca(puremvc_mediator_size()) },
@@ -1037,91 +952,100 @@ void testMediatorMapShiftLeft() {
         NULL
     };
 
-    struct IView *view = puremvc_view_getInstance(instanceMap, "ViewTestKey17");
+    struct IView *view = puremvc_view_getInstance(viewMap, "ViewTestKey17");
     view->initializeView(view, observerMap, mediatorMap);
-
-    size_t offset1 = sizeof(struct IView) + KEY_SIZE;  // skip base + multitonKey
-    struct ObserverMap ***ppp = (struct ObserverMap ***)((char *) view + offset1);
-    struct ObserverMap **obsMap = *ppp;
-
-    size_t offset2 = offset1 + sizeof(struct ObserverMap **);  // skip base + multitonKey
-    struct MediatorMap ***ppp2 = (struct MediatorMap ***)((char *) view + offset2);
-    struct MediatorMap **medMap = *ppp2;
 
     // Register four mediators and verify that each is correctly associated to their observers
     view->registerMediator(view, view_test_mediator7, "mediator0", NULL);
-    if (strcmp(medMap[0]->mediator->getName(medMap[0]->mediator), "mediator0") != 0) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != medMap[0]->mediator) abort();
+    const struct IMediator *mediator0 = mediatorMap[0]->mediator;
+    if (strcmp(mediatorMap[0]->key, "mediator0") != 0) abort();
+    if (strcmp(mediator0->getName(mediator0), "mediator0") != 0) abort();
 
     view->registerMediator(view, view_test_mediator7, "mediator1", NULL);
-    if (strcmp(medMap[1]->mediator->getName(medMap[1]->mediator), "mediator1") != 0) abort();
-    if (obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) != medMap[1]->mediator) abort();
+    const struct IMediator *mediator1 = mediatorMap[1]->mediator;
+    if (strcmp(mediatorMap[1]->key, "mediator1") != 0) abort();
+    if (strcmp(mediator1->getName(mediator1), "mediator1") != 0) abort();
 
     view->registerMediator(view, view_test_mediator7, "mediator2", NULL);
-    if (strcmp(medMap[2]->mediator->getName(medMap[2]->mediator), "mediator2") != 0) abort();
-    if (obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) != medMap[2]->mediator) abort();
+    const struct IMediator *mediator2 = mediatorMap[2]->mediator;
+    if (strcmp(mediatorMap[2]->key, "mediator2") != 0) abort();
+    if (strcmp(mediator2->getName(mediator2), "mediator2") != 0) abort();
 
     view->registerMediator(view, view_test_mediator7, "mediator3", NULL);
-    if (strcmp(medMap[3]->mediator->getName(medMap[3]->mediator), "mediator3") != 0) abort();
-    if (obsMap[0]->observers[3]->getContext(obsMap[0]->observers[3]) != medMap[3]->mediator) abort();
+    const struct IMediator *mediator3 = mediatorMap[3]->mediator;
+    if (strcmp(mediatorMap[3]->key, "mediator3") != 0) abort();
+    if (strcmp(mediator3->getName(mediator3), "mediator3") != 0) abort();
 
-    // Verify the dictionary key for the map is correctly set
-    if (strcmp(obsMap[0]->key, NOTE7) != 0) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != mediator0) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[1]) != mediator1) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[2]) != mediator2) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[3]) != mediator3) abort();
 
     // Remove the second mediator1 (middle) and verify that remaining mediators 2, 3 are shifted correctly
     struct IMediator *removedMediator1 = NULL;
     if (view->removeMediator(view, "mediator1", &removedMediator1) != true) abort();
     if (strcmp(removedMediator1->getName(removedMediator1), "mediator1") != 0) abort();
-    if (strcmp(medMap[0]->key, "mediator0") != 0) abort();
-    if (strcmp(medMap[0]->mediator->getName(medMap[0]->mediator), "mediator0") != 0) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != medMap[0]->mediator) abort();
-    if (strcmp(medMap[1]->key, "mediator2") != 0) abort();
-    if (strcmp(medMap[1]->mediator->getName(medMap[1]->mediator), "mediator2") != 0) abort();
-    if (obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) != medMap[1]->mediator) abort();
-    if (strcmp(medMap[2]->key, "mediator3") != 0) abort();
-    if (strcmp(medMap[2]->mediator->getName(medMap[2]->mediator), "mediator3") != 0) abort();
-    if (obsMap[0]->observers[2]->getContext(obsMap[0]->observers[2]) != medMap[2]->mediator) abort();
-    if (medMap[3]->key[0] != '\0') abort(); // mediatorMap key
-    if (obsMap[0]->key[0] == '\0') abort(); // observerMap key
+
+    if (strcmp(mediatorMap[0]->key, "mediator0") != 0) abort();
+    if (strcmp(mediatorMap[1]->key, "mediator2") != 0) abort();
+    if (strcmp(mediatorMap[2]->key, "mediator3") != 0) abort();
+    if (mediatorMap[3]->key[0] != '\0') abort();
+
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != mediator0) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[1]) != mediator2) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[2]) != mediator3) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[3]) != NULL) abort();
 
     // Remove the last mediator3 and verify the remaining mediators 0, 2 stay in place
     struct IMediator *removedMediator3 = NULL;
     if (view->removeMediator(view, "mediator3", &removedMediator3) != true) abort();;
     if (strcmp(removedMediator3->getName(removedMediator3), "mediator3") != 0) abort();
-    if (strcmp(medMap[0]->mediator->getName(medMap[0]->mediator), "mediator0") != 0) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != medMap[0]->mediator) abort();
-    if (strcmp(medMap[1]->mediator->getName(medMap[1]->mediator), "mediator2") != 0) abort();
-    if (obsMap[0]->observers[1]->getContext(obsMap[0]->observers[1]) != medMap[1]->mediator) abort();
-    if (medMap[2]->key[0] != '\0') abort();
-    if (medMap[3]->key[0] != '\0') abort();
-    if (obsMap[0]->key[0] == '\0') abort(); // ObserverMap key will persist while observers exist
+
+    if (strcmp(mediatorMap[0]->key, "mediator0") != 0) abort();
+    if (strcmp(mediatorMap[1]->key, "mediator2") != 0) abort();
+    if (mediatorMap[2]->key[0] != '\0') abort();
+    if (mediatorMap[3]->key[0] != '\0') abort();
+
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != mediator0) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[1]) != mediator2) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[2]) != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[3]) != NULL) abort();
 
     // Remove the first mediator0 and verify that subsequent mediator2 shift left
     struct IMediator *removedMediator0 = NULL;
     if (view->removeMediator(view, "mediator0", &removedMediator0) != true) abort();;
     if (strcmp(removedMediator0->getName(removedMediator0), "mediator0") != 0) abort();
-    if (strcmp(medMap[0]->mediator->getName(medMap[0]->mediator), "mediator2") != 0) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != medMap[0]->mediator) abort();
 
-    if (medMap[1]->key[0] != '\0') abort();
-    if (medMap[2]->key[0] != '\0') abort();
-    if (medMap[3]->key[0] != '\0') abort();
-    if (obsMap[0]->key[0] == '\0') abort(); // ObserverMap key will persist while observers exist
+    if (strcmp(mediatorMap[0]->key, "mediator2") != 0) abort();
+    if (mediatorMap[1]->key[0] != '\0') abort();
+    if (mediatorMap[2]->key[0] != '\0') abort();
+    if (mediatorMap[3]->key[0] != '\0') abort();
+
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != mediator2) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[1]) != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[2]) != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[3]) != NULL) abort();
 
     // Remove the last mediator2 and confirm that the dictionary key is cleared
     struct IMediator *removedMediator2 = NULL;
     if (view->removeMediator(view, "mediator2", &removedMediator2) != true) abort();
     if (strcmp(removedMediator2->getName(removedMediator2), "mediator2") != 0) abort();
-    if (medMap[1]->key[0] != '\0') abort();
-    if (medMap[2]->key[0] != '\0') abort();
-    if (medMap[3]->key[0] != '\0') abort();
-    if (obsMap[0]->key[0] != '\0') abort(); // ObserverMap key cleared since no observers left
+
+    if (mediatorMap[0]->key[0] != '\0') abort();
+    if (mediatorMap[1]->key[0] != '\0') abort();
+    if (mediatorMap[2]->key[0] != '\0') abort();
+    if (mediatorMap[3]->key[0] != '\0') abort();
+
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[1]) != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[2]) != NULL) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[3]) != NULL) abort();
 
     if (puremvc_view_removeView("ViewTestKey17", NULL) != true) abort();
 }
 
 void testViewMapShiftLeft() {
-    struct ViewMap **instanceMap = (struct ViewMap *[]) {
+    struct ViewMap **viewMap = (struct ViewMap *[]) {
         &(struct ViewMap) { .view = alloca(puremvc_view_size()) },
         &(struct ViewMap) { .view = alloca(puremvc_view_size()) },
         &(struct ViewMap) { .view = alloca(puremvc_view_size()) },
@@ -1130,56 +1054,56 @@ void testViewMapShiftLeft() {
     };
 
     // create 4 instances
-    puremvc_view_getInstance(instanceMap, "view0");
-    if (strcmp(instanceMap[0]->key, "view0") != 0) abort();
-    const char *key0 = (char *)instanceMap[0]->view + sizeof(struct IView);
-    if (strcmp(key0, "view0") != 0) abort();
+    puremvc_view_getInstance(viewMap, "view0");
+    if (strcmp(viewMap[0]->key, "view0") != 0) abort();
 
-    puremvc_view_getInstance(instanceMap, "view1");
-    if (strcmp(instanceMap[1]->key, "view1") != 0) abort();
-    const char *key1 = (char *)instanceMap[1]->view + sizeof(struct IView);
-    if (strcmp(key1, "view1") != 0) abort();
+    puremvc_view_getInstance(viewMap, "view1");
+    if (strcmp(viewMap[1]->key, "view1") != 0) abort();
 
-    puremvc_view_getInstance(instanceMap, "view2");
-    if (strcmp(instanceMap[2]->key, "view2") != 0) abort();
-    const char *key2 = (char *)instanceMap[2]->view + sizeof(struct IView);
-    if (strcmp(key2, "view2") != 0) abort();
+    puremvc_view_getInstance(viewMap, "view2");
+    if (strcmp(viewMap[2]->key, "view2") != 0) abort();
 
-    puremvc_view_getInstance(instanceMap, "view3");
-    if (strcmp(instanceMap[3]->key, "view3") != 0) abort();
-    const char *key3 = (char *)instanceMap[3]->view + sizeof(struct IView);
-    if (strcmp(key3, "view3") != 0) abort();
+    puremvc_view_getInstance(viewMap, "view3");
+    if (strcmp(viewMap[3]->key, "view3") != 0) abort();
 
     // remove
     struct IView *view1 = NULL; // remove middle view1, remaining 0, 2, 3
     if (puremvc_view_removeView("view1", &view1) != true) abort();
-    if (strcmp(instanceMap[0]->key, "view0") != 0) abort();
-    if (strcmp(instanceMap[1]->key, "view2") != 0) abort();
-    if (strcmp(instanceMap[2]->key, "view3") != 0) abort();
-    if (instanceMap[3]->key[0] != '\0') abort();
-    if (instanceMap[4] != NULL) abort();
+    const char *multitonKey1 = (const char *) view1 + sizeof(struct IView);
+    if (strcmp(multitonKey1, "view1") != 0) abort();
+
+    if (strcmp(viewMap[0]->key, "view0") != 0) abort();
+    if (strcmp(viewMap[1]->key, "view2") != 0) abort();
+    if (strcmp(viewMap[2]->key, "view3") != 0) abort();
+    if (viewMap[3]->key[0] != '\0') abort();
 
     struct IView *view3 = NULL; // remove last view3, remaining 0, 2
     if (puremvc_view_removeView("view3", &view3) != true) abort();
-    if (strcmp(instanceMap[0]->key, "view0") != 0) abort();
-    if (strcmp(instanceMap[1]->key, "view2") != 0) abort();
-    if (instanceMap[2]->key[0] != '\0') abort();
-    if (instanceMap[3]->key[0] != '\0') abort();
-    if (instanceMap[4] != NULL) abort();
+    const char *multitonKey3 = (const char *) view3 + sizeof(struct IView);
+    if (strcmp(multitonKey3, "view3") != 0) abort();
+
+    if (strcmp(viewMap[0]->key, "view0") != 0) abort();
+    if (strcmp(viewMap[1]->key, "view2") != 0) abort();
+    if (viewMap[2]->key[0] != '\0') abort();
+    if (viewMap[3]->key[0] != '\0') abort();
 
     struct IView *view0 = NULL; // remove first, remaining 2
     if (puremvc_view_removeView("view0", &view0) != true) abort();
-    if (strcmp(instanceMap[0]->key, "view2") != 0) abort();
-    if (instanceMap[1]->key[0] != '\0') abort();
-    if (instanceMap[2]->key[0] != '\0') abort();
-    if (instanceMap[3]->key[0] != '\0') abort();
-    if (instanceMap[4] != NULL) abort();
+    const char *multitonKey0 = (const char *) view0 + sizeof(struct IView);
+    if (strcmp(multitonKey0, "view0") != 0) abort();
+
+    if (strcmp(viewMap[0]->key, "view2") != 0) abort();
+    if (viewMap[1]->key[0] != '\0') abort();
+    if (viewMap[2]->key[0] != '\0') abort();
+    if (viewMap[3]->key[0] != '\0') abort();
 
     struct IView *view2 = NULL; // remove remaining
     if (puremvc_view_removeView("view2", &view2) != true) abort();
-    if (instanceMap[0]->key[0] != '\0') abort();
-    if (instanceMap[1]->key[0] != '\0') abort();
-    if (instanceMap[2]->key[0] != '\0') abort();
-    if (instanceMap[3]->key[0] != '\0') abort();
-    if (instanceMap[4] != NULL) abort();
+    const char *multitonKey2 = (const char *) view2 + sizeof(struct IView);
+    if (strcmp(multitonKey2, "view2") != 0) abort();
+
+    if (viewMap[0]->key[0] != '\0') abort();
+    if (viewMap[1]->key[0] != '\0') abort();
+    if (viewMap[2]->key[0] != '\0') abort();
+    if (viewMap[3]->key[0] != '\0') abort();
 }

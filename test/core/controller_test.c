@@ -394,89 +394,89 @@ void testCommandMapShiftLeft() {
     struct IController *controller = puremvc_controller_getInstance(controllerMap, "ControllerTestKey8");
     controller->initializeController(controller, view, commandMap);
 
-    size_t offset1 = sizeof(struct IView) + KEY_SIZE;  // skip base + multitonKey
-    struct ObserverMap ***ppp = (struct ObserverMap ***)((char *) view + offset1);
-    struct ObserverMap **obsMap = *ppp;
-
-    size_t offset2 = sizeof(struct IController) + KEY_SIZE;  // skip base + multitonKey
-    struct CommandMap ***ppp2 = (struct CommandMap ***)((char *) controller + offset2);
-    struct CommandMap **cmdMap = *ppp2;
-
     struct INotification *notification0 = puremvc_notification_init(alloca(puremvc_notification_size()), "command0", NULL, NULL);
     controller->executeCommand(controller, notification0); // crash test
     controller->executeCommand(controller, notification0);
 
     // Register four commands and verify that each is correctly associated to their dictionaries and observers
     if (controller->registerCommand(controller, "command0", puremvc_simple_command_init) != true) abort();;
-    if (strcmp(cmdMap[0]->key, "command0") != 0) abort();
-    if(cmdMap[0]->factory != puremvc_simple_command_init) abort();
-    if (strcmp(obsMap[0]->key, "command0") != 0) abort();
-    if (obsMap[0]->observers[0]->getContext(obsMap[0]->observers[0]) != controller) abort();
+    if (strcmp(commandMap[0]->key, "command0") != 0) abort();
+    if(commandMap[0]->factory != puremvc_simple_command_init) abort();
+    if (strcmp(observerMap[0]->key, "command0") != 0) abort();
+    if (observerMap[0]->observers[0]->getContext(observerMap[0]->observers[0]) != controller) abort();
 
     if (controller->registerCommand(controller, "command1", puremvc_simple_command_init) != true) abort();
-    if (strcmp(cmdMap[1]->key, "command1") != 0) abort();
-    if(cmdMap[1]->factory != puremvc_simple_command_init) abort();
-    if (strcmp(obsMap[1]->key, "command1") != 0) abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != controller) abort();
+    if (strcmp(commandMap[1]->key, "command1") != 0) abort();
+    if(commandMap[1]->factory != puremvc_simple_command_init) abort();
+    if (strcmp(observerMap[1]->key, "command1") != 0) abort();
+    if (observerMap[1]->observers[0]->getContext(observerMap[1]->observers[0]) != controller) abort();
 
-    if (controller->registerCommand(controller, "command2", puremvc_simple_command_init) != true)
-
-        abort();
-    if (strcmp(cmdMap[2]->key, "command2") != 0) abort();
-    if(cmdMap[2]->factory != puremvc_simple_command_init) abort();
-    if (strcmp(obsMap[2]->key, "command2") != 0) abort();
-    if (obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) != controller) abort();
+    if (controller->registerCommand(controller, "command2", puremvc_simple_command_init) != true) abort();
+    if (strcmp(commandMap[2]->key, "command2") != 0) abort();
+    if(commandMap[2]->factory != puremvc_simple_command_init) abort();
+    if (strcmp(observerMap[2]->key, "command2") != 0) abort();
+    if (observerMap[2]->observers[0]->getContext(observerMap[2]->observers[0]) != controller) abort();
 
     if (controller->registerCommand(controller, "command3", puremvc_simple_command_init) != true) abort();
-    if (strcmp(cmdMap[3]->key, "command3") != 0) abort();
-    if(cmdMap[3]->factory != puremvc_simple_command_init) abort();
-    if (strcmp(obsMap[3]->key, "command3") != 0) abort();
-    if (obsMap[3]->observers[0]->getContext(obsMap[3]->observers[0]) != controller) abort();
+    if (strcmp(commandMap[3]->key, "command3") != 0) abort();
+    if(commandMap[3]->factory != puremvc_simple_command_init) abort();
+    if (strcmp(observerMap[3]->key, "command3") != 0) abort();
+    if (observerMap[3]->observers[0]->getContext(observerMap[3]->observers[0]) != controller) abort();
 
     // Remove the second command1 (middle) and verify that remaining commands 2, 3 and observers shifted correctly
     if (controller->removeCommand(controller, "command1", NULL) != true) abort();
-    if (strcmp(cmdMap[0]->key, "command0") != 0) abort();
-    if(cmdMap[0]->factory != puremvc_simple_command_init) abort();
-    if (strcmp(obsMap[1]->key, "command2") != 0) abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != controller) abort();
-    if (strcmp(obsMap[2]->key, "command3") != 0) abort();
-    if (obsMap[2]->observers[0]->getContext(obsMap[2]->observers[0]) != controller) abort();
+    if (strcmp(commandMap[0]->key, "command0") != 0) abort();
+    if (strcmp(commandMap[1]->key, "command2") != 0) abort();
+    if (strcmp(commandMap[2]->key, "command3") != 0) abort();
+    if (commandMap[3]->key[0] != '\0') abort();
+
+    if (strcmp(observerMap[0]->key, "command0") != 0) abort();
+    if (strcmp(observerMap[1]->key, "command2") != 0) abort();
+    if (strcmp(observerMap[2]->key, "command3") != 0) abort();
+    if (observerMap[3]->key[0] != '\0') abort();
 
     // // Remove the last command3 and verify the remaining command 0, 2 stay in place
     if (controller->removeCommand(controller, "command3", NULL) != true) abort();
-    if (strcmp(cmdMap[0]->key, "command0") != 0) abort();
-    if(cmdMap[0]->factory != puremvc_simple_command_init) abort();
-    if (strcmp(obsMap[1]->key, "command2") != 0) abort();
-    if (obsMap[1]->observers[0]->getContext(obsMap[1]->observers[0]) != controller) abort();
+    if (strcmp(commandMap[0]->key, "command0") != 0) abort();
+    if (strcmp(commandMap[1]->key, "command2") != 0) abort();
+    if (commandMap[2]->key[0] != '\0') abort();
+    if (commandMap[3]->key[0] != '\0') abort();
+
+    if (strcmp(observerMap[0]->key, "command0") != 0) abort();
+    if (strcmp(observerMap[1]->key, "command2") != 0) abort();
+    if (observerMap[2]->key[0] != '\0') abort();
+    if (observerMap[3]->key[0] != '\0') abort();
 
     // Remove the first command0 and verify that subsequent command2 shift left
     if (controller->removeCommand(controller, "command0", NULL) != true) abort();
-    if (strcmp(cmdMap[0]->key, "command2") != 0) abort();
-    if(cmdMap[0]->factory != puremvc_simple_command_init) abort();
+    if (strcmp(commandMap[0]->key, "command2") != 0) abort();
+    if (commandMap[1]->key[0] != '\0') abort();
+    if (commandMap[2]->key[0] != '\0') abort();
+    if (commandMap[3]->key[0] != '\0') abort();
 
-    // Remove all remaining mediators and confirm that the dictionary key is cleared
+    if (strcmp(observerMap[0]->key, "command2") != 0) abort();
+    if (observerMap[1]->key[0] != '\0') abort();
+    if (observerMap[2]->key[0] != '\0') abort();
+    if (observerMap[3]->key[0] != '\0') abort();
+
+    // Remove the remaining command2
     if (controller->removeCommand(controller, "command2", NULL) != true) abort();
-    if (cmdMap[0]->key[0] != '\0') abort();
+    if (commandMap[0]->key[0] != '\0') abort();
+    if (commandMap[1]->key[0] != '\0') abort();
+    if (commandMap[2]->key[0] != '\0') abort();
+    if (commandMap[3]->key[0] != '\0') abort();
+
+    if (observerMap[0]->key[0] != '\0') abort();
+    if (observerMap[1]->key[0] != '\0') abort();
+    if (observerMap[2]->key[0] != '\0') abort();
+    if (observerMap[3]->key[0] != '\0') abort();
 
     if (puremvc_controller_removeController("ControllerTestKey8", NULL) != true) abort();
     if (puremvc_view_removeView("ControllerTestKey8", NULL) != true) abort();
 }
 
 void TestControllerMapShiftLeft() {
-    struct ViewMap **viewMap = (struct ViewMap *[]) {
-        &(struct ViewMap){ .view = alloca(puremvc_view_size() ) },
-        &(struct ViewMap){ .view = alloca(puremvc_view_size() ) },
-        &(struct ViewMap){ .view = alloca(puremvc_view_size() ) },
-        &(struct ViewMap){ .view = alloca(puremvc_view_size() ) },
-        NULL
-    };
-
-    if (puremvc_view_getInstance(viewMap, "controller0") == NULL) abort(); // Controller dependencies
-    if (puremvc_view_getInstance(viewMap, "controller1") == NULL) abort();
-    if (puremvc_view_getInstance(viewMap, "controller2") == NULL) abort();
-    if (puremvc_view_getInstance(viewMap, "controller3") == NULL) abort();
-
-    struct ControllerMap **instanceMap = (struct ControllerMap *[]) {
+    struct ControllerMap **controllerMap = (struct ControllerMap *[]) {
         &(struct ControllerMap){ .controller = alloca(puremvc_controller_size() ) },
         &(struct ControllerMap){ .controller = alloca(puremvc_controller_size() ) },
         &(struct ControllerMap){ .controller = alloca(puremvc_controller_size() ) },
@@ -485,56 +485,56 @@ void TestControllerMapShiftLeft() {
     };
 
     // create 4 instances
-    if (puremvc_controller_getInstance(instanceMap, "controller0") == NULL) abort();
-    if (strcmp(instanceMap[0]->key, "controller0") != 0) abort();
-    const char *key0 = (char *)instanceMap[0]->controller + sizeof(struct IController);
-    if (strcmp(key0, "controller0") != 0) abort();
+    if (puremvc_controller_getInstance(controllerMap, "controller0") == NULL) abort();
+    if (strcmp(controllerMap[0]->key, "controller0") != 0) abort();
 
-    if (puremvc_controller_getInstance(instanceMap, "controller1") == NULL) abort();
-    if (strcmp(instanceMap[1]->key, "controller1") != 0) abort();
-    const char *key1 = (char *)instanceMap[1]->controller + sizeof(struct IController);
-    if (strcmp(key1, "controller1") != 0) abort();
+    if (puremvc_controller_getInstance(controllerMap, "controller1") == NULL) abort();
+    if (strcmp(controllerMap[1]->key, "controller1") != 0) abort();
 
-    if (puremvc_controller_getInstance(instanceMap, "controller2") == NULL) abort();
-    if (strcmp(instanceMap[2]->key, "controller2") != 0) abort();
-    const char *key2 = (char *)instanceMap[2]->controller + sizeof(struct IController);
-    if (strcmp(key2, "controller2") != 0) abort();
+    if (puremvc_controller_getInstance(controllerMap, "controller2") == NULL) abort();
+    if (strcmp(controllerMap[2]->key, "controller2") != 0) abort();
 
-    if (puremvc_controller_getInstance(instanceMap, "controller3") == NULL) abort();
-    if (strcmp(instanceMap[3]->key, "controller3") != 0) abort();
-    const char *key3 = (char *)instanceMap[3]->controller + sizeof(struct IController);
-    if (strcmp(key3, "controller3") != 0) abort();
+    if (puremvc_controller_getInstance(controllerMap, "controller3") == NULL) abort();
+    if (strcmp(controllerMap[3]->key, "controller3") != 0) abort();
 
     // remove
     struct IController *controller1 = NULL; // remove middle controller1, remaining 0, 2, 3
     if (puremvc_controller_removeController("controller1", &controller1) != true) abort();
-    if (strcmp(instanceMap[0]->key, "controller0") != 0) abort();
-    if (strcmp(instanceMap[1]->key, "controller2") != 0) abort();
-    if (strcmp(instanceMap[2]->key, "controller3") != 0) abort();
-    if (instanceMap[3]->key[0] != '\0') abort();
-    if (instanceMap[4] != NULL) abort();
+    const char *multitonKey1 = (const char *) controller1 + sizeof(struct IController);
+    if (strcmp(multitonKey1, "controller1") != 0) abort();
+
+    if (strcmp(controllerMap[0]->key, "controller0") != 0) abort();
+    if (strcmp(controllerMap[1]->key, "controller2") != 0) abort();
+    if (strcmp(controllerMap[2]->key, "controller3") != 0) abort();
+    if (controllerMap[3]->key[0] != '\0') abort();
 
     struct IController *controller3 = NULL; // remove last, remaining 0, 2
     if (puremvc_controller_removeController("controller3", &controller3) != true) abort();
-    if (strcmp(instanceMap[0]->key, "controller0") != 0) abort();
-    if (strcmp(instanceMap[1]->key, "controller2") != 0) abort();
-    if (instanceMap[2]->key[0] != '\0') abort();
-    if (instanceMap[3]->key[0] != '\0') abort();
-    if (instanceMap[4] != NULL) abort();
+    const char *multitonKey3 = (const char *) controller3 + sizeof(struct IController);
+    if (strcmp(multitonKey3, "controller3") != 0) abort();
+
+    if (strcmp(controllerMap[0]->key, "controller0") != 0) abort();
+    if (strcmp(controllerMap[1]->key, "controller2") != 0) abort();
+    if (controllerMap[2]->key[0] != '\0') abort();
+    if (controllerMap[3]->key[0] != '\0') abort();
 
     struct IController *controller0 = NULL; // remove first, remaining 2
     if (puremvc_controller_removeController("controller0", &controller0) != true) abort();
-    if (strcmp(instanceMap[0]->key, "controller2") != 0) abort();
-    if (instanceMap[1]->key[0] != '\0') abort();
-    if (instanceMap[2]->key[0] != '\0') abort();
-    if (instanceMap[3]->key[0] != '\0') abort();
-    if (instanceMap[4] != NULL) abort();
+    const char *multitonKey0 = (const char *) controller0 + sizeof(struct IController);
+    if (strcmp(multitonKey0, "controller0") != 0) abort();
+
+    if (strcmp(controllerMap[0]->key, "controller2") != 0) abort();
+    if (controllerMap[1]->key[0] != '\0') abort();
+    if (controllerMap[2]->key[0] != '\0') abort();
+    if (controllerMap[3]->key[0] != '\0') abort();
 
     struct IController *controller2 = NULL; // remove remaining
     if (puremvc_controller_removeController("controller2", &controller2) != true) abort();
-    if (instanceMap[0]->key[0] != '\0') abort();
-    if (instanceMap[1]->key[0] != '\0') abort();
-    if (instanceMap[2]->key[0] != '\0') abort();
-    if (instanceMap[3]->key[0] != '\0') abort();
-    if (instanceMap[4] != NULL) abort();
+    const char *multitonKey2 = (const char *) controller2 + sizeof(struct IController);
+    if (strcmp(multitonKey2, "controller2") != 0) abort();
+
+    if (controllerMap[0]->key[0] != '\0') abort();
+    if (controllerMap[1]->key[0] != '\0') abort();
+    if (controllerMap[2]->key[0] != '\0') abort();
+    if (controllerMap[3]->key[0] != '\0') abort();
 }

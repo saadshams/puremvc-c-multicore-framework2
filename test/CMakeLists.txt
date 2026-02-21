@@ -11,8 +11,7 @@ add_test(NAME PureMVC.ModelTest COMMAND ModelTest)
 add_executable(ViewTest core/view_test.c
         core/view_test_mediator.c core/view_test_mediator2.c
         core/view_test_mediator3.c core/view_test_mediator4.c
-        core/view_test_mediator5.c core/view_test_mediator6.c
-        core/view_test_mediator7.c)
+        core/view_test_mediator5.c core/view_test_mediator6.c core/view_test_mediator7.c)
 target_link_libraries(ViewTest PRIVATE puremvc)
 add_test(NAME PureMVC.ViewTest COMMAND ViewTest)
 

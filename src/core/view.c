@@ -15,10 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-// instanceMap (global)
+// instanceMap
 static struct ViewMap **instanceMap = NULL;
 
-// mutex for viewMap (global)
+// mutex for viewMap
 static Mutex instanceMapMutex;
 static MutexOnce mutexOnce = MUTEX_ONCE_INIT;
 
@@ -117,30 +117,32 @@ bool removeObserver(struct IView *self, const char *notificationName, const void
 
     mutex_lock(&this->observerMapMutex);
 
-    // todo after sanitization remove extra NULL check
     for (size_t i = 0; this->observerMap != NULL && this->observerMap[i] != NULL && this->observerMap[i]->key[0] != '\0'; i++) { // find observer
         if (strcmp(this->observerMap[i]->key, notificationName) == 0) { // match (observerMap key)
-
-            size_t index = 0, j = 0; // find observer to remove
+            size_t index = 0; // find observer to remove
             struct IObserver **observers = this->observerMap[i]->observers;
-            for (; observers != NULL && observers[j] != NULL && observers[j]->getContext(observers[j]) != NULL; j++) {
+            for (size_t j = 0; observers[j] != NULL && observers[j]->getContext(observers[j]) != NULL; j++) {
                 const struct IObserver *observer = observers[j];
                 if (observer->compareNotifyContext(observer, notifyContext) == true) { // match
                     removed = true;
                     observers[j]->setContext(observers[j], NULL);
                 } else {
-                    if (index != j) { // shift observers left
-                        observers[index]->setContext(observers[index], observers[j]->getContext(observers[j]));
-                        observers[j]->setContext(observers[j], NULL);
-                    }
+                    if (index != j)
+                        observers[index]->setContext(observers[index], observers[j]->getContext(observers[j])); // shift left (Gap-free array)
+
                     index++;
                 }
             }
+            observers[index]->setContext(observers[index], NULL);
 
-            if (index == 0) { // Since no entries were shifted left, the current observerMap is empty
+
+            if (index == 0) { // observerMap is empty since no observers were shifted left
                 memset(this->observerMap[i]->key, 0, KEY_SIZE); // remove
-                for (j = i; this->observerMap[j + 1] != NULL && this->observerMap[j + 1]->key[0] != '\0'; j++) { // shift observerMap left
-                    struct ObserverMap *temp = this->observerMap[j];
+                puremvc_observer_init(this->observerMap[i]->observers[0], NULL, NULL);
+
+                size_t j = i;
+                for (; this->observerMap[j + 1] != NULL && this->observerMap[j + 1]->key[0] != '\0'; j++) { // shift observerMap left
+                    struct ObserverMap *temp = this->observerMap[j]; // Swap the ObserverMap and its child Observer array as one unit
                     this->observerMap[j] = this->observerMap[j + 1];
                     this->observerMap[j + 1] = temp;
                 }
@@ -243,7 +245,8 @@ static bool removeMediator(struct IView *self, const char *mediatorName, struct 
 
     mutex_lock(&this->mediatorMapMutex);
 
-    for (size_t i = 0, index = 0; this->mediatorMap != NULL && this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find mediator
+    size_t index = 0;
+    for (size_t i = 0; this->mediatorMap != NULL && this->mediatorMap[i] != NULL && this->mediatorMap[i]->key[0] != '\0'; i++) { // find mediator
         if (strcmp(this->mediatorMap[i]->key, mediatorName) == 0) { // match
             if (out != NULL) *out = this->mediatorMap[i]->mediator; // out param
 
@@ -257,31 +260,13 @@ static bool removeMediator(struct IView *self, const char *mediatorName, struct 
             memset(&this->mediatorMap[i]->key, 0, KEY_SIZE); // remove
             removed = true;
         } else {
-            if (index != i) { // shift mediatorMap left
-                const struct IMediator *previous = this->mediatorMap[i]->mediator;
+            if (index != i)
+                *this->mediatorMap[index] = *this->mediatorMap[i]; // shift left (Gap-free array)
 
-                *this->mediatorMap[index] = *this->mediatorMap[i]; // shift left first
-                memset(&this->mediatorMap[i]->key, 0, KEY_SIZE); // remove
-
-                struct IMediator *mediator = this->mediatorMap[index]->mediator;
-                const char *const *interests = mediator->listNotificationInterests(mediator);
-                for (const char *const *cursor = interests; *cursor; cursor++) { // update observer context to relocated mediators
-                    for (size_t j = 0; this->observerMap[j] != NULL && this->observerMap[j]->key[0] != '\0'; j++) {
-                        if (strcmp(this->observerMap[j]->key, *cursor) == 0) {
-                            struct IObserver **observers = this->observerMap[j]->observers;
-                            for (size_t k = 0; observers[k] != NULL && observers[k]->getContext(observers[k]) != NULL; k++) {
-                                if (observers[k]->getContext(observers[k]) == previous) {
-                                    observers[k]->setContext(observers[k], mediator); // point context to mediator's new address
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
             index++;
         }
     }
+    memset(&this->mediatorMap[index]->key, 0, KEY_SIZE); // remove
 
     mutex_unlock(&this->mediatorMapMutex);
     return removed;
@@ -393,13 +378,13 @@ bool puremvc_view_removeView(const char *key, struct IView **out) {
             memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
             removed = true;
         } else {
-            if (index != i) { // shift left (Gap-free array)
-                *instanceMap[index] = *instanceMap[i]; // shift left first
-                memset(instanceMap[i]->key, 0, KEY_SIZE); // remove
-            }
+            if (index != i)
+                *instanceMap[index] = *instanceMap[i]; // shift left (Gap-free array)
+
             index++;
         }
     }
+    memset(instanceMap[index]->key, 0, KEY_SIZE); // remove
 
     if (index == 0) instanceMap = NULL;
 
