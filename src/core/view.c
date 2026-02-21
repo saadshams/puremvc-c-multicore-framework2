@@ -181,23 +181,22 @@ bool registerMediator(struct IView *self, struct IMediator *(*factory)(void *buf
         goto finally;
     }
 
+    int len = snprintf(this->mediatorMap[i]->key, KEY_SIZE, "%s", name); // registration
+    if (len < 0 || len >= KEY_SIZE) {
+        fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: MediatorMap key truncated: '%s' (max %zu chars).\033[0m\n", this->mediatorMap[i]->key, sizeof(name));
+        memset(this->mediatorMap[i]->key, 0, KEY_SIZE); // clear
+        goto finally;
+    }
+
     mediator = factory(this->mediatorMap[i]->mediator, name, component); // init todo check if mediator exists (error if .mediator wasn't alloca)
     mediator->getNotifier(mediator)->initializeNotifier(mediator->getNotifier(mediator), this->multitonKey);
-    mediator->onRegister(mediator);
 
     const char *const *interests = mediator->listNotificationInterests(mediator);
     for (const char *const *interest = interests; *interest; interest++) { // register observers (mutex guards context if mediator is removed)
         self->registerObserver(self, *interest, (void (*)(const void *, const struct INotification *)) mediator->handleNotification, mediator);
     }
 
-    const char *key = mediator->getName(mediator);
-    int len = snprintf(this->mediatorMap[i]->key, KEY_SIZE, "%s", key); // registration
-    if (len < 0 || len >= KEY_SIZE) {
-        fprintf(stderr, "\033[0;31m[PureMVC::View::registerMediator] Error: MediatorMap key truncated: '%s' (max %zu chars).\033[0m\n", this->mediatorMap[i]->key, sizeof(key));
-        memset(this->mediatorMap[i]->key, 0, KEY_SIZE); // clear
-        goto finally;
-    }
-
+    mediator->onRegister(mediator);
     registered = true;
 
 finally:

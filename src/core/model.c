@@ -58,18 +58,17 @@ static bool registerProxy(struct IModel *self, struct IProxy *(*factory)(void *b
         goto finally;
     }
 
-    proxy = factory(this->proxyMap[i]->proxy, name, data); // init  todo check if proxy exists (error if .proxy wasn't alloca)
-    proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), this->multitonKey);
-    proxy->onRegister(proxy);
-
-    const char *key = proxy->getName(proxy);
-    int len = snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", key); // registration
+    int len = snprintf(this->proxyMap[i]->key, KEY_SIZE, "%s", name); // registration
     if (len < 0 || len >= KEY_SIZE) { // todo reset proxy or init proxy after, you have the name, you have to reinit buffer too in this case
-        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap key truncated: '%s' (max %d chars).\033[0m\n", key, KEY_SIZE);
+        fprintf(stderr, "\033[0;31m[PureMVC::Model::registerProxy] Error: ProxyMap key truncated: '%s' (max %d chars).\033[0m\n", name, KEY_SIZE);
         memset(this->proxyMap[i]->key, 0, KEY_SIZE); // clear
         goto finally;
     }
 
+    proxy = factory(this->proxyMap[i]->proxy, name, data); // init  todo check if proxy exists (error if .proxy wasn't alloca)
+    proxy->getNotifier(proxy)->initializeNotifier(proxy->getNotifier(proxy), this->multitonKey);
+
+    proxy->onRegister(proxy);
     registered = true;
 
 finally:
