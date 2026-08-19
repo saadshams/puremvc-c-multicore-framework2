@@ -85,7 +85,6 @@ void testGetInstance(void) {
     view->initializeView(view, NULL, NULL);
 
     // test assertions
-    if (view == NULL) abort();
     if (view != puremvc_view_getInstance(instanceMap, "ViewTestKey1")) abort();
     if (strcmp(instanceMap[0]->key, "ViewTestKey1") != 0) abort();
 

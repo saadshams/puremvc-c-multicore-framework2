@@ -57,4 +57,3 @@ struct INotifier *puremvc_notifier_init(void *buffer) {
 
     return (struct INotifier *) this;
 }
-

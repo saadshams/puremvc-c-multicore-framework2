@@ -1,6 +1,5 @@
 add_executable(ControllerTest core/controller_test.c
-        core/controller_test_command.c
-        core/controller_test_command2.c)
+        core/controller_test_command.c core/controller_test_command2.c)
 target_link_libraries(ControllerTest PRIVATE puremvc)
 add_test(NAME PureMVC.ControllerTest COMMAND ControllerTest)
 

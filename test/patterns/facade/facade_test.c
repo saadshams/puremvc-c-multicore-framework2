@@ -46,7 +46,6 @@ int main(void) {
     printf("\033[1;36m================================================\033[0m\n\n");
 
     beforeAll();
-    // mytest(void);
     test("testGetInstance", testGetInstance);
     test("testRegisterCommandAndSendNotification", testRegisterCommandAndSendNotification);
     test("testRegisterAndRemoveCommandAndSendNotification", testRegisterAndRemoveCommandAndSendNotification);
@@ -135,7 +134,7 @@ void testRegisterAndRemoveCommandAndSendNotification(void) {
     controller->initializeController(controller, view, commandMap);
 
     // Create the Facade, register the FacadeTestCommand to
-    // handle 'FacadeTest' events
+    // handle 'FacadeTestNote' events
     struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap){ .key = "", .facade = alloca(puremvc_facade_size()) }, NULL };
     struct IFacade *facade = puremvc_facade_getInstance(facadeMap, "FacadeTestKey3");
     facade->initializeFacade(facade, NULL, view, controller);
@@ -199,9 +198,6 @@ void testRegisterAndRemoveProxy(void) {
 
     struct ViewMap **viewMap = (struct ViewMap *[]) { &(struct ViewMap){ .view = alloca(puremvc_view_size()) }, NULL };
     struct IView *view = puremvc_view_getInstance(viewMap, "FacadeTestKey5");
-
-    // struct ControllerMap **controllerMap = (struct ControllerMap *[]){ &(struct ControllerMap){ .controller = alloca(puremvc_controller_size()) }, NULL };
-    // struct IController *controller = puremvc_controller_getInstance(controllerMap, "FacadeTestKey5"); // extra to prevent memory aliasing
 
     // register a proxy, remove it, then try to retrieve it
     struct FacadeMap **facadeMap = (struct FacadeMap *[]) { &(struct FacadeMap) { .facade = alloca(puremvc_facade_size()) }, NULL};
